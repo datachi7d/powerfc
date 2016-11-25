@@ -20,7 +20,7 @@ struct _PFC_MemoryRegister
     PFC_ID ID;
     PFC_ValueList * Values;
     uint8_t * Memory;
-    uint16_t * MemorySize;
+    uint16_t MemorySize;
     char * Name;
 };
 
@@ -45,7 +45,7 @@ void PFC_MemoryValue_Free(PFC_MemoryValue * ptr)
 {
     if(ptr != NULL)
     {
-        PFC_free(ptr->Value);
+        PFC_free(ptr->Name);
         PFC_free(ptr);
     }
 }
@@ -90,7 +90,7 @@ pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
 
         if(list != NULL)
         {
-            PFC_MemoryValue * value = list->value;
+            PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
             do
             {
                 if(value)
@@ -112,7 +112,7 @@ PFC_MemoryRegister * PFC_MemoryRegister_New(PFC_Memory * Memory, PFC_ID Register
 
     if (Memory != NULL && Memory->MemoryRegisters != NULL)
     {
-        if(PFC_MemoryRegister_Get(Memory, RegisterID) == NULL)
+        if(PFC_Memory_GetMemoryRegister(Memory, RegisterID) == NULL)
         {
             memoryRegister = PFC_malloc(sizeof(*memoryRegister));
 
@@ -163,7 +163,7 @@ void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
 
         if(list != NULL)
         {
-            PFC_MemoryValue * value = list->value;
+            PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
             do
             {
                 if(value)
@@ -186,7 +186,7 @@ void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
 
 PFC_Memory * PFC_Memory_New()
 {
-    PFC_Memory * result = PFC_malloc(*result);
+    PFC_Memory * result = PFC_malloc(sizeof(*result));
 
     if(result != NULL)
     {
@@ -210,7 +210,7 @@ void PFC_Memory_Free(PFC_Memory * memory)
 
         if(list != NULL)
         {
-            PFC_MemoryRegister * value = list->value;
+            PFC_MemoryRegister * value = PFC_ValueList_GetValue(list);
             do
             {
                 if(value)
@@ -232,11 +232,10 @@ PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID Re
     if(Memory != NULL)
     {
         PFC_ValueList * list = PFC_ValueList_GetFirst(Memory->MemoryRegisters);
-        PFC_MemoryRegister * value = list->value;
 
         if(list != NULL)
         {
-            PFC_MemoryRegister * value = list->value;
+            PFC_MemoryRegister * value = PFC_ValueList_GetValue(list);
             do
             {
                 if(value)
@@ -267,7 +266,7 @@ void *  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID Register
     return ptr;
 }
 
-pfc_size  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID)
+pfc_size  PFC_Memory_GetMemoryRegisterSize(PFC_Memory * Memory, PFC_ID RegisterID)
 {
     return PFC_MemoryRegister_GetSize(PFC_Memory_GetMemoryRegister(Memory, RegisterID));
 }

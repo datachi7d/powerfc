@@ -5,26 +5,29 @@
  *      Author: sekelly
  */
 
+#include <string.h>
+
 #include "pfc_types.h"
 #include "pfc_list.h"
+#include "pfc_memory.h"
 
 struct _PFC_ValueList
 {
     PFC_ValueList * next;
     PFC_ValueList * previous;
-    PFC_MemoryValue * value;
+    void * value;
 };
 
 PFC_ValueList * PFC_ValueList_New()
 {
     PFC_ValueList * result = PFC_malloc(sizeof(*result));
 
-    memset(result, 0, sizeof(*result))
+    memset(result, 0, sizeof(*result));
 
     return result;
 }
 
-PFC_ValueList_Free(PFC_ValueList * list)
+void PFC_ValueList_Free(PFC_ValueList * list)
 {
 
     if(list != NULL)
@@ -105,10 +108,10 @@ void * PFC_ValueList_NextItemValue(PFC_ValueList ** List)
 
     if(List != NULL && *List != NULL)
     {
-        if(*List->next != NULL && *List->next->value != NULL)
+        if((*List)->next != NULL && (*List)->next->value != NULL)
         {
-            *List = *List->next;
-            nextValue = *List->value;
+            *List = (*List)->next;
+            nextValue = (*List)->value;
         }
     }
 
