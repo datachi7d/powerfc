@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "pfc_types.h"
 #include "pfc_memory.h"
