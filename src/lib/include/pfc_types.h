@@ -16,6 +16,7 @@ typedef enum
   PFC_ERROR_NONE = 0,
   PFC_ERROR_MEMORY,
   PFC_ERROR_NULL_PARAMETER,
+  PFC_ERROR_LIST,
 
   PFC_ERROR_UNSET,
 } pfc_error;

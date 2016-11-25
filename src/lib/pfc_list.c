@@ -22,8 +22,6 @@ PFC_ValueList * PFC_ValueList_New()
 {
     PFC_ValueList * result = PFC_malloc(sizeof(*result));
 
-    memset(result, 0, sizeof(*result));
-
     return result;
 }
 
@@ -33,15 +31,14 @@ void PFC_ValueList_Free(PFC_ValueList * list)
     if(list != NULL)
     {
         PFC_ValueList * listItem = list;
-        do
+        while( listItem != NULL )
         {
-            PFC_ValueList * nextItem = list->next;
+            PFC_ValueList * nextItem = listItem->next;
             PFC_free(listItem);
             listItem = nextItem;
-        }while( listItem != NULL );
+        }
     }
 }
-
 
 PFC_ValueList * PFC_ValueList_GetFirst(PFC_ValueList * List)
 {
@@ -80,13 +77,17 @@ pfc_error PFC_ValueList_AddItem(PFC_ValueList * List, void * Value)
     if(List != NULL && Value != NULL)
     {
         PFC_ValueList * lastListItem = PFC_ValueList_GetLast(List);
-        PFC_ValueList * newListItem = PFC_malloc(sizeof(*newListItem));
+        PFC_ValueList * newListItem = lastListItem->value == NULL ? lastListItem : PFC_malloc(sizeof(*newListItem));
 
         if(lastListItem != NULL && newListItem != NULL)
         {
-            newListItem->previous = lastListItem;
-            lastListItem->next = newListItem;
+            if(lastListItem->value != NULL)
+            {
+                newListItem->previous = lastListItem;
+                lastListItem->next = newListItem;
+            }
             newListItem->value = Value;
+            Result = PFC_ERROR_NONE;
         }
         else
         {

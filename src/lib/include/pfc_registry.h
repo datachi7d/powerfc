@@ -8,6 +8,10 @@
 #ifndef PFC_REGISTRY_H_
 #define PFC_REGISTRY_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pfc_types.h"
 
 typedef struct _PFC_MemoryRegister PFC_MemoryRegister;
@@ -24,5 +28,9 @@ void PFC_Memory_Free(PFC_Memory * memory);
 PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID RegisterID);
 void *  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID);
 pfc_size  PFC_Memory_GetMemoryRegisterSize(PFC_Memory * Memory, PFC_ID RegisterID);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PFC_REGISTRY_H_ */

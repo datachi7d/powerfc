@@ -14,7 +14,9 @@
 
 void * PFC_malloc(uint16_t size)
 {
-    return malloc(size);
+    void * ptr = malloc(size);
+    memset(ptr, 0, size);
+    return ptr;
 }
 
 void PFC_free(void * ptr)
