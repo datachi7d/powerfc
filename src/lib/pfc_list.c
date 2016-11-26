@@ -46,8 +46,8 @@ PFC_ValueList * PFC_ValueList_GetFirst(PFC_ValueList * List)
 
     if(item != NULL && item->value != NULL)
     {
-        while(item->next != NULL && item->value != NULL)
-            item = item->next;
+        while(item->previous != NULL && item->value != NULL)
+            item = item->previous;
     }
     else
     {

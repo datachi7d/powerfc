@@ -42,6 +42,29 @@ TEST_F(PFC_List, test_List_AddItem)
     PFC_ValueList_Free(list);
 }
 
+TEST_F(PFC_List, test_List_GetFirst)
+{
+    PFC_ValueList * list = PFC_ValueList_New();
+
+    ASSERT_TRUE(list != NULL);
+
+    int i1 = 0;
+
+    ASSERT_EQ(PFC_ERROR_NONE, PFC_ValueList_AddItem(list, &i1));
+
+    int i2 = 0;
+
+    ASSERT_EQ(PFC_ERROR_NONE, PFC_ValueList_AddItem(list, &i2));
+
+    PFC_ValueList * first = PFC_ValueList_GetFirst(list);
+
+    ASSERT_TRUE(first != NULL);
+
+    ASSERT_EQ(&i1, PFC_ValueList_GetValue(first));
+
+    PFC_ValueList_Free(list);
+}
+
 TEST_F(PFC_List, test_List_AddItem_Error)
 {
     PFC_ValueList * list = PFC_ValueList_New();
@@ -53,7 +76,6 @@ TEST_F(PFC_List, test_List_AddItem_Error)
     ASSERT_EQ(PFC_ERROR_NULL_PARAMETER, PFC_ValueList_AddItem(list, NULL));
 
     ASSERT_EQ(PFC_ERROR_NULL_PARAMETER, PFC_ValueList_AddItem(NULL, &i));
-
 
     PFC_ValueList_Free(list);
 }

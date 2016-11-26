@@ -10,6 +10,8 @@
 #include "pfc_memory.h"
 #include "pfc_list.h"
 
+#include <stdio.h>
+
 struct _PFC_Memory
 {
     PFC_ValueList * MemoryRegisters;
@@ -53,20 +55,22 @@ void PFC_MemoryValue_Free(PFC_MemoryValue * ptr)
 PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_size Size, const char * Name)
 {
     PFC_MemoryValue * memoryValue = NULL;
+    pfc_error result = PFC_ERROR_UNSET;
+
 
     if(memoryRegister != NULL && Size > 0)
     {
-        memoryValue = PFC_MemoryValue_New(Size);
-
-        if(memoryValue != NULL)
+        if(PFC_MemoryRegister_GetSize(memoryRegister) + Size <= memoryRegister->MemorySize)
         {
-            if(PFC_MemoryRegister_GetSize(memoryRegister) <= memoryRegister->MemorySize + Size)
+            memoryValue = PFC_MemoryValue_New(Size);
+
+            if(memoryValue != NULL)
             {
-                pfc_error result = PFC_ERROR_UNSET;
 
                 if ( (result = PFC_ValueList_AddItem(memoryRegister->Values, memoryValue)) == PFC_ERROR_NONE )
                 {
                     memoryValue->Name = PFC_strdup(Name);
+                    memoryValue->Size = Size;
                 }
                 else
                 {
@@ -87,19 +91,14 @@ pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
     if(memoryRegister)
     {
         PFC_ValueList * list = PFC_ValueList_GetFirst(memoryRegister->Values);
+        PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
 
-        if(list != NULL)
+        while( value != NULL )
         {
-            PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
-            do
-            {
-                if(value)
-                {
-                    Size += value->Size;
-                }
-                value = PFC_ValueList_NextItemValue(&list);
-            }while( value != NULL );
+            Size += value->Size;
+            value = PFC_ValueList_NextItemValue(&list);
         }
+
     }
 
     return Size;
@@ -180,6 +179,9 @@ void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
         if(memoryRegister->Memory)
             PFC_free(memoryRegister->Memory);
 
+        if(memoryRegister->Name)
+            PFC_free(memoryRegister->Name);
+
         PFC_free(memoryRegister);
     }
 }
@@ -222,6 +224,8 @@ void PFC_Memory_Free(PFC_Memory * memory)
         }
 
         PFC_ValueList_Free(memory->MemoryRegisters);
+
+        PFC_free(memory);
     }
 }
 

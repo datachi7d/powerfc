@@ -10,5 +10,7 @@ if (RUN_TESTS)
   set (BUILD_TESTS ON)
 endif ()
 
+add_compile_options (-g)
+
 add_subdirectory (lib)
 add_subdirectory (src)
