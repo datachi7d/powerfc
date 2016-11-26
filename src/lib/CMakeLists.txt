@@ -1,7 +1,8 @@
 set (pfclib_SOURCES
 	pfc_list.c
 	pfc_memory.c
-	pfc_registry.c)
+	pfc_memorytypes.c
+	pfc_memoryregistry.c)
 
 set (pfclib_INCLUDE_DIRS
 	${PFCLIB_INCLUDE_DIR})

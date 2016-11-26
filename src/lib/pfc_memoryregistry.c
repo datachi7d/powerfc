@@ -5,8 +5,8 @@
  *      Author: sekelly
  */
 
+#include "pfc_memoryregistry.h"
 #include "pfc_types.h"
-#include "pfc_registry.h"
 #include "pfc_memory.h"
 #include "pfc_list.h"
 
