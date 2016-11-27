@@ -21,7 +21,7 @@ class PFC_MemoryTypes : public testing::Test
 
 namespace detail
 {
-    struct TestMemoryTypeResource
+    struct TestMemoryTypeFloatResource
     {
         pfc_memorytype memoryType;
         uint16_t rawValue;
@@ -29,9 +29,18 @@ namespace detail
 
         pfc_conversion_error expectedResult;
     };
+
+    struct TestMemoryTypeIntResource
+    {
+        pfc_memorytype memoryType;
+        uint16_t rawValue;
+        int expectedConvertedValue;
+
+        pfc_conversion_error expectedResult;
+    };
 }
 
-class TestConvertValueFloat : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeResource>
+class TestConvertValueFloat : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeFloatResource>
 {
     void SetUp() {  }
     void TearDown() {  }
@@ -39,9 +48,8 @@ class TestConvertValueFloat : public testing::Test, public ::testing::WithParamI
 
 TEST_P(TestConvertValueFloat, test_MemoryTypes)
 {
-    detail::TestMemoryTypeResource data = GetParam();
+    detail::TestMemoryTypeFloatResource data = GetParam();
     float convertedValue = 0.0f;
-
 
     ASSERT_EQ(data.expectedResult, PFC_Convert_PFCValueToFloat(data.memoryType, &data.rawValue, &convertedValue));
 
@@ -56,10 +64,36 @@ INSTANTIATE_TEST_CASE_P(
         TestConvertValueFloat1,
         TestConvertValueFloat,
         ::testing::Values(
-                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0.01f, PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8000 + (199), 1.99f, PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, 0, -760.0f, PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, (760-508), -508.0f, PFC_CONVERSION_ERROR_NOERROR }
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0.01f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8000 + (199), 1.99f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, 0, -760.0f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, (760-508), -508.0f, PFC_CONVERSION_ERROR_NOERROR }
         ));
 
 
+class TestConvertValueInt : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeIntResource>
+{
+    void SetUp() {  }
+    void TearDown() {  }
+};
+
+TEST_P(TestConvertValueInt, test_MemoryTypes)
+{
+    detail::TestMemoryTypeIntResource data = GetParam();
+    int convertedValue = 0.0f;
+
+    ASSERT_EQ(data.expectedResult, PFC_Convert_PFCValueToInt(data.memoryType, &data.rawValue, &convertedValue));
+
+    if(data.expectedResult == PFC_CONVERSION_ERROR_NOERROR)
+    {
+        ASSERT_EQ(data.expectedConvertedValue, convertedValue);
+    }
+}
+
+
+INSTANTIATE_TEST_CASE_P(
+        TestConvertValueInt1,
+        TestConvertValueInt,
+        ::testing::Values(
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0, PFC_CONVERSION_ERROR_UNSUPPORTED }
+        ));

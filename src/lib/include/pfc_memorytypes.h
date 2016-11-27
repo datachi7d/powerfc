@@ -40,7 +40,7 @@ typedef enum
     PFC_CONVERSION_TOPFC_FROMSTRING,
 } pcf_conversion;
 
-typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, void * output, int outputLength);
+
 
 /*
 int PFC_Convert_X(pcf_conversion conversion, const void * value, void * output, int outputLength)
@@ -77,6 +77,7 @@ typedef enum
 {
     PFC_MEMORYTYPE_BYTE = 0,
     PFC_MEMORYTYPE_SHORT,
+    PFC_MEMORYTYPE_SHORTRPM,
     PFC_MEMORYTYPE_SHORTBOOST,
     PFC_MEMORYTYPE_LAST,
 } pfc_memorytype;
@@ -88,15 +89,6 @@ typedef enum
     PFC_BASICTYPE_FLOAT,
     PFC_BASICTYPE_STRING
 } pfc_basictype;
-
-typedef struct
-{
-    pfc_memorytype MemoryType;
-    pfc_size Size;
-    pfc_basictype BasicType;
-    PFC_ConversionFunction ConversionFunction;
-} pfc_memorytype_conversioninfo;
-
 
 //typedef uint8_t byte;
 //typedef uint8_t byte_temperature;
@@ -119,6 +111,7 @@ typedef struct
 
 pfc_size PFC_Convert_PFCValueSize(pfc_memorytype MemoryType);
 pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue);
+pfc_conversion_error PFC_Convert_PFCValueToInt(pfc_memorytype MemoryType, const void * Value, int * ConvertedValue);
 
 
 #ifdef __cplusplus
