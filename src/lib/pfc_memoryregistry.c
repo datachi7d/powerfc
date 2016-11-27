@@ -29,7 +29,7 @@ struct _PFC_MemoryRegister
 struct _PFC_MemoryValue
 {
     char * Name;
-    pfc_size Size;
+    pfc_memorytype Type;
 };
 
 PFC_MemoryValue * PFC_MemoryValue_New(pfc_size Size)
@@ -52,11 +52,11 @@ void PFC_MemoryValue_Free(PFC_MemoryValue * ptr)
     }
 }
 
-PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_size Size, const char * Name)
+PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name)
 {
     PFC_MemoryValue * memoryValue = NULL;
     pfc_error result = PFC_ERROR_UNSET;
-
+    pfc_size Size = PFC_Convert_PFCValueSize(Type);
 
     if(memoryRegister != NULL && Size > 0)
     {
@@ -70,7 +70,7 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegiste
                 if ( (result = PFC_ValueList_AddItem(memoryRegister->Values, memoryValue)) == PFC_ERROR_NONE )
                 {
                     memoryValue->Name = PFC_strdup(Name);
-                    memoryValue->Size = Size;
+                    memoryValue->Type = Type;
                 }
                 else
                 {
@@ -95,7 +95,7 @@ pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
 
         while( value != NULL )
         {
-            Size += value->Size;
+            Size += PFC_Convert_PFCValueSize(value->Type);
             value = PFC_ValueList_NextItemValue(&list);
         }
 

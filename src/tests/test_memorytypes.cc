@@ -19,31 +19,47 @@ class PFC_MemoryTypes : public testing::Test
     void TearDown() {  }
 };
 
-
-TEST_F(PFC_MemoryTypes, test_MemoryTypes_Boost)
+namespace detail
 {
-    uint16_t rawValue = 0x8001;
+    struct TestMemoryTypeResource
+    {
+        pfc_memorytype memoryType;
+        uint16_t rawValue;
+        float expectedConvertedValue;
+
+        pfc_conversion_error expectedResult;
+    };
+}
+
+class TestConvertValueFloat : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeResource>
+{
+    void SetUp() {  }
+    void TearDown() {  }
+};
+
+TEST_P(TestConvertValueFloat, test_MemoryTypes)
+{
+    detail::TestMemoryTypeResource data = GetParam();
     float convertedValue = 0.0f;
 
-    ASSERT_EQ(PFC_CONVERSION_ERROR_NOERROR, PFC_Convert_PFCValueToFloat(PFC_MEMORYTYPE_SHORTBOOST, &rawValue, &convertedValue));
-    ASSERT_EQ(0.01f, convertedValue);
 
-    rawValue = 0x8000 + (199);
+    ASSERT_EQ(data.expectedResult, PFC_Convert_PFCValueToFloat(data.memoryType, &data.rawValue, &convertedValue));
 
-    ASSERT_EQ(PFC_CONVERSION_ERROR_NOERROR, PFC_Convert_PFCValueToFloat(PFC_MEMORYTYPE_SHORTBOOST, &rawValue, &convertedValue));
-    ASSERT_EQ(1.99f, convertedValue);
-
-    rawValue = 0;
-
-    ASSERT_EQ(PFC_CONVERSION_ERROR_NOERROR, PFC_Convert_PFCValueToFloat(PFC_MEMORYTYPE_SHORTBOOST, &rawValue, &convertedValue));
-    ASSERT_EQ(-760.0f, convertedValue);
-
-    rawValue = (760-508);
-
-    ASSERT_EQ(PFC_CONVERSION_ERROR_NOERROR, PFC_Convert_PFCValueToFloat(PFC_MEMORYTYPE_SHORTBOOST, &rawValue, &convertedValue));
-    ASSERT_EQ(-508.0f, convertedValue);
+    if(data.expectedResult == PFC_CONVERSION_ERROR_NOERROR)
+    {
+        ASSERT_EQ(data.expectedConvertedValue, convertedValue);
+    }
 }
 
 
+INSTANTIATE_TEST_CASE_P(
+        TestConvertValueFloat1,
+        TestConvertValueFloat,
+        ::testing::Values(
+                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0.01f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8000 + (199), 1.99f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, 0, -760.0f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeResource { PFC_MEMORYTYPE_SHORTBOOST, (760-508), -508.0f, PFC_CONVERSION_ERROR_NOERROR }
+        ));
 
 

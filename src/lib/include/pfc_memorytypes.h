@@ -13,6 +13,13 @@
 extern "C" {
 #endif
 
+
+#include "pfc_types.h"
+
+#define PFC_SIZE_SHORT 2
+#define PFC_SIZE_BYTE  1
+
+
 typedef enum
 {
     PFC_CONVERSION_ERROR_NONSET = 0,
@@ -69,6 +76,7 @@ int PFC_Convert_X(pcf_conversion conversion, const void * value, void * output, 
 typedef enum
 {
     PFC_MEMORYTYPE_BYTE = 0,
+    PFC_MEMORYTYPE_SHORT,
     PFC_MEMORYTYPE_SHORTBOOST,
     PFC_MEMORYTYPE_LAST,
 } pfc_memorytype;
@@ -84,6 +92,7 @@ typedef enum
 typedef struct
 {
     pfc_memorytype MemoryType;
+    pfc_size Size;
     pfc_basictype BasicType;
     PFC_ConversionFunction ConversionFunction;
 } pfc_memorytype_conversioninfo;
@@ -108,7 +117,7 @@ typedef struct
 //typedef uint16_t short_voltage;
 //typedef uint16_t short_RPM;
 
-
+pfc_size PFC_Convert_PFCValueSize(pfc_memorytype MemoryType);
 pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue);
 
 

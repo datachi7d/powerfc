@@ -12,20 +12,28 @@
 #include "pfc_memorytypes.h"
 
 int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength);
+int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength);
 int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength);
 
 static const pfc_memorytype_conversioninfo conversionTable[] = {
         { .MemoryType = PFC_MEMORYTYPE_BYTE,
+          .Size = PFC_SIZE_BYTE,
           .BasicType = PFC_BASICTYPE_INT,
           .ConversionFunction = Convert_Byte,
         },
         {
-           .MemoryType = PFC_MEMORYTYPE_SHORTBOOST,
+          .MemoryType = PFC_MEMORYTYPE_SHORT,
+          .Size = PFC_SIZE_SHORT,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_Short,
+        },
+        {
+          .MemoryType = PFC_MEMORYTYPE_SHORTBOOST,
+          .Size = PFC_SIZE_SHORT,
           .BasicType = PFC_BASICTYPE_FLOAT,
           .ConversionFunction = Convert_ShortBoost,
         }
 };
-
 
 int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength)
 {
@@ -34,6 +42,12 @@ int Convert_Byte(pcf_conversion conversion, const void * value, void * output, i
     return result;
 }
 
+int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    return result;
+}
 
 int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength)
 {
@@ -87,10 +101,10 @@ int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * out
     return result;
 }
 
-pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue)
+
+const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryType)
 {
     const pfc_memorytype_conversioninfo * memoryTypeConversion = NULL;
-    pfc_conversion_error result = PFC_CONVERSION_ERROR_NONSET;
 
     for(int i = 0; i < (sizeof(conversionTable) / sizeof(pfc_memorytype_conversioninfo)); i++)
     {
@@ -100,6 +114,27 @@ pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, cons
             break;
         }
     }
+
+    return memoryTypeConversion;
+}
+
+pfc_size PFC_Convert_PFCValueSize(pfc_memorytype MemoryType)
+{
+    const pfc_memorytype_conversioninfo * memoryTypeConversion = getConverstionInfo(MemoryType);
+    pfc_size Result = 0;
+
+    if(memoryTypeConversion != NULL)
+    {
+        Result = memoryTypeConversion->Size;
+    }
+
+    return Result;
+}
+
+pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue)
+{
+    const pfc_memorytype_conversioninfo * memoryTypeConversion = getConverstionInfo(MemoryType);
+    pfc_conversion_error result = PFC_CONVERSION_ERROR_NONSET;
 
     if(memoryTypeConversion != NULL)
     {

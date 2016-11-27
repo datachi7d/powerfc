@@ -13,12 +13,13 @@ extern "C" {
 #endif
 
 #include "pfc_types.h"
+#include "pfc_memorytypes.h"
 
 typedef struct _PFC_MemoryRegister PFC_MemoryRegister;
 typedef struct _PFC_MemoryValue PFC_MemoryValue;
 typedef struct _PFC_Memory PFC_Memory;
 
-PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_size Size, const char * Name);
+PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name);
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister);
 PFC_MemoryRegister * PFC_MemoryRegister_Get(PFC_Memory * Memory, PFC_ID RegisterID);
 PFC_MemoryRegister * PFC_MemoryRegister_New(PFC_Memory * Memory, PFC_ID RegisterID, pfc_size Size, const char * name);
