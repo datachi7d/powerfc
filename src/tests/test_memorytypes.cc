@@ -68,7 +68,6 @@ TEST_P(TestConvertValueFloat, test_MemoryTypes)
     }
 }
 
-
 INSTANTIATE_TEST_CASE_P(
         TestConvertValueFloat1,
         TestConvertValueFloat,
@@ -80,7 +79,6 @@ INSTANTIATE_TEST_CASE_P(
                 detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTVOLTAGE,  148,            14.8f,      PFC_CONVERSION_ERROR_NOERROR },
                 detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTVOLTAGE,  44,             4.4f,       PFC_CONVERSION_ERROR_NOERROR }
         ));
-
 
 class TestConvertValueInt : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeIntResource>
 {
@@ -101,7 +99,6 @@ TEST_P(TestConvertValueInt, test_MemoryTypes)
     }
 }
 
-
 INSTANTIATE_TEST_CASE_P(
         TestConvertValueInt1,
         TestConvertValueInt,
@@ -114,7 +111,6 @@ INSTANTIATE_TEST_CASE_P(
                 detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_BYTE,        0x01,   1,      PFC_CONVERSION_ERROR_NOERROR },
                 detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_BYTE,        0xff,   255,    PFC_CONVERSION_ERROR_NOERROR }
         ));
-
 
 class TestConvertValueString : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeStringResource>
 {
@@ -135,13 +131,21 @@ TEST_P(TestConvertValueString, test_MemoryTypes)
     }
 }
 
-
 INSTANTIATE_TEST_CASE_P(
         TestConvertValueString1,
         TestConvertValueString,
         ::testing::Values(
-                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001,           true, "0.01 kg/cm²",    PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8000 + (157),   true, "1.57 kg/cm²",    PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST, 0,                true, "-760 mmHg",      PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST, (760-434),        true, "-434 mmHg",      PFC_CONVERSION_ERROR_NOERROR }
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTFLOAT,       1,              true, "0.004",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTFLOAT,       0xffff,         true, "262.140",        PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       0x8001,         true, "0.01 kg/cm²",    PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       0x8000 + (157), true, "1.57 kg/cm²",    PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       0,              true, "-760 mmHg",      PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       (760-434),      true, "-434 mmHg",      PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTVOLTAGE,     1,              true, "0.1 V",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTVOLTAGE,     150,            true, "15.0 V",         PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTMILLISECOND, 1,              true, "0.004 ms",       PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTMILLISECOND, 9999,           true, "39.996 ms",      PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTPERCENTAGE,  (9999*2),       true, "99.990 %",       PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80+20),        true, "20 °C",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80-35),        true, "-35 °C",         PFC_CONVERSION_ERROR_NOERROR }
         ));
