@@ -7,16 +7,17 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "pfc_types.h"
 #include "pfc_memorytypes.h"
 
-int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
-int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
-int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
-int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
+int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format);
+int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format);
+int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format);
+int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format);
 
-typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
+typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format);
 
 typedef struct
 {
@@ -25,6 +26,7 @@ typedef struct
     pfc_basictype BasicType;
     PFC_ConversionFunction ConversionFunction;
     const char * Units;
+    const char * Format;
 } pfc_memorytype_conversioninfo;
 
 static const pfc_memorytype_conversioninfo conversionTable[] = {
@@ -33,6 +35,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .BasicType = PFC_BASICTYPE_INT,
           .ConversionFunction = Convert_Byte,
           .Units = NULL,
+          .Format = "%d",
         },
         {
           .MemoryType = PFC_MEMORYTYPE_SHORT,
@@ -40,6 +43,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .BasicType = PFC_BASICTYPE_INT,
           .ConversionFunction = Convert_Short,
           .Units = NULL,
+          .Format = "%d",
         },
         {
           .MemoryType = PFC_MEMORYTYPE_SHORTRPM,
@@ -47,6 +51,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .BasicType = PFC_BASICTYPE_INT,
           .ConversionFunction = Convert_Short,
           .Units = " RPM",
+          .Format = "%d %s",
         },
         {
           .MemoryType = PFC_MEMORYTYPE_SHORTVOLTAGE,
@@ -54,19 +59,21 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .BasicType = PFC_BASICTYPE_FLOAT,
           .ConversionFunction = Convert_ShortVoltage,
           .Units = " V",
+          .Format = "%2.1f %s",
         },
         {
           .MemoryType = PFC_MEMORYTYPE_SHORTBOOST,
           .Size = PFC_SIZE_SHORT,
           .BasicType = PFC_BASICTYPE_FLOAT,
           .ConversionFunction = Convert_ShortBoost,
-          .Units = " mmHg, Kgcm2",
+          .Units = "mmHg\0kg/cm²",
+          .Format = "%3.0f %s\0%1.2f %s",
         }
 };
 
 
 
-static int Convert_Float(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+static int Convert_Float(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -76,7 +83,7 @@ static int Convert_Float(pcf_conversion conversion, const void * value, void * o
             result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
             break;
         case PFC_CONVERSION_TOSTRING_WITHUNIT:
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            result = snprintf((char *)output, outputLength, Format, *((float *)value), Units);
             break;
         case PFC_CONVERSION_TOBASIC:
             if(outputLength == sizeof(float))
@@ -103,7 +110,7 @@ static int Convert_Float(pcf_conversion conversion, const void * value, void * o
     return result;
 }
 
-static int Convert_Int(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+static int Convert_Int(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -142,7 +149,7 @@ static int Convert_Int(pcf_conversion conversion, const void * value, void * out
 }
 
 
-int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -151,13 +158,13 @@ int Convert_Byte(pcf_conversion conversion, const void * value, void * output, i
          conversion == PFC_CONVERSION_TOBASIC)
     {
         int intValue = *((uint8_t *)value);
-        result = Convert_Int(conversion, &intValue, output, outputLength, Units);
+        result = Convert_Int(conversion, &intValue, output, outputLength, Units, Format);
     }
 
     return result;
 }
 
-int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -166,13 +173,13 @@ int Convert_Short(pcf_conversion conversion, const void * value, void * output, 
          conversion == PFC_CONVERSION_TOBASIC)
     {
         int intValue = *((uint16_t *)value);
-        result = Convert_Int(conversion, &intValue, output, outputLength, Units);
+        result = Convert_Int(conversion, &intValue, output, outputLength, Units, Format);
     }
 
     return result;
 }
 
-int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -181,13 +188,13 @@ int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * o
          conversion == PFC_CONVERSION_TOBASIC)
     {
         float floatValue = ((float)(*((uint16_t*)value)))/10.0f;
-        result = Convert_Float(conversion, &floatValue, output, outputLength, Units);
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
     }
 
     return result;
 }
 
-int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -197,16 +204,20 @@ int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * out
     {
         float floatValue = 0.0f;
 
+
+
         if( *((uint16_t*)value) & 0x8000 )
         {
             floatValue = (((float)(*((uint16_t*)value)&0xff))/100.0f);
+            Units += strlen(Units) + 1;
+            Format += strlen(Format) + 1;
         }
         else
         {
             floatValue = ((float)(*((uint16_t*)value)&0x3ff))-760.0f;
         }
 
-        result = Convert_Float(conversion, &floatValue, output, outputLength, Units);
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
     }
 
     return result;
@@ -242,16 +253,16 @@ pfc_size PFC_Convert_PFCValueSize(pfc_memorytype MemoryType)
     return Result;
 }
 
-pfc_conversion_error PFC_Convert_PFCValueToBasic(pfc_basictype BasicType, pfc_memorytype MemoryType, const void * Value, void * ConvertedValue, int ConvertedValueSize)
+pfc_conversion_error PFC_Convert_PFCValueTo(pcf_conversion conversionType,pfc_basictype BasicType, pfc_memorytype MemoryType, const void * Value, void * ConvertedValue, int ConvertedValueSize)
 {
     const pfc_memorytype_conversioninfo * memoryTypeConversion = getConverstionInfo(MemoryType);
     pfc_conversion_error result = PFC_CONVERSION_ERROR_NONSET;
 
     if(memoryTypeConversion != NULL)
     {
-        if(memoryTypeConversion->BasicType == BasicType)
+        if(memoryTypeConversion->BasicType == BasicType || conversionType == PFC_CONVERSION_TOSTRING_WITHUNIT || conversionType == PFC_CONVERSION_TOSTRING_WITHUNIT)
         {
-            int len = memoryTypeConversion->ConversionFunction(PFC_CONVERSION_TOBASIC, Value, ConvertedValue, ConvertedValueSize, NULL);
+            int len = memoryTypeConversion->ConversionFunction(conversionType, Value, ConvertedValue, ConvertedValueSize, memoryTypeConversion->Units, memoryTypeConversion->Format);
 
             if(len > 0)
             {
@@ -278,12 +289,17 @@ pfc_conversion_error PFC_Convert_PFCValueToBasic(pfc_basictype BasicType, pfc_me
 
 pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue)
 {
-    return PFC_Convert_PFCValueToBasic(PFC_BASICTYPE_FLOAT, MemoryType, Value, ConvertedValue, sizeof(*ConvertedValue));
+    return PFC_Convert_PFCValueTo(PFC_CONVERSION_TOBASIC, PFC_BASICTYPE_FLOAT, MemoryType, Value, ConvertedValue, sizeof(*ConvertedValue));
 }
 
 pfc_conversion_error PFC_Convert_PFCValueToInt(pfc_memorytype MemoryType, const void * Value, int * ConvertedValue)
 {
-    return PFC_Convert_PFCValueToBasic(PFC_BASICTYPE_INT, MemoryType, Value, ConvertedValue, sizeof(*ConvertedValue));
+    return PFC_Convert_PFCValueTo(PFC_CONVERSION_TOBASIC, PFC_BASICTYPE_INT, MemoryType, Value, ConvertedValue, sizeof(*ConvertedValue));
+}
+
+pfc_conversion_error PFC_Convert_PFCValueToString(pfc_memorytype MemoryType, bool Unit, const void * Value, char * ConvertedValue, int ConvertedValueLength)
+{
+    return PFC_Convert_PFCValueTo(Unit ? PFC_CONVERSION_TOSTRING_WITHUNIT : PFC_CONVERSION_TOSTRING_WITHUNIT, PFC_BASICTYPE_NONE, MemoryType, Value, ConvertedValue, ConvertedValueLength);
 }
 
 

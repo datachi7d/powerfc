@@ -86,6 +86,7 @@ typedef enum
 
 typedef enum
 {
+    PFC_BASICTYPE_NONE,
     PFC_BASICTYPE_INT,
     PFC_BASICTYPE_FLOAT,
     PFC_BASICTYPE_STRING
@@ -113,7 +114,7 @@ typedef enum
 pfc_size PFC_Convert_PFCValueSize(pfc_memorytype MemoryType);
 pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue);
 pfc_conversion_error PFC_Convert_PFCValueToInt(pfc_memorytype MemoryType, const void * Value, int * ConvertedValue);
-
+pfc_conversion_error PFC_Convert_PFCValueToString(pfc_memorytype MemoryType, bool Unit, const void * Value, char * ConvertedValue, int ConvertedValueLength);
 
 #ifdef __cplusplus
 }
