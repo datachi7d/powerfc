@@ -67,7 +67,9 @@ INSTANTIATE_TEST_CASE_P(
                 detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0.01f, PFC_CONVERSION_ERROR_NOERROR },
                 detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8000 + (199), 1.99f, PFC_CONVERSION_ERROR_NOERROR },
                 detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, 0, -760.0f, PFC_CONVERSION_ERROR_NOERROR },
-                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, (760-508), -508.0f, PFC_CONVERSION_ERROR_NOERROR }
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTBOOST, (760-508), -508.0f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTVOLTAGE, 148, 14.8f, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeFloatResource { PFC_MEMORYTYPE_SHORTVOLTAGE, 44, 4.4f, PFC_CONVERSION_ERROR_NOERROR }
         ));
 
 
@@ -95,5 +97,11 @@ INSTANTIATE_TEST_CASE_P(
         TestConvertValueInt1,
         TestConvertValueInt,
         ::testing::Values(
-                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0, PFC_CONVERSION_ERROR_UNSUPPORTED }
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORTBOOST, 0x8001, 0, PFC_CONVERSION_ERROR_UNSUPPORTED },
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORTRPM, 6500, 6500, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORTRPM, 100, 100, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORT, 65000, 65000, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_SHORT, 10, 10, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_BYTE, 0x01, 1, PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeIntResource { PFC_MEMORYTYPE_BYTE, 0xff, 255, PFC_CONVERSION_ERROR_NOERROR }
         ));

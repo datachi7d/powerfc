@@ -13,6 +13,7 @@
 
 int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
 int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
+int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
 int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
 
 typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units);
@@ -48,6 +49,13 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .Units = " RPM",
         },
         {
+          .MemoryType = PFC_MEMORYTYPE_SHORTVOLTAGE,
+          .Size = PFC_SIZE_SHORT,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ShortVoltage,
+          .Units = " V",
+        },
+        {
           .MemoryType = PFC_MEMORYTYPE_SHORTBOOST,
           .Size = PFC_SIZE_SHORT,
           .BasicType = PFC_BASICTYPE_FLOAT,
@@ -56,14 +64,46 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
         }
 };
 
-int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+
+
+static int Convert_Float(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    switch(conversion)
+    {
+        case PFC_CONVERSION_TOSTRING:
+            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            break;
+        case PFC_CONVERSION_TOSTRING_WITHUNIT:
+            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            break;
+        case PFC_CONVERSION_TOBASIC:
+            if(outputLength == sizeof(float))
+            {
+                memcpy(output, value, sizeof(float));
+                result = sizeof(float);
+            }
+            else
+            {
+                result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_TYPELENGTH);
+            }
+            break;
+        case PFC_CONVERSION_TOPFC_FROMBASIC:
+            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            break;
+        case PFC_CONVERSION_TOPFC_FROMSTRING:
+            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            break;
+
+        default:
+            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+    }
 
     return result;
 }
 
-int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+static int Convert_Int(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -78,24 +118,71 @@ int Convert_Short(pcf_conversion conversion, const void * value, void * output, 
         case PFC_CONVERSION_TOBASIC:
             if(outputLength == sizeof(int))
             {
-                *((int *)output) = *((uint16_t *)value);
+                memcpy(output, value, sizeof(int));
+                result = sizeof(int);
             }
             else
             {
                 result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_TYPELENGTH);
             }
             break;
+
         case PFC_CONVERSION_TOPFC_FROMBASIC:
             result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
             break;
         case PFC_CONVERSION_TOPFC_FROMSTRING:
+            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            break;
 
         default:
             result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
-
     }
 
     return result;
+}
+
+
+int Convert_Byte(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = *((uint8_t *)value);
+        result = Convert_Int(conversion, &intValue, output, outputLength, Units);
+    }
+
+    return result;
+}
+
+int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = *((uint16_t *)value);
+        result = Convert_Int(conversion, &intValue, output, outputLength, Units);
+    }
+
+    return result;
+}
+
+int Convert_ShortVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = ((float)(*((uint16_t*)value)))/10.0f;
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units);
+    }
 
     return result;
 }
@@ -103,61 +190,34 @@ int Convert_Short(pcf_conversion conversion, const void * value, void * output, 
 int Convert_ShortBoost(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
-    float boost = 0.0f;
 
     if  (conversion == PFC_CONVERSION_TOSTRING ||
          conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
          conversion == PFC_CONVERSION_TOBASIC)
     {
+        float floatValue = 0.0f;
+
         if( *((uint16_t*)value) & 0x8000 )
         {
-            boost = (((float)(*((uint16_t*)value)&0xff))/100.0f);
+            floatValue = (((float)(*((uint16_t*)value)&0xff))/100.0f);
         }
         else
         {
-            boost = ((float)(*((uint16_t*)value)&0x3ff))-760.0f;
+            floatValue = ((float)(*((uint16_t*)value)&0x3ff))-760.0f;
         }
 
-    }
-
-    switch(conversion)
-    {
-        case PFC_CONVERSION_TOSTRING:
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
-            break;
-        case PFC_CONVERSION_TOSTRING_WITHUNIT:
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
-            break;
-        case PFC_CONVERSION_TOBASIC:
-            if(outputLength == sizeof(boost))
-            {
-                memcpy(output, &boost, sizeof(boost));
-                result = sizeof(boost);
-            }
-            else
-            {
-                result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_TYPELENGTH);
-            }
-            break;
-        case PFC_CONVERSION_TOPFC_FROMBASIC:
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
-            break;
-        case PFC_CONVERSION_TOPFC_FROMSTRING:
-
-        default:
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
-
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units);
     }
 
     return result;
 }
 
-
 const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryType)
 {
     const pfc_memorytype_conversioninfo * memoryTypeConversion = NULL;
+    int i = 0;
 
-    for(int i = 0; i < (sizeof(conversionTable) / sizeof(pfc_memorytype_conversioninfo)); i++)
+    for(i = 0; i < (sizeof(conversionTable) / sizeof(pfc_memorytype_conversioninfo)); i++)
     {
         if(conversionTable[i].MemoryType == MemoryType)
         {
