@@ -19,7 +19,6 @@ extern "C" {
 #define PFC_SIZE_SHORT 2
 #define PFC_SIZE_BYTE  1
 
-
 typedef enum
 {
     PFC_CONVERSION_ERROR_NONSET = 0,

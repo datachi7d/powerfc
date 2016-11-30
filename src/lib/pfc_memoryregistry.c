@@ -30,6 +30,8 @@ struct _PFC_MemoryValue
 {
     char * Name;
     pfc_memorytype Type;
+    int Row;
+    int Column;
 };
 
 PFC_MemoryValue * PFC_MemoryValue_New(pfc_size Size)
@@ -52,7 +54,7 @@ void PFC_MemoryValue_Free(PFC_MemoryValue * ptr)
     }
 }
 
-PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name)
+PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
 {
     PFC_MemoryValue * memoryValue = NULL;
     pfc_error result = PFC_ERROR_UNSET;
@@ -71,6 +73,8 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegiste
                 {
                     memoryValue->Name = PFC_strdup(Name);
                     memoryValue->Type = Type;
+                    memoryValue->Row = Row;
+                    memoryValue->Column = Column;
                 }
                 else
                 {
@@ -82,6 +86,11 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegiste
     }
 
     return memoryValue;
+}
+
+PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name)
+{
+    return MemoryRegister_AddValue(memoryRegister, Type, Name, -1, -1);
 }
 
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
@@ -102,56 +111,6 @@ pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
     }
 
     return Size;
-}
-
-
-PFC_MemoryRegister * PFC_MemoryRegister_New(PFC_Memory * Memory, PFC_ID RegisterID, pfc_size Size, const char * name)
-{
-    PFC_MemoryRegister * memoryRegister = NULL;
-
-    if (Memory != NULL && Memory->MemoryRegisters != NULL)
-    {
-        if(PFC_Memory_GetMemoryRegister(Memory, RegisterID) == NULL)
-        {
-            memoryRegister = PFC_malloc(sizeof(*memoryRegister));
-
-            if (memoryRegister != NULL)
-            {
-                memoryRegister->Memory = PFC_malloc(Size);
-                if(memoryRegister->Memory != NULL)
-                {
-                    pfc_error result;
-
-                    if ( (result = PFC_ValueList_AddItem(Memory->MemoryRegisters, memoryRegister)) == PFC_ERROR_NONE)
-                    {
-                        if ( (memoryRegister->Values = PFC_ValueList_New()) != NULL)
-                        {
-                            memoryRegister->ID = RegisterID;
-                            memoryRegister->MemorySize = Size;
-                            memoryRegister->Name = PFC_strdup(name);
-                        }
-                        else
-                        {
-                            PFC_MemoryRegister_Free(memoryRegister);
-                            memoryRegister = NULL;
-                        }
-                    }
-                    else
-                    {
-                        PFC_MemoryRegister_Free(memoryRegister);
-                        memoryRegister = NULL;
-                    }
-                }
-                else
-                {
-                    PFC_MemoryRegister_Free(memoryRegister);
-                    memoryRegister = NULL;
-                }
-            }
-        }
-    }
-
-    return memoryRegister;
 }
 
 void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
@@ -228,6 +187,129 @@ void PFC_Memory_Free(PFC_Memory * memory)
         PFC_free(memory);
     }
 }
+
+PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID RegisterID, pfc_size Size, const char * name)
+{
+    PFC_MemoryRegister * memoryRegister = NULL;
+
+    if (Memory != NULL && Memory->MemoryRegisters != NULL)
+    {
+        if(PFC_Memory_GetMemoryRegister(Memory, RegisterID) == NULL)
+        {
+            memoryRegister = PFC_malloc(sizeof(*memoryRegister));
+
+            if (memoryRegister != NULL)
+            {
+                memoryRegister->Memory = PFC_malloc(Size);
+                if(memoryRegister->Memory != NULL)
+                {
+                    pfc_error result;
+
+                    if ( (result = PFC_ValueList_AddItem(Memory->MemoryRegisters, memoryRegister)) == PFC_ERROR_NONE)
+                    {
+                        if ( (memoryRegister->Values = PFC_ValueList_New()) != NULL)
+                        {
+                            memoryRegister->ID = RegisterID;
+                            memoryRegister->MemorySize = Size;
+                            memoryRegister->Name = PFC_strdup(name);
+                        }
+                        else
+                        {
+                            PFC_MemoryRegister_Free(memoryRegister);
+                            memoryRegister = NULL;
+                        }
+                    }
+                    else
+                    {
+                        PFC_MemoryRegister_Free(memoryRegister);
+                        memoryRegister = NULL;
+                    }
+                }
+                else
+                {
+                    PFC_MemoryRegister_Free(memoryRegister);
+                    memoryRegister = NULL;
+                }
+            }
+        }
+    }
+
+    return memoryRegister;
+}
+
+pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+
+    if(Memory != NULL)
+    {
+        int cellSize = PFC_Convert_PFCValueSize(cellType);
+
+        if(cellSize)
+        {
+            int TotalSize = ((int)rows) * ((int)columns) * (int)PFC_Convert_PFCValueSize(cellType);
+            int Registers = (LastRegisterID - FirstRegisterID) + 1;
+            int RegisterSize = (TotalSize/Registers);
+            int ValuesPerRegister =  RegisterSize % cellSize == 0 ? RegisterSize/cellSize : 0;
+            int X = 0;
+            int Y = 0;
+
+
+            if(RegisterSize <= PFC_MAX_REGISTER_SIZE && ValuesPerRegister > 0)
+            {
+                PFC_ID registerID = FirstRegisterID;
+
+                for(registerID = FirstRegisterID; registerID <= LastRegisterID; registerID++)
+                {
+                    int registerCount = 0;
+                    char registerName[256] = {0};
+                    PFC_MemoryRegister * registerN = NULL;
+                    snprintf(registerName, sizeof(registerName), "%s[%d]", name, registerID - FirstRegisterID);
+
+                    registerN = PFC_Memory_NewRegister(Memory, registerID, RegisterSize, registerName);
+
+                    if(registerN != NULL)
+                    {
+
+                        for(registerCount = 0; registerCount < (RegisterSize/cellSize); registerCount++)
+                        {
+                            char valueName[256] = {0};
+                            snprintf(valueName, sizeof(valueName), "%s[%d][%d]", name, X, Y);
+                            if(PFC_MemoryRegister_AddValue(registerN, cellType, registerName) == NULL)
+                            {
+                                break;
+                            }
+
+                            if(X < rows)
+                                X++;
+                            else
+                            {
+                                X = 0;
+                                Y++;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //Result = PFC_ERROR_NULL_PARAMETER;
+            }
+        }
+        else
+        {
+            //Result = PFC_ERROR_NULL_PARAMETER;
+        }
+    }
+    else
+    {
+        Result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return Result;
+
+}
+
 
 PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID RegisterID)
 {

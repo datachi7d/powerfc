@@ -35,9 +35,9 @@ TEST_F(PFC_MemoryRegistry, test_Memory_Invalid)
 
     ASSERT_TRUE(memory != NULL);
 
-    EXPECT_TRUE(PFC_Memory_GetMemoryRegister(memory, 0) == NULL);
-    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) == NULL);
-    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterSize(memory, 0) == 0);
+    EXPECT_TRUE(PFC_Memory_GetMemoryRegister(memory, PFC_ID_MIN) == NULL);
+    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_MIN) == NULL);
+    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterSize(memory, PFC_ID_MIN) == 0);
 
     PFC_Memory_Free(memory);
 }
@@ -48,7 +48,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryRegister_New)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_MemoryRegister_New(memory, 0, 10, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, 10, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -62,7 +62,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryRegister_AddValue)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_MemoryRegister_New(memory, 0, 10, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, 10, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -87,7 +87,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryRegister_AddValue_Invalid)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_MemoryRegister_New(memory, 0, 2, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, 2, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -114,7 +114,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_GetMemoryRegister)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_MemoryRegister_New(memory, 0, PFC_SIZE_SHORT * 2, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, PFC_SIZE_SHORT * 2, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -130,8 +130,8 @@ TEST_F(PFC_MemoryRegistry, test_Memory_GetMemoryRegister)
 
     ASSERT_EQ(PFC_SIZE_SHORT*2, PFC_MemoryRegister_GetSize(Register));
 
-    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) != NULL);
-    ASSERT_EQ(PFC_SIZE_SHORT * 2, PFC_Memory_GetMemoryRegisterSize(memory, 0));
+    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_MIN) != NULL);
+    ASSERT_EQ(PFC_SIZE_SHORT * 2, PFC_Memory_GetMemoryRegisterSize(memory, PFC_ID_MIN));
 
 
     PFC_Memory_Free(memory);
