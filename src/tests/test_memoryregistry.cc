@@ -137,6 +137,17 @@ TEST_F(PFC_MemoryRegistry, test_Memory_GetMemoryRegister)
     PFC_Memory_Free(memory);
 }
 
+TEST_F(PFC_MemoryRegistry, test_Memory_NewMap)
+{
+    PFC_Memory * memory = PFC_Memory_New();
+
+    ASSERT_TRUE(memory != NULL);
+
+    ASSERT_EQ(PFC_ERROR_NONE, PFC_Memory_NewMap(memory, PFC_ID_InjectorCorrection_0, PFC_ID_InjectorCorrection_3, PFC_MEMORYTYPE_BYTEDEGREE, 20, 20, "InjectorCorrection"));
+
+    PFC_Memory_Free(memory);
+}
+
 
 
 

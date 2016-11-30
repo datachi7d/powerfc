@@ -93,6 +93,11 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegiste
     return MemoryRegister_AddValue(memoryRegister, Type, Name, -1, -1);
 }
 
+PFC_MemoryValue * PFC_MemoryRegister_AddValueXY(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name,  int Row, int Column)
+{
+    return MemoryRegister_AddValue(memoryRegister, Type, Name, Row, Column);
+}
+
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
 {
     pfc_size Size = 0;
@@ -258,6 +263,7 @@ pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID 
             if(RegisterSize <= PFC_MAX_REGISTER_SIZE && ValuesPerRegister > 0)
             {
                 PFC_ID registerID = FirstRegisterID;
+                bool failed = false;
 
                 for(registerID = FirstRegisterID; registerID <= LastRegisterID; registerID++)
                 {
@@ -270,35 +276,67 @@ pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID 
 
                     if(registerN != NULL)
                     {
+                        failed = false;
+
 
                         for(registerCount = 0; registerCount < (RegisterSize/cellSize); registerCount++)
                         {
                             char valueName[256] = {0};
                             snprintf(valueName, sizeof(valueName), "%s[%d][%d]", name, X, Y);
-                            if(PFC_MemoryRegister_AddValue(registerN, cellType, registerName) == NULL)
+                            if(PFC_MemoryRegister_AddValueXY(registerN, cellType, registerName, X, Y) == NULL)
                             {
+                                failed = true;
                                 break;
                             }
 
-                            if(X < rows)
-                                X++;
-                            else
+                            if(Y < (rows-1))
                             {
-                                X = 0;
                                 Y++;
                             }
+                            else if(X < (columns-1))
+                            {
+                                Y = 0;
+                                X++;
+                            }
+                        }
+
+                        if(failed)
+                        {
+                            break;
                         }
                     }
+                    else
+                    {
+                        failed = true;
+                        break;
+                    }
                 }
+
+                if(!failed)
+                {
+                    if(Y == rows-1 && X == columns-1)
+                    {
+                        Result = PFC_ERROR_NONE;
+                    }
+                    else
+                    {
+                        Result = PFC_ERROR_NULL_PARAMETER;
+                    }
+                }
+                else
+                {
+                    Result = PFC_ERROR_NULL_PARAMETER;
+                }
+
             }
             else
             {
-                //Result = PFC_ERROR_NULL_PARAMETER;
+                Result = PFC_ERROR_NULL_PARAMETER;
             }
         }
         else
         {
-            //Result = PFC_ERROR_NULL_PARAMETER;
+            Result = PFC_ERROR_NULL_PARAMETER;
         }
     }
     else

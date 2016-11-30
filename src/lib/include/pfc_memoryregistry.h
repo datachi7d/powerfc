@@ -25,6 +25,7 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegiste
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister);
 PFC_MemoryRegister * PFC_MemoryRegister_Get(PFC_Memory * Memory, PFC_ID RegisterID);
 PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID RegisterID, pfc_size Size, const char * name);
+pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name);
 void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister);
 
 PFC_Memory * PFC_Memory_New();
