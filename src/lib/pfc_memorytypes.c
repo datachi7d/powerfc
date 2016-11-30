@@ -123,6 +123,36 @@ int Convert_ByteTemperature(pcf_conversion conversion, const void * value, void 
     return result;
 }
 
+int Convert_ByteBatteryVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (*((uint8_t *)value)) * 0.1f;
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+int Convert_ByteVoltage(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (*((uint8_t *)value)) * 0.02f;
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
 int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
@@ -248,6 +278,20 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .ConversionFunction = Convert_Byte,
           .Units = "°",
           .Format = "%d %s",
+        },
+        { .MemoryType = PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE,
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ByteBatteryVoltage,
+          .Units = "V",
+          .Format = "%2.1f %s",
+        },
+        { .MemoryType = PFC_MEMORYTYPE_BYTEVOLTAGE,
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ByteVoltage,
+          .Units = "V",
+          .Format = "%1.2f %s",
         },
         {
           .MemoryType = PFC_MEMORYTYPE_SHORT,

@@ -54,6 +54,43 @@ void PFC_MemoryValue_Free(PFC_MemoryValue * ptr)
     }
 }
 
+const char * PFC_MemoryValue_GetName(PFC_MemoryValue * memoryValue)
+{
+    const char * result = NULL;
+
+    if(memoryValue != NULL)
+    {
+        result = memoryValue->Name;
+    }
+
+    return result;
+}
+
+pfc_size PFC_MemoryValue_GetSize(PFC_MemoryValue * memoryValue)
+{
+    pfc_size result = 0;
+
+    if(memoryValue != NULL)
+    {
+        result = PFC_Convert_PFCValueSize(memoryValue->Type);
+    }
+
+    return result;
+}
+
+pfc_memorytype PFC_MemoryValue_GetType(PFC_MemoryValue * memoryValue)
+{
+    pfc_memorytype result = PFC_MEMORYTYPE_LAST;
+
+    if(memoryValue != NULL)
+    {
+        result = memoryValue->Type;
+    }
+
+    return result;
+}
+
+
 PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
 {
     PFC_MemoryValue * memoryValue = NULL;
@@ -98,6 +135,68 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValueXY(PFC_MemoryRegister * memoryRegis
     return MemoryRegister_AddValue(memoryRegister, Type, Name, Row, Column);
 }
 
+
+PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRegister)
+{
+    PFC_MemoryValue * value = NULL;
+
+    if(memoryRegister)
+    {
+        value = (PFC_MemoryValue *)PFC_ValueList_GetValue(PFC_ValueList_GetFirst(memoryRegister->Values));
+    }
+
+    return value;
+}
+
+
+pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue ** value)
+{
+    pfc_error result = PFC_ERROR_UNSET;
+
+    if(memoryRegister && value && *value)
+    {
+        PFC_ValueList * list = PFC_ValueList_GetFirst(memoryRegister->Values);
+
+        if(list != NULL)
+        {
+            PFC_MemoryValue * current = PFC_ValueList_GetValue(list);
+            PFC_MemoryValue * previous = NULL;
+
+            result = PFC_ERROR_NOT_FOUND;
+
+            while( current != NULL )
+            {
+                previous = current;
+                current = PFC_ValueList_NextItemValue(&list);
+
+                if(previous == *value && current != NULL)
+                {
+                    *value = current;
+                    result = PFC_ERROR_NONE;
+                    break;
+                }
+            }
+
+
+            if(result == PFC_ERROR_NOT_FOUND)
+            {
+                *value = NULL;
+            }
+        }
+        else
+        {
+            result = PFC_ERROR_NULL_PARAMETER;
+        }
+    }
+    else
+    {
+        result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return result;
+}
+
+
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
 {
     pfc_size Size = 0;
@@ -112,11 +211,38 @@ pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
             Size += PFC_Convert_PFCValueSize(value->Type);
             value = PFC_ValueList_NextItemValue(&list);
         }
-
     }
 
     return Size;
 }
+
+
+int PFC_MemoryRegister_GetOffsetOfValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue * memoryValue)
+{
+    int Size = 0;
+    bool found = false;
+
+    if(memoryRegister)
+    {
+        PFC_ValueList * list = PFC_ValueList_GetFirst(memoryRegister->Values);
+        PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
+
+        while( value != NULL )
+        {
+            if(value == memoryValue)
+            {
+                found = true;
+                break;
+            }
+
+            Size += PFC_Convert_PFCValueSize(value->Type);
+            value = PFC_ValueList_NextItemValue(&list);
+        }
+    }
+
+    return found ? Size : -1;
+}
+
 
 void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
 {
@@ -327,7 +453,6 @@ pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID 
                 {
                     Result = PFC_ERROR_NULL_PARAMETER;
                 }
-
             }
             else
             {
