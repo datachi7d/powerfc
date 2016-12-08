@@ -103,6 +103,52 @@ pfc_error PFC_ValueList_AddItem(PFC_ValueList * List, void * Value)
     return Result;
 }
 
+pfc_error PFC_ValueList_RemoveItem(PFC_ValueList * List, void * Value)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+
+    if(List != NULL && Value != NULL)
+    {
+        PFC_ValueList * valueListItem = List;
+
+        Result = PFC_ERROR_NOT_FOUND;
+
+        do
+        {
+
+            if(valueListItem->value == Value)
+            {
+                if(valueListItem->previous != NULL)
+                    valueListItem->previous->next = valueListItem->next;
+
+                if(valueListItem->next != NULL)
+                    valueListItem->next->previous = valueListItem->previous;
+
+                PFC_free(valueListItem);
+                valueListItem = NULL;
+
+                Result = PFC_ERROR_NONE;
+            }
+            else
+            {
+                if(PFC_ValueList_NextItemValue(&valueListItem) == NULL)
+                {
+                    valueListItem = NULL;
+                }
+            }
+
+        }while(valueListItem != NULL);
+
+    }
+    else
+    {
+        Result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return Result;
+}
+
+
 void * PFC_ValueList_NextItemValue(PFC_ValueList ** List)
 {
     void * nextValue = NULL;

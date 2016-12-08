@@ -130,6 +130,53 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegiste
     return MemoryRegister_AddValue(memoryRegister, Type, Name, -1, -1);
 }
 
+PFC_MemoryValue * PFC_MemoryRegister_AddValueArray(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int count)
+{
+    int i = 0;
+    bool failed = false;
+    PFC_MemoryValue * first = NULL;
+
+    for(i = 0; i < count; i++)
+    {
+        char valueName[256] = {0};
+        snprintf(valueName, sizeof(valueName), "%s[%d]", Name, i);
+        PFC_MemoryValue * memoryValue = NULL;
+
+        if((memoryValue = MemoryRegister_AddValue(memoryRegister, Type, valueName, i, -1)) == NULL)
+        {
+            failed = true;
+            break;
+        }
+        else if(first == NULL)
+        {
+            first = memoryValue;
+        }
+    }
+
+    if(failed)
+    {
+        PFC_MemoryValue * next = first;
+
+        while(first != NULL)
+        {
+            PFC_MemoryRegister_GetNextValue(memoryRegister, &next);
+            if(PFC_ValueList_RemoveItem(memoryRegister->Values, first) == PFC_ERROR_NONE)
+            {
+                PFC_MemoryValue_Free(first);
+                first = next;
+            }
+            else
+            {
+                first = NULL;
+            }
+        }
+
+        first = NULL;
+    }
+
+    return first;
+}
+
 PFC_MemoryValue * PFC_MemoryRegister_AddValueXY(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name,  int Row, int Column)
 {
     return MemoryRegister_AddValue(memoryRegister, Type, Name, Row, Column);
@@ -214,6 +261,25 @@ pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister)
     }
 
     return Size;
+}
+
+int PFC_MemoryRegister_GetCount(PFC_MemoryRegister * memoryRegister)
+{
+    int Count = 0;
+
+    if(memoryRegister)
+    {
+        PFC_ValueList * list = PFC_ValueList_GetFirst(memoryRegister->Values);
+        PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
+
+        while( value != NULL )
+        {
+            Count += 1;
+            value = PFC_ValueList_NextItemValue(&list);
+        }
+    }
+
+    return Count;
 }
 
 
@@ -409,7 +475,7 @@ pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID 
                         {
                             char valueName[256] = {0};
                             snprintf(valueName, sizeof(valueName), "%s[%d][%d]", name, X, Y);
-                            if(PFC_MemoryRegister_AddValueXY(registerN, cellType, registerName, X, Y) == NULL)
+                            if(PFC_MemoryRegister_AddValueXY(registerN, cellType, valueName, X, Y) == NULL)
                             {
                                 failed = true;
                                 break;
