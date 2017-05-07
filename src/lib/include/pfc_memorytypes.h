@@ -1,10 +1,3 @@
-/*
- * pfc_memorytypes.h
- *
- *  Created on: 26/11/2016
- *      Author: sean
- */
-
 #ifndef SRC_LIB_INCLUDE_PFC_MEMORYTYPES_H_
 #define SRC_LIB_INCLUDE_PFC_MEMORYTYPES_H_
 

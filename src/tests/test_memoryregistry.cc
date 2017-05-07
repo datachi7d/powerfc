@@ -1,10 +1,3 @@
-/*
- * test_resource.cc
- *
- *  Created on: 25/11/2016
- *      Author: sean
- */
-
 #include <gtest/gtest.h>
 #include <string>
 #include <stdio.h>

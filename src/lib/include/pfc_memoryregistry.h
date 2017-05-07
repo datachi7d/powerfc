@@ -1,10 +1,3 @@
-/*
- * pfc_registry.h
- *
- *  Created on: 25/11/2016
- *      Author: sekelly
- */
-
 #ifndef PFC_REGISTRY_H_
 #define PFC_REGISTRY_H_
 

@@ -1,10 +1,3 @@
-/*
- * pfc_registry.c
- *
- *  Created on: 25/11/2016
- *      Author: sekelly
- */
-
 #include "pfc_memoryregistry.h"
 #include "pfc_types.h"
 #include "pfc_memory.h"

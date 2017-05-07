@@ -1,12 +1,7 @@
-/*
- * pfc_memory.h
- *
- *  Created on: 25/11/2016
- *      Author: sekelly
- */
-
 #ifndef PFC_MEMORY_H_
 #define PFC_MEMORY_H_
+
+#include <stdint.h>
 
 void * PFC_malloc(uint16_t size);
 void PFC_free(void * ptr);

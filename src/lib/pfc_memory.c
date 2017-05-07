@@ -1,10 +1,3 @@
-/*
- * pfc_memory.c
- *
- *  Created on: 25/11/2016
- *      Author: sekelly
- */
-
 #include <string.h>
 #include <stdlib.h>
 

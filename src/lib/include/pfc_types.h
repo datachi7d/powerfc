@@ -1,10 +1,3 @@
-/*
- * pfc_types.h
- *
- *  Created on: 25/11/2016
- *      Author: sekelly
- */
-
 #ifndef PFC_TYPES_H_
 #define PFC_TYPES_H_
 

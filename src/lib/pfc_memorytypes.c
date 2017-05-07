@@ -1,10 +1,3 @@
-/*
- * pfc_memorytypes.c
- *
- *  Created on: 26/11/2016
- *      Author: sean
- */
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

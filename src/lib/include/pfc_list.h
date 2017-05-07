@@ -1,10 +1,3 @@
-/*
- * pfc_list.h
- *
- *  Created on: 25/11/2016
- *      Author: sekelly
- */
-
 #ifndef PFC_LIST_H_
 #define PFC_LIST_H_
 
