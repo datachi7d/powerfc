@@ -142,3 +142,46 @@ INSTANTIATE_TEST_CASE_P(
                 detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80+20),        true, "20 °C",          PFC_CONVERSION_ERROR_NOERROR },
                 detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80-35),        true, "-35 °C",         PFC_CONVERSION_ERROR_NOERROR }
         ));
+
+
+class TestMemoryTypeString : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeStringResource>
+{
+    void SetUp() {  }
+    void TearDown() {  }
+};
+
+TEST_P(TestMemoryTypeString, test_MemoryTypes)
+{
+    detail::TestMemoryTypeStringResource data = GetParam();
+
+    if(data.Unit)
+    {
+        ASSERT_STREQ(data.expectedConvertedValue.c_str(), PFC_MemoryType_ToString(data.memoryType));
+        ASSERT_EQ(data.memoryType, PFC_MemoryType_FromString(data.expectedConvertedValue.c_str()));
+    }
+    else
+    {
+        ASSERT_TRUE(PFC_MemoryType_ToString(data.memoryType) == NULL);
+        ASSERT_EQ(data.memoryType, PFC_MemoryType_FromString(data.expectedConvertedValue.c_str()));
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(
+        TestMemoryTypeString1,
+        TestMemoryTypeString,
+        ::testing::Values(
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTE,              0, true, "PFC_MEMORYTYPE_BYTE",                PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,   0, true, "PFC_MEMORYTYPE_BYTETEMPERATURE",     PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTEDEGREE,        0, true, "PFC_MEMORYTYPE_BYTEDEGREE",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE,0, true, "PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE",  PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTEVOLTAGE,       0, true, "PFC_MEMORYTYPE_BYTEVOLTAGE",         PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORT,             0, true, "PFC_MEMORYTYPE_SHORT",               PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTFLOAT,        0, true, "PFC_MEMORYTYPE_SHORTFLOAT",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTSPEED,        0, true, "PFC_MEMORYTYPE_SHORTSPEED",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTRPM,          0, true, "PFC_MEMORYTYPE_SHORTRPM",            PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTVOLTAGE,      0, true, "PFC_MEMORYTYPE_SHORTVOLTAGE",        PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,        0, true, "PFC_MEMORYTYPE_SHORTBOOST",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTMILLISECOND,  0, true, "PFC_MEMORYTYPE_SHORTMILLISECOND",    PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTPERCENTAGE,   0, true, "PFC_MEMORYTYPE_SHORTPERCENTAGE",     PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_LAST,              0, false,"PFC_MEMORYTYPE_LAST",                PFC_CONVERSION_ERROR_NOERROR }
+        ));

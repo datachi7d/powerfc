@@ -2,7 +2,8 @@ set (test_pfclib_runner_SOURCES
 	main.cc
 	test_lists.cc
 	test_memorytypes.cc
-	test_memoryregistry.cc)
+	test_memoryregistry.cc
+	test_memoryconfig.cc)
 
 set (test_pfclib_runner_INCLUDE_DIRS
 	${GTEST_INCLUDE_DIR}

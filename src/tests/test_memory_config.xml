@@ -1,0 +1,23 @@
+<pfc_memory_config>
+<pfc_memory>
+    <pfc_memory_register>
+        <Name>TestRegister</Name>
+        <RegisterID>0x01</RegisterID>
+        <Size>20</Size>
+        <pfc_memory_values>
+            <pfc_memory_value>
+                <Name>TestValue1</Name>
+                <MemoryType>PFC_MEMORYTYPE_BYTE</MemroyType>
+            </pfc_memory_value>
+        </pfc_memory_values>
+    </pfc_memory_register>
+    <pfc_memory_map>
+        <Name>TestRegister</Name>
+        <RegisterIDMin>0x02</RegisterIDMin>
+        <RegisterIDMax>0x05</RegisterIDMax>
+        <MemoryType>PFC_MEMORYTYPE_BYTE</MemroyType>
+        <Rows>20</Rows>
+        <Columns>20</Columns>
+    </pfc_memory_map>
+</pfc_memory>
+</pfc_memory_config>

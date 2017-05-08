@@ -6,6 +6,49 @@
 #include "pfc_memorytypes.h"
 
 
+const char * pfc_memorytype_str [] = {
+            "PFC_MEMORYTYPE_BYTE",
+            "PFC_MEMORYTYPE_BYTETEMPERATURE",
+            "PFC_MEMORYTYPE_BYTEDEGREE",
+            "PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE",
+            "PFC_MEMORYTYPE_BYTEVOLTAGE",
+            "PFC_MEMORYTYPE_SHORT",
+            "PFC_MEMORYTYPE_SHORTFLOAT",
+            "PFC_MEMORYTYPE_SHORTSPEED",
+            "PFC_MEMORYTYPE_SHORTRPM",
+            "PFC_MEMORYTYPE_SHORTVOLTAGE",
+            "PFC_MEMORYTYPE_SHORTBOOST",
+            "PFC_MEMORYTYPE_SHORTMILLISECOND",
+            "PFC_MEMORYTYPE_SHORTPERCENTAGE"
+};
+
+const char * PFC_MemoryType_ToString(pfc_memorytype memory_type)
+{
+    const char * result = NULL;
+
+    if(memory_type < PFC_MEMORYTYPE_LAST)
+        result = pfc_memorytype_str[memory_type];
+
+    return result;
+}
+
+pfc_memorytype PFC_MemoryType_FromString(const char * name)
+{
+    pfc_memorytype result = 0;
+
+    while (result < PFC_MEMORYTYPE_LAST)
+    {
+        if(strcmp(pfc_memorytype_str[result], name) == 0)
+            break;
+
+        result++;
+    }
+
+    return result;
+}
+
+
+
 /***********************************************************************************************************************************************
  * Conversion Functions
  */

@@ -444,7 +444,6 @@ pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID 
             int X = 0;
             int Y = 0;
 
-
             if(RegisterSize <= PFC_MAX_REGISTER_SIZE && ValuesPerRegister > 0)
             {
                 PFC_ID registerID = FirstRegisterID;

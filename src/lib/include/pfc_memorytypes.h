@@ -116,6 +116,10 @@ pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, cons
 pfc_conversion_error PFC_Convert_PFCValueToInt(pfc_memorytype MemoryType, const void * Value, int * ConvertedValue);
 pfc_conversion_error PFC_Convert_PFCValueToString(pfc_memorytype MemoryType, bool Unit, const void * Value, char * ConvertedValue, int ConvertedValueLength);
 
+
+const char * PFC_MemoryType_ToString(pfc_memorytype memory_type);
+pfc_memorytype PFC_MemoryType_FromString(const char * name);
+
 #ifdef __cplusplus
 }
 #endif
