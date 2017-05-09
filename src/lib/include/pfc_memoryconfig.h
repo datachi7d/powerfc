@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "pfc_types.h"
+#include "pfc_memoryregistry.h"
 
 #define XML_PFC_MEMORY_CONFIG "pfc_memory_config"
 #define XML_PFC_MEMORY "pfc_memory"
@@ -36,8 +37,10 @@ extern "C" {
 
 typedef struct _PFC_MemoryConfig PFC_MemoryConfig;
 PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName);
+PFC_Memory * PFC_MemoryConfig_GetMemory(PFC_MemoryConfig * MemoryConfig);
 void PFC_MemoryConfig_Free(PFC_MemoryConfig * MemoryConfig);
 
+pfc_error PFC_MemoryConfig_LoadString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length);
 pfc_error PFC_MemoryConfig_Load(PFC_MemoryConfig * MemoryConfig);
 
 #ifdef __cplusplus

@@ -8,12 +8,18 @@
 
 const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTE",
+            "PFC_MEMORYTYPE_BYTERPM",
             "PFC_MEMORYTYPE_BYTETEMPERATURE",
             "PFC_MEMORYTYPE_BYTEDEGREE",
             "PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE",
             "PFC_MEMORYTYPE_BYTEVOLTAGE",
+            "PFC_MEMORYTYPE_BYTEBOOST",
+            "PFC_MEMORYTYPE_BYTEFLOAT",
+            "PFC_MEMORYTYPE_BYTEFLOAT17",
+            "PFC_MEMORYTYPE_BYTEFLOAT26",
             "PFC_MEMORYTYPE_SHORT",
             "PFC_MEMORYTYPE_SHORTFLOAT",
+            "PFC_MEMORYTYPE_SHORTFLOAT88",
             "PFC_MEMORYTYPE_SHORTSPEED",
             "PFC_MEMORYTYPE_SHORTRPM",
             "PFC_MEMORYTYPE_SHORTVOLTAGE",
@@ -189,6 +195,51 @@ int Convert_ByteVoltage(pcf_conversion conversion, const void * value, void * ou
     return result;
 }
 
+int Convert_ByteFloat(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (((*((uint8_t *)value))*0.3898f)+49.697f);
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+int Convert_ByteFloat17(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (*((uint8_t *)value))/64.0f ;
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+int Convert_ByteFloat26(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (*((uint8_t *)value))/128.0f;
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+
 int Convert_Short(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
@@ -213,6 +264,21 @@ int Convert_ShortFloat(pcf_conversion conversion, const void * value, void * out
          conversion == PFC_CONVERSION_TOBASIC)
     {
         float floatValue = (( ((float)(*((uint16_t*)value))) * 4.0f) / 1000.0f) ;
+        result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+int Convert_ShortFloat88(pcf_conversion conversion, const void * value, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (((float)(*((uint16_t*)value))) / 256.0f) ;
         result = Convert_Float(conversion, &floatValue, output, outputLength, Units, Format);
     }
 
@@ -308,6 +374,13 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .Units = "°C",
           .Format = "%d %s",
         },
+        { .MemoryType = PFC_MEMORYTYPE_BYTERPM, //TODO
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_INT,
+          .ConversionFunction = Convert_Byte,
+          .Units = NULL,
+          .Format = "%d",
+        },
         { .MemoryType = PFC_MEMORYTYPE_BYTEDEGREE,
           .Size = PFC_SIZE_BYTE,
           .BasicType = PFC_BASICTYPE_INT,
@@ -329,6 +402,34 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .Units = "V",
           .Format = "%1.2f %s",
         },
+        { .MemoryType = PFC_MEMORYTYPE_BYTEBOOST,
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ByteFloat17,
+          .Units = "kg/cm²",
+          .Format = "%1.5f %s",
+        },
+        { .MemoryType = PFC_MEMORYTYPE_BYTEFLOAT,
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ByteFloat,
+          .Units = NULL,
+          .Format = "%3.1f",
+        },
+        { .MemoryType = PFC_MEMORYTYPE_BYTEFLOAT17,
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ByteFloat17,
+          .Units = NULL,
+          .Format = "%1.5f",
+        },
+        { .MemoryType = PFC_MEMORYTYPE_BYTEFLOAT26,
+          .Size = PFC_SIZE_BYTE,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ByteFloat26,
+          .Units = NULL,
+          .Format = "%1.5f",
+        },
         {
           .MemoryType = PFC_MEMORYTYPE_SHORT,
           .Size = PFC_SIZE_SHORT,
@@ -342,6 +443,14 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
           .Size = PFC_SIZE_SHORT,
           .BasicType = PFC_BASICTYPE_FLOAT,
           .ConversionFunction = Convert_ShortFloat,
+          .Units = NULL,
+          .Format = "%3.3f",
+        },
+        {
+          .MemoryType = PFC_MEMORYTYPE_SHORTFLOAT88,
+          .Size = PFC_SIZE_SHORT,
+          .BasicType = PFC_BASICTYPE_FLOAT,
+          .ConversionFunction = Convert_ShortFloat88,
           .Units = NULL,
           .Format = "%3.3f",
         },

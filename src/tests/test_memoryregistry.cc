@@ -164,7 +164,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryMap_GetXY)
 
             ASSERT_TRUE(value != NULL);
 
-            printf("%s = [%d][%d]\n", PFC_MemoryValue_GetName(value), row, column);
+            //printf("%s = [%d][%d]\n", PFC_MemoryValue_GetName(value), row, column);
         }
     }
 
@@ -289,7 +289,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_MapReference)
         PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), true, RegisterMemory + offset, valueBuffer, sizeof(valueBuffer));
 
 
-        printf("\t%s = %s\n", PFC_MemoryValue_GetName(value), valueBuffer);
+        printf("\t%s[%d] = %s\n", PFC_MemoryValue_GetName(value), PFC_MemoryValue_GetIndex(value), valueBuffer);
 
         if(i != (Count-1))
         {

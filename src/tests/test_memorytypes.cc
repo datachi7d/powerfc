@@ -185,3 +185,21 @@ INSTANTIATE_TEST_CASE_P(
                 detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTPERCENTAGE,   0, true, "PFC_MEMORYTYPE_SHORTPERCENTAGE",     PFC_CONVERSION_ERROR_NOERROR },
                 detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_LAST,              0, false,"PFC_MEMORYTYPE_LAST",                PFC_CONVERSION_ERROR_NOERROR }
         ));
+
+
+class PFC_ConvertTest : public testing::Test
+{
+    void SetUp() {  }
+    void TearDown() {  }
+};
+
+TEST_F(PFC_ConvertTest, test_Convert_PFCValueSize)
+{
+    for(int i = 0; i < PFC_MEMORYTYPE_LAST; i++)
+    {
+        //This will fail if a memory type conversion is not implemented.
+        ASSERT_NE(PFC_Convert_PFCValueSize((pfc_memorytype)i),0);
+    }
+}
+
+

@@ -118,10 +118,6 @@ int XML_GetChildValueAsRawInt(TreeNode node, const char * name)
     {
         sscanf(value, "%d", &Result);
     }
-    else
-    {
-        Result = PFC_ERROR_XML;
-    }
 
     return Result;
 }
@@ -147,6 +143,14 @@ PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName)
     }
 
     return memoryConfig;
+}
+
+XML_PrintErrorChild(TreeNode parent, const char * name, const char * error)
+{
+    TreeNode errorNode = XML_GetChild(parent, name);
+
+    printf("Node %s line:%d:%d\n", TreeNode_GetName(errorNode), TreeNode_GetLine(errorNode), TreeNode_GetCharacter(errorNode));
+
 }
 
 pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root)
@@ -191,7 +195,19 @@ pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root)
         }
         else
         {
-            Result = PFC_ERROR_XML;
+            if(MemoryType == PFC_MEMORYTYPE_LAST)
+            {
+                //TODO:
+                printf("Unkown memory type: %s for %s:\n", MemroyTypeRaw, Name);
+                TreeNode error = XML_GetChild(root, XML_MEMORY_TYPE);
+                XML_PrintErrorChild(root, XML_MEMORY_TYPE, "test");
+
+                Result = PFC_ERROR_XML;
+            }
+            else
+            {
+                Result = PFC_ERROR_XML;
+            }
         }
     }
     else
@@ -227,9 +243,19 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
                 pfc_memorytype MemoryType = PFC_MemoryType_FromString(MemroyTypeRaw);
                 PFC_MemoryValue * memoryValue = NULL;
 
+                if(MemoryType == PFC_MEMORYTYPE_LAST)
+                {
+                    //TODO:
+                    printf("Unkown memory type: %s\n", MemroyTypeRaw);
+                    XML_PrintErrorChild(child, XML_MEMORY_TYPE, "test");
+                    Result = PFC_ERROR_NONE;
+                    break;
+                }
+
+
                 if(XML_NodeNameIs(child, XML_PFC_MEMORY_VALUE_ARRAY))
                 {
-                    int Size = XML_GetChildValueAsRawInt(child, XML_SIZE);
+                    int Size = XML_GetChildValueAsRawInt(child, XML_COUNT);
 
                     if(Size > 0)
                     {
@@ -254,6 +280,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
                 else
                 {
                     memoryValue = PFC_MemoryRegister_AddValue(MemoryRegister, MemoryType, Name);
+                    Result = PFC_ERROR_NONE;
                 }
 
                 if(memoryValue == NULL)
@@ -306,6 +333,7 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                     const char * Name = XML_GetChildValue(child, XML_NAME);
                     uint16_t RegisterID = 0;
                     int Size = XML_GetChildValueAsRawInt(child, XML_SIZE);
+
 
                     PFC_MemoryRegister * MemoryRegister = NULL;
 
@@ -382,6 +410,24 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
     return Result;
 }
 
+pfc_error PFC_MemoryConfig_LoadString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+    TreeNode * root = TreeNode_ParseXML((char *)string, length, true);
+
+    if(root != NULL && XML_NodeNameIs(root, XML_PFC_MEMORY_CONFIG))
+    {
+        Result = MemoryConfig_LoadConfig_Memory(MemoryConfig, TreeNode_GetChild(root, 0));
+        //TODO: free TreeNode
+    }
+    else
+    {
+        Result = PFC_ERROR_XML;
+    }
+
+    return Result;
+}
+
 pfc_error  MemoryConfig_ReadFile(PFC_MemoryConfig * MemoryConfig)
 {
     pfc_error Result = PFC_ERROR_UNSET;
@@ -402,18 +448,9 @@ pfc_error  MemoryConfig_ReadFile(PFC_MemoryConfig * MemoryConfig)
 
                 if(file_buffer != NULL)
                 {
-                    TreeNode * root = NULL;
-                    fread(file_buffer, file_buffer_size, 1, MemoryConfig->FileP);
-
-                    root = TreeNode_ParseXML(file_buffer, file_buffer_size, true);
-
-                    if(root != NULL && XML_NodeNameIs(root, XML_PFC_MEMORY_CONFIG))
+                    if(fread(file_buffer, file_buffer_size, 1, MemoryConfig->FileP) > 0)
                     {
-                        Result = MemoryConfig_LoadConfig_Memory(MemoryConfig, TreeNode_GetChild(root, 0));
-                    }
-                    else
-                    {
-                        Result = PFC_ERROR_XML;
+                        Result = PFC_MemoryConfig_LoadString(MemoryConfig, file_buffer, file_buffer_size);
                     }
 
                     PFC_free(file_buffer);
@@ -463,6 +500,18 @@ pfc_error PFC_MemoryConfig_Load(PFC_MemoryConfig * MemoryConfig)
     return Result;
 }
 
+PFC_Memory * PFC_MemoryConfig_GetMemory(PFC_MemoryConfig * MemoryConfig)
+{
+    PFC_Memory * Result = NULL;
+
+    if(MemoryConfig != NULL)
+    {
+        Result = MemoryConfig->Memory;
+    }
+
+    return Result;
+}
+
 void PFC_MemoryConfig_Free(PFC_MemoryConfig * MemoryConfig)
 {
     if(MemoryConfig != NULL)
@@ -477,6 +526,5 @@ void PFC_MemoryConfig_Free(PFC_MemoryConfig * MemoryConfig)
             PFC_Memory_Free(MemoryConfig->Memory);
 
         PFC_free(MemoryConfig);
-
     }
 }

@@ -26,6 +26,8 @@ struct _PFC_MemoryValue
     pfc_memorytype Type;
     int Row;
     int Column;
+    bool ArrayItem;
+    PFC_MemoryValue * firstItem;
 };
 
 struct _PFC_MemoryMap
@@ -95,6 +97,32 @@ pfc_memorytype PFC_MemoryValue_GetType(PFC_MemoryValue * memoryValue)
     return result;
 }
 
+PFC_MemoryValue * PFC_MemoryValue_GetFirst(PFC_MemoryValue * memoryValue)
+{
+    PFC_MemoryValue * result = NULL;
+
+    if(memoryValue != NULL)
+    {
+        result = memoryValue->firstItem;
+    }
+
+    return result;
+}
+
+int PFC_MemoryValue_GetIndex(PFC_MemoryValue * memoryValue)
+{
+    int result = 0;
+
+    if(memoryValue != NULL)
+    {
+        if(memoryValue->ArrayItem)
+        {
+            result = memoryValue->Row;
+        }
+    }
+
+    return result;
+}
 
 
 PFC_MemoryMap * PFC_MemoryMap_New(PFC_Memory * Memory, const char * Name, PFC_ID IDMin, PFC_ID IDMax, int Columns, int Rows)
@@ -151,7 +179,7 @@ pfc_memorytype PFC_MemoryMap_GetType(PFC_MemoryMap * memoryValue)
 
 PFC_MemoryValue * PFC_MemoryMap_GetMemoryValue(PFC_MemoryMap * MemoryMap, int Row, int Column)
 {
-    const PFC_MemoryValue * Result = NULL;
+    PFC_MemoryValue * Result = NULL;
 
     if(MemoryMap != NULL)
     {
@@ -167,12 +195,14 @@ PFC_MemoryValue * PFC_MemoryMap_GetMemoryValue(PFC_MemoryMap * MemoryMap, int Ro
 
                 do
                 {
-                    if(value->Row == Row && value->Column == Column)
+                    if(value)
                     {
-                        Result = value;
-                        break;
+                        if(value->Row == Row && value->Column == Column)
+                        {
+                            Result = value;
+                            break;
+                        }
                     }
-
                 } while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
 
 
@@ -189,7 +219,6 @@ PFC_MemoryValue * PFC_MemoryMap_GetMemoryValue(PFC_MemoryMap * MemoryMap, int Ro
 }
 
 
-
 PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
 {
     PFC_MemoryValue * memoryValue = NULL;
@@ -198,7 +227,7 @@ PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, p
 
     if(memoryRegister != NULL && Size > 0)
     {
-        if(PFC_MemoryRegister_GetSize(memoryRegister) + Size <= memoryRegister->MemorySize)
+        if((PFC_MemoryRegister_GetSize(memoryRegister) + Size <= memoryRegister->MemorySize) || (memoryRegister->MemorySize == 0 && memoryRegister->Memory == NULL))
         {
             memoryValue = PFC_MemoryValue_New(Size);
 
@@ -211,6 +240,8 @@ PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, p
                     memoryValue->Type = Type;
                     memoryValue->Row = Row;
                     memoryValue->Column = Column;
+                    memoryValue->ArrayItem = false;
+                    memoryValue->firstItem = NULL;
                 }
                 else
                 {
@@ -237,18 +268,24 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValueArray(PFC_MemoryRegister * memoryRe
 
     for(i = 0; i < count; i++)
     {
-        char valueName[256] = {0};
-        snprintf(valueName, sizeof(valueName), "%s[%d]", Name, i);
+//        char valueName[256] = {0};
+//        snprintf(valueName, sizeof(valueName), "%s[%d]", Name, i);
         PFC_MemoryValue * memoryValue = NULL;
 
-        if((memoryValue = MemoryRegister_AddValue(memoryRegister, Type, valueName, i, -1)) == NULL)
+        if((memoryValue = MemoryRegister_AddValue(memoryRegister, Type, Name, i, -1)) != NULL)
+        {
+            if(first == NULL)
+            {
+                first = memoryValue;
+            }
+
+            memoryValue->ArrayItem = true;
+            memoryValue->firstItem = first;
+        }
+        else
         {
             failed = true;
             break;
-        }
-        else if(first == NULL)
-        {
-            first = memoryValue;
         }
     }
 
@@ -522,8 +559,8 @@ PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID Register
 
             if (memoryRegister != NULL)
             {
-                memoryRegister->Memory = PFC_malloc(Size);
-                if(memoryRegister->Memory != NULL)
+                memoryRegister->Memory = Size > 0 ? PFC_malloc(Size) : 0;
+                if(memoryRegister->Memory != NULL || Size == 0)
                 {
                     pfc_error result;
 
@@ -705,4 +742,43 @@ PFC_MemoryValue *  PFC_Memory_GetFirstMemoryValue(PFC_Memory * Memory, PFC_ID Re
 
     return memoryValue;
 }
+
+void PFC_Memory_Dump(PFC_Memory * Memory)
+{
+    if(Memory != NULL)
+    {
+        PFC_ValueList * list = PFC_ValueList_GetFirst(Memory->MemoryRegisters);
+
+        if(list != NULL)
+        {
+            PFC_MemoryRegister * MemoryRegister = PFC_ValueList_GetValue(list);
+            do
+            {
+                if(MemoryRegister)
+                {
+
+                    printf("%s [%02x]:\n", MemoryRegister->Name, MemoryRegister->ID);
+
+                    PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
+                    do
+                    {
+                        if(value)
+                        {
+                            if(value->ArrayItem)
+                            {
+                                printf("\t %s[%d]:\n", value->Name, value->Row);
+                            }
+                            else
+                            {
+                                printf("\t %s:\n", value->Name);
+                            }
+                        }
+                    } while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+                }
+                MemoryRegister = PFC_ValueList_NextItemValue(&list);
+            }while( MemoryRegister != NULL );
+        }
+    }
+}
+
 
