@@ -12,6 +12,7 @@ extern "C" {
 
 typedef struct _PFC_MemoryRegister PFC_MemoryRegister;
 typedef struct _PFC_MemoryValue PFC_MemoryValue;
+typedef struct _PFC_MemoryMap PFC_MemoryMap;
 typedef struct _PFC_Memory PFC_Memory;
 
 PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name);
@@ -19,7 +20,6 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValueArray(PFC_MemoryRegister * memoryRe
 const char * PFC_MemoryValue_GetName(PFC_MemoryValue * memoryValue);
 pfc_size PFC_MemoryValue_GetSize(PFC_MemoryValue * memoryValue);
 pfc_memorytype PFC_MemoryValue_GetType(PFC_MemoryValue * memoryValue);
-
 
 PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRegister);
 pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue ** value);
@@ -30,7 +30,7 @@ PFC_MemoryRegister * PFC_MemoryRegister_Get(PFC_Memory * Memory, PFC_ID Register
 void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister);
 
 PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID RegisterID, pfc_size Size, const char * name);
-pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name);
+PFC_MemoryMap * PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name);
 
 PFC_Memory * PFC_Memory_New();
 void PFC_Memory_Free(PFC_Memory * memory);

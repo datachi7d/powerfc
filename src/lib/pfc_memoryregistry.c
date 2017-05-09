@@ -7,6 +7,7 @@
 
 struct _PFC_Memory
 {
+    PFC_ValueList * MemoryMaps;
     PFC_ValueList * MemoryRegisters;
 };
 
@@ -25,6 +26,17 @@ struct _PFC_MemoryValue
     pfc_memorytype Type;
     int Row;
     int Column;
+};
+
+struct _PFC_MemoryMap
+{
+    PFC_Memory * Memory;
+    PFC_ID IDMin;
+    PFC_ID IDMax;
+    char * Name;
+    pfc_memorytype Type;
+    int Rows;
+    int Columns;
 };
 
 PFC_MemoryValue * PFC_MemoryValue_New(pfc_size Size)
@@ -82,6 +94,61 @@ pfc_memorytype PFC_MemoryValue_GetType(PFC_MemoryValue * memoryValue)
 
     return result;
 }
+
+
+
+PFC_MemoryMap * PFC_MemoryMap_New(PFC_Memory * Memory, const char * Name, PFC_ID IDMin, PFC_ID IDMax, int Columns, int Rows)
+{
+    PFC_MemoryMap * memoryMap = NULL;
+    if(Memory != NULL && Rows != 0 && Columns != 0 && IDMin < IDMax)
+    {
+        memoryMap = PFC_malloc(sizeof(*memoryMap));
+
+
+        memoryMap->Memory = Memory;
+        memoryMap->Name = PFC_strdup(Name);
+        memoryMap->IDMin = IDMin;
+        memoryMap->IDMax = IDMax;
+        memoryMap->Rows = Rows;
+        memoryMap->Columns = Columns;
+    }
+
+    return memoryMap;
+}
+
+void PFC_MemoryMap_Free(PFC_MemoryMap * ptr)
+{
+    if(ptr != NULL)
+    {
+        PFC_free(ptr->Name);
+        PFC_free(ptr);
+    }
+}
+
+const char * PFC_MemoryMap_GetName(PFC_MemoryMap * memoryValue)
+{
+    const char * result = NULL;
+
+    if(memoryValue != NULL)
+    {
+        result = memoryValue->Name;
+    }
+
+    return result;
+}
+
+pfc_memorytype PFC_MemoryMap_GetType(PFC_MemoryMap * memoryValue)
+{
+    pfc_memorytype result = PFC_MEMORYTYPE_LAST;
+
+    if(memoryValue != NULL)
+    {
+        result = memoryValue->Type;
+    }
+
+    return result;
+}
+
 
 
 PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
@@ -343,7 +410,18 @@ PFC_Memory * PFC_Memory_New()
     {
         result->MemoryRegisters = PFC_ValueList_New();
 
-        if(result->MemoryRegisters == NULL)
+        if(result->MemoryRegisters != NULL)
+        {
+            result->MemoryMaps = PFC_ValueList_New();
+
+            if(result->MemoryMaps == NULL)
+            {
+                PFC_ValueList_Free(result->MemoryRegisters);
+                PFC_free(result);
+                result = NULL;
+            }
+        }
+        else
         {
             PFC_free(result);
             result = NULL;
@@ -373,6 +451,21 @@ void PFC_Memory_Free(PFC_Memory * memory)
         }
 
         PFC_ValueList_Free(memory->MemoryRegisters);
+
+        list = PFC_ValueList_GetFirst(memory->MemoryMaps);
+
+        if(list != NULL)
+        {
+            PFC_MemoryMap * value = PFC_ValueList_GetValue(list);
+            do
+            {
+                if(value)
+                {
+                    PFC_MemoryMap_Free(value);
+                }
+                value = PFC_ValueList_NextItemValue(&list);
+            }while( value != NULL );
+        }
 
         PFC_free(memory);
     }
@@ -427,9 +520,9 @@ PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID Register
     return memoryRegister;
 }
 
-pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name)
+PFC_MemoryMap * PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name)
 {
-    pfc_error Result = PFC_ERROR_UNSET;
+    PFC_MemoryMap * Result = NULL;
 
     if(Memory != NULL)
     {
@@ -500,32 +593,15 @@ pfc_error PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID 
                 {
                     if(Y == rows-1 && X == columns-1)
                     {
-                        Result = PFC_ERROR_NONE;
-                    }
-                    else
-                    {
-                        Result = PFC_ERROR_NULL_PARAMETER;
+                        Result = PFC_MemoryMap_New(Memory, name, FirstRegisterID, LastRegisterID, columns, rows);
+
+
                     }
                 }
-                else
-                {
-                    Result = PFC_ERROR_NULL_PARAMETER;
-                }
-            }
-            else
-            {
-                Result = PFC_ERROR_NULL_PARAMETER;
             }
         }
-        else
-        {
-            Result = PFC_ERROR_NULL_PARAMETER;
-        }
     }
-    else
-    {
-        Result = PFC_ERROR_NULL_PARAMETER;
-    }
+
 
     return Result;
 
