@@ -94,7 +94,7 @@ typedef struct
 #define CHARHISTORY_LENGTH          (6)
 
 /* SAX-parser callback function pointer types*/
-typedef void (*XMLParser_StartElementHandler) (void *userData, const char *name, const char **atts);
+typedef void (*XMLParser_StartElementHandler) (void *userData, const char *name, const char **atts, uint32_t line, uint32_t character);
 typedef void (*XMLParser_EndElementHandler) (void *userData, const char *name);
 typedef void (*XMLParser_CharacterDataHandler) (void *userData, const char *s, int len);
 typedef void (*XMLParser_EndOfChunkHandler) (void *userData);
@@ -125,6 +125,8 @@ typedef struct
     int                             HistoryBuffLen;
 
     uint32_t                    DocIndex;
+    uint32_t                    LineNumber;
+    uint32_t                    CharacterNumber;
 } XMLParser_ContextStruct;
 
 typedef XMLParser_ContextStruct *XMLParser_Context;

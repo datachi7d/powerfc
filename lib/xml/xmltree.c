@@ -70,6 +70,8 @@ typedef struct
     uint8_t     *Value;                         // Node value
     uint32_t ChildID;                       // The ID of this child (relative to its parent node). 0 = invalid, 1 ... n = valid
 
+    uint32_t Line;
+    uint32_t Character;
 } TreeNodeImpl;
 
 
@@ -85,7 +87,7 @@ static TreeNode* currentTreeNode = NULL;
 
 
 /* DOM XML-parser setup and callback functions */
-void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName, const char **atts);
+void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName, const char **atts, uint32_t line, uint32_t character);
 void HTTP_xmlDOMBuilder_EndElementHandler(void *userData, const char *nodeName);
 void HTTP_xmlDOMBuilder_CharDataHandler(void *userData, const char *s, int len);
 
@@ -276,6 +278,26 @@ int TreeNode_GetID(TreeNode node)
     return -1;
 }
 
+int TreeNode_GetLine(TreeNode node)
+{
+    _treeNode _node = (_treeNode) node;
+    if (_node)
+    {
+        return _node->Line;
+    }
+    return -1;
+}
+
+int TreeNode_GetCharacter(TreeNode node)
+{
+    _treeNode _node = (_treeNode) node;
+    if (_node)
+    {
+        return _node->Character;
+    }
+    return -1;
+}
+
 TreeNode TreeNode_GetChild(TreeNode node, uint32_t index)
 {
     TreeNode child = NULL;
@@ -423,12 +445,25 @@ bool TreeNode_SetName(const TreeNode node, const char* name, const uint32_t leng
     return result;
 }
 
-bool TreeNode_SetParent(const TreeNode node, const TreeNode parent)
+bool TreeNode_SetPosition(const TreeNode node, uint32_t line, uint32_t character)
 {
     bool result = false;
     _treeNode _node = (_treeNode) node;
     if (_node)
     {       
+        _node->Line = line;
+        _node->Character = character;
+        result = true;
+    }
+    return result;
+}
+
+bool TreeNode_SetParent(const TreeNode node, const TreeNode parent)
+{
+    bool result = false;
+    _treeNode _node = (_treeNode) node;
+    if (_node)
+    {
         _node->Parent = parent;
         result = true;
     }
@@ -585,7 +620,7 @@ TreeNode TreeNode_ParseXML(uint8_t* doc, uint32_t length, bool wholeDoc)
     return root;
 }
 
-void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName, const char **atts)
+void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName, const char **atts, uint32_t line, uint32_t character)
 {
     TreeNode newNode = TreeNode_Create();
     if (newNode)
@@ -607,6 +642,8 @@ void HTTP_xmlDOMBuilder_StartElementHandler(void *userData, const char *nodeName
         TreeNode_AddChild(currentTreeNode, newNode);
 
         currentTreeNode = newNode;
+
+        TreeNode_SetPosition(newNode, line, character);
     }
 }
 

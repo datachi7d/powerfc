@@ -248,7 +248,7 @@ void runStartElementCallback(XMLParser_Context xmlParser)
         char** attributes = (char**) XMLParser_getAttributesArray(xmlParser);
 
         if(xmlParser->StartHandler)
-            xmlParser->StartHandler(xmlParser->UserData, xmlParser->CurrentElement.ElementName, (const char**) attributes);
+            xmlParser->StartHandler(xmlParser->UserData, xmlParser->CurrentElement.ElementName, (const char**) attributes, xmlParser->LineNumber, xmlParser->CharacterNumber);
 
         if(XMLParser_DestroyAttributesArray(attributes) )
         { /* No attributes were freed */ }
@@ -389,6 +389,7 @@ bool XMLParser_Parse(XMLParser_Context xmlParser, const char *doc, unsigned int 
        len > 0)
     {
         //unsigned int chIndex = 0;
+        xmlParser->LineNumber = 1;
         xmlParser->DocIndex = 0;
         for(xmlParser->DocIndex=0; xmlParser->DocIndex<len; xmlParser->DocIndex++)
         {
@@ -397,6 +398,12 @@ bool XMLParser_Parse(XMLParser_Context xmlParser, const char *doc, unsigned int 
             //Todo add check
             if( !BAD_XML_CHAR(ch) )
             {
+
+                if (ch == '\n')
+                {
+                    xmlParser->CharacterNumber = 1;
+                    xmlParser->LineNumber++;
+                }
 
                 if(!charhistoryBuffer_add(xmlParser, ch))
                 {  /* Todo Do something on error if can't? */ }
@@ -792,6 +799,7 @@ bool XMLParser_Parse(XMLParser_Context xmlParser, const char *doc, unsigned int 
 
             }
 
+            xmlParser->CharacterNumber++;
         }
 
         // Finished parsing buffer. Check if we are done.

@@ -40,6 +40,8 @@ TreeNode TreeNode_CopyTreeNode(TreeNode node);
 bool TreeNode_DeleteSingle(TreeNode node);                      // Delete this node but not any children it might have
 int TreeNode_GetChildCount(TreeNode node);
 int TreeNode_GetID(TreeNode node);
+int TreeNode_GetLine(TreeNode node);
+int TreeNode_GetCharacter(TreeNode node);
 TreeNode TreeNode_GetChild(TreeNode node, uint32_t index);
 const char *TreeNode_GetName(const TreeNode node);
 TreeNode TreeNode_GetParent(const TreeNode node);
