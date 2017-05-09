@@ -13,13 +13,38 @@ struct _PFC_MemoryConfig
 	PFC_Memory * Memory;
 };
 
+char * XML_ToLower(const char * str)
+{
+    char * p = PFC_strdup(str);
+    char * result = p;
+
+    if(p != NULL)
+    {
+        for ( ; *p; ++p)
+        {
+            *p = tolower(*p);
+        }
+    }
+
+    return result;
+}
 
 bool XML_NodeNameIs(TreeNode node, const char * name)
 {
-    if(TreeNode_GetName(node) != NULL && strcmp(name, TreeNode_GetName(node)) == 0)
-        return true;
-    else
-        return false;
+    bool result = false;
+    char * lowerStr = XML_ToLower(TreeNode_GetName(node));
+
+    if(TreeNode_GetName(node) != NULL && lowerStr != NULL && strcmp(name, lowerStr) == 0)
+    {
+        result = true;
+    }
+
+    if(lowerStr != NULL)
+    {
+        PFC_free(lowerStr);
+    }
+
+    return result;
 }
 
 TreeNode XML_GetChild(TreeNode node, const char * name)
@@ -124,6 +149,65 @@ PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName)
     return memoryConfig;
 }
 
+pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+
+    if(Memory != NULL && XML_NodeNameIs(root, XML_PFC_MEMORY_MAP))
+    {
+        const char * Name = XML_GetChildValue(root, XML_NAME);
+        const char * MemroyTypeRaw = XML_GetChildValue(root, XML_MEMORY_TYPE);
+        pfc_memorytype MemoryType = PFC_MemoryType_FromString(MemroyTypeRaw);
+        uint16_t RegisterIDMin = 0;
+        uint16_t RegisterIDMax = 0;
+        PFC_MemoryMap * memoryMap = NULL;
+
+        int Columns = XML_GetChildValueAsRawInt(root, XML_COLUMNS);
+        int Rows = XML_GetChildValueAsRawInt(root, XML_ROWS);
+
+        Result = XML_GetChildValueAsHex(root, XML_REGISTERIDMIN, &RegisterIDMin);
+
+        if(Result == PFC_ERROR_NONE && MemoryType != PFC_MEMORYTYPE_LAST && Name != NULL && Columns > 0 && Rows > 0)
+        {
+            Result = XML_GetChildValueAsHex(root, XML_REGISTERIDMAX, &RegisterIDMax);
+
+            if(Result == PFC_ERROR_NONE)
+            {
+                memoryMap = PFC_Memory_NewMap(Memory, RegisterIDMin, RegisterIDMax, MemoryType, Columns, Rows, Name);
+
+                if(memoryMap != NULL)
+                {
+                    Result = PFC_ERROR_NONE;
+                }
+                else
+                {
+                    Result = PFC_ERROR_XML;
+                }
+            }
+            else
+            {
+                Result = PFC_ERROR_XML;
+            }
+        }
+        else
+        {
+            Result = PFC_ERROR_XML;
+        }
+    }
+    else
+    {
+        if(Memory != NULL)
+        {
+            Result = PFC_ERROR_XML;
+        }
+        else
+        {
+            Result = PFC_ERROR_NULL_PARAMETER;
+        }
+    }
+
+    return Result;
+}
 
 pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegister, TreeNode root)
 {
@@ -136,12 +220,47 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
 
         while ((child = TreeNode_GetChild(root, child_number)))
         {
-            if(XML_NodeNameIs(child, XML_PFC_MEMORY_VALUE))
+            if(XML_NodeNameIs(child, XML_PFC_MEMORY_VALUE) || XML_NodeNameIs(child, XML_PFC_MEMORY_VALUE_ARRAY))
             {
                 const char * Name = XML_GetChildValue(child, XML_NAME);
                 const char * MemroyTypeRaw = XML_GetChildValue(child, XML_MEMORY_TYPE);
                 pfc_memorytype MemoryType = PFC_MemoryType_FromString(MemroyTypeRaw);
-                PFC_MemoryValue * memoryValue = PFC_MemoryRegister_AddValue(MemoryRegister, MemoryType, Name);
+                PFC_MemoryValue * memoryValue = NULL;
+
+                if(XML_NodeNameIs(child, XML_PFC_MEMORY_VALUE_ARRAY))
+                {
+                    int Size = XML_GetChildValueAsRawInt(child, XML_SIZE);
+
+                    if(Size > 0)
+                    {
+                        memoryValue = PFC_MemoryRegister_AddValueArray(MemoryRegister, MemoryType, Name, Size);
+
+                        if(memoryValue != NULL)
+                        {
+                            Result = PFC_ERROR_NONE;
+                        }
+                        else
+                        {
+                            //TODO
+                            Result = PFC_ERROR_UNSET;
+                        }
+                    }
+                    else
+                    {
+                        Result = PFC_ERROR_XML;
+                        break;
+                    }
+                }
+                else
+                {
+                    memoryValue = PFC_MemoryRegister_AddValue(MemoryRegister, MemoryType, Name);
+                }
+
+                if(memoryValue == NULL)
+                {
+                    Result = PFC_ERROR_XML;
+                    break;
+                }
             }
             else
             {
@@ -221,7 +340,12 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                 }
                 else if (XML_NodeNameIs(child, XML_PFC_MEMORY_MAP))
                 {
+                    Result = MemoryConfig_LoadConfig_MemoryMap(MemoryConfig->Memory, child);
 
+                    if(Result != PFC_ERROR_NONE)
+                    {
+                        break;
+                    }
                 }
                 else
                 {
@@ -338,7 +462,6 @@ pfc_error PFC_MemoryConfig_Load(PFC_MemoryConfig * MemoryConfig)
 
     return Result;
 }
-
 
 void PFC_MemoryConfig_Free(PFC_MemoryConfig * MemoryConfig)
 {

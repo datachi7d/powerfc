@@ -31,7 +31,6 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_Load)
 
     ASSERT_TRUE(memoryConfig != NULL);
 
-
     PFC_MemoryConfig_Load(memoryConfig);
 
     PFC_MemoryConfig_Free(memoryConfig);

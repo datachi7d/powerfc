@@ -14,21 +14,24 @@ extern "C" {
 #define XML_PFC_MEMORY_REGISTER "pfc_memory_register"
 #define XML_PFC_MEMORY_VALUES "pfc_memory_values"
 #define XML_PFC_MEMORY_VALUE "pfc_memory_value"
+#define XML_PFC_MEMORY_VALUE_ARRAY "pfc_memory_value_array"
 #define XML_PFC_MEMORY_MAP "pfc_memory_map"
 
 
+#define XML_NAME "name"
 
+#define XML_REGISTERID "registerid"
 
-#define XML_NAME "Name"
+#define XML_REGISTERIDMIN "registeridmin"
+#define XML_REGISTERIDMAX "registeridmax"
 
-#define XML_REGISTERID "RegisterID"
+#define XML_SIZE "size"
+#define XML_COUNT "count"
 
-#define XML_SIZE "Size"
+#define XML_MEMORY_TYPE "memorytype"
 
-#define XML_MEMORY_TYPE "MemoryType"
-
-#define XML_ROWS "Rows"
-#define XML_COLUMNS "COLUMNS"
+#define XML_ROWS "rows"
+#define XML_COLUMNS "columns"
 
 
 typedef struct _PFC_MemoryConfig PFC_MemoryConfig;

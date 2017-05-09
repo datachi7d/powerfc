@@ -9,6 +9,15 @@
                 <Name>TestValue1</Name>
                 <MemoryType>PFC_MEMORYTYPE_BYTE</MemroyType>
             </pfc_memory_value>
+            <pfc_memory_value_array>
+                <Name>TestValue2</Name>
+                <MemoryType>PFC_MEMORYTYPE_SHORTBOOST</MemroyType>
+                <Count>9</Count>
+            </pfc_memory_value_array>
+            <pfc_memory_value>
+                <Name>TestValue3</Name>
+                <MemoryType>PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE</MemroyType>
+            </pfc_memory_value>
         </pfc_memory_values>
     </pfc_memory_register>
     <pfc_memory_map>
