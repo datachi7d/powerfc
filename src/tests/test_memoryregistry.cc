@@ -144,6 +144,36 @@ TEST_F(PFC_MemoryRegistry, test_Memory_NewMap)
     PFC_Memory_Free(memory);
 }
 
+TEST_F(PFC_MemoryRegistry, test_MemoryMap_GetXY)
+{
+    PFC_Memory * memory = PFC_Memory_New();
+
+    ASSERT_TRUE(memory != NULL);
+
+    PFC_MemoryMap * memoryMap = PFC_Memory_NewMap(memory, PFC_ID_InjectorCorrection_0, PFC_ID_InjectorCorrection_3, PFC_MEMORYTYPE_BYTEDEGREE, 20, 20, "InjectorCorrection");
+
+    ASSERT_TRUE(memoryMap != NULL);
+
+    int row = 0, column = 0;
+
+    for(row = 0; row < 20; row++)
+    {
+        for(column = 0; column < 20; column++)
+        {
+            PFC_MemoryValue * value = PFC_MemoryMap_GetMemoryValue(memoryMap, row, column);
+
+            ASSERT_TRUE(value != NULL);
+
+            printf("%s = [%d][%d]\n", PFC_MemoryValue_GetName(value), row, column);
+        }
+    }
+
+
+
+    PFC_Memory_Free(memory);
+}
+
+
 
 TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_Advanced)
 {

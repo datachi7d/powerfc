@@ -149,6 +149,45 @@ pfc_memorytype PFC_MemoryMap_GetType(PFC_MemoryMap * memoryValue)
     return result;
 }
 
+PFC_MemoryValue * PFC_MemoryMap_GetMemoryValue(PFC_MemoryMap * MemoryMap, int Row, int Column)
+{
+    const PFC_MemoryValue * Result = NULL;
+
+    if(MemoryMap != NULL)
+    {
+        PFC_ID ID = MemoryMap->IDMin;
+
+        for(; ID <= MemoryMap->IDMax; ID++)
+        {
+            PFC_MemoryRegister * MemoryRegister = PFC_Memory_GetMemoryRegister(MemoryMap->Memory, ID);
+
+            if(MemoryRegister != NULL)
+            {
+                PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
+
+                do
+                {
+                    if(value->Row == Row && value->Column == Column)
+                    {
+                        Result = value;
+                        break;
+                    }
+
+                } while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+
+
+                if(Result != NULL)
+                {
+                    break;
+                }
+            }
+        }
+
+    }
+
+    return Result;
+}
+
 
 
 PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
