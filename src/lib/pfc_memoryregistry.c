@@ -756,21 +756,27 @@ void PFC_Memory_Dump(PFC_Memory * Memory)
             {
                 if(MemoryRegister)
                 {
+                    uint8_t * RegisterMemory = MemoryRegister->Memory;
 
                     printf("%s [%02x]:\n", MemoryRegister->Name, MemoryRegister->ID);
 
                     PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
                     do
                     {
-                        if(value)
+                        if(value != NULL)
                         {
+                            uint64_t temp = 0;
+                            char valueBuffer[256] = {0};
+
+                            PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), true, &temp, valueBuffer, sizeof(valueBuffer));
+
                             if(value->ArrayItem)
                             {
-                                printf("\t %s[%d]:\n", value->Name, value->Row);
+                                printf("\t %s[%d]: %s\n", value->Name, value->Row, valueBuffer);
                             }
                             else
                             {
-                                printf("\t %s:\n", value->Name);
+                                printf("\t %s: %s\n", value->Name, valueBuffer);
                             }
                         }
                     } while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);

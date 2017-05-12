@@ -156,7 +156,7 @@
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Boost</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_BYTEBOOST</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
