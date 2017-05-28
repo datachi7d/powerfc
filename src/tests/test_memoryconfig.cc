@@ -17,7 +17,7 @@ class PFC_MemoryConfiguration : public testing::Test
 
 TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_NewFree)
 {
-    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("test_memory_config.xml");
+    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("src/tests/test_memory_config.xml");
 
     ASSERT_TRUE(memoryConfig != NULL);
 
@@ -27,7 +27,7 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_NewFree)
 
 TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_Load)
 {
-    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("/home/sekelly/git/github/powerfc/src/tests/test_memory_config.xml");
+    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("src/tests/test_memory_config.xml");
 
     ASSERT_TRUE(memoryConfig != NULL);
 

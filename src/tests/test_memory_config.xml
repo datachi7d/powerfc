@@ -485,7 +485,7 @@
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Tuner</name>
-               <MemoryType>PFC_MEMORYTYPE_type_string</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_STRINGTYPE</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
@@ -511,7 +511,7 @@
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Sensor</name>
-               <MemoryType>PFC_MEMORYTYPE_sensor_string</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_STRINGSENSOR</MemoryType>
                <Count>20</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -620,7 +620,7 @@
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Type</name>
-               <MemoryType>PFC_MEMORYTYPE_type_string</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_STRINGTYPE</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
@@ -640,7 +640,7 @@
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Version</name>
-               <MemoryType>PFC_MEMORYTYPE_version_string</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_STRINGVERSION</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>

@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 struct _PFC_MemoryConfig
 {
@@ -145,7 +147,7 @@ PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName)
     return memoryConfig;
 }
 
-XML_PrintErrorChild(TreeNode parent, const char * name, const char * error)
+void XML_PrintErrorChild(TreeNode parent, const char * name, const char * error)
 {
     TreeNode errorNode = XML_GetChild(parent, name);
 
