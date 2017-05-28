@@ -17,6 +17,7 @@ const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTEFLOAT",
             "PFC_MEMORYTYPE_BYTEFLOAT17",
             "PFC_MEMORYTYPE_BYTEFLOAT26",
+			"PFC_MEMORYTYPE_CONTROLFLAG",
             "PFC_MEMORYTYPE_SHORT",
             "PFC_MEMORYTYPE_SHORTFLOAT",
             "PFC_MEMORYTYPE_SHORTFLOAT88",
@@ -171,6 +172,21 @@ static int Convert_String(pcf_conversion conversion, const void * value, int val
 
         default:
             result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+    }
+
+    return result;
+}
+
+int Convert_ControlFlag(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        char * controlValue = (*((uint8_t *)value)) == 0xFF ? &Units[0] : &Units[3];
+        result = Convert_String(conversion, controlValue, valueSize, output, outputLength, Units, Format);
     }
 
     return result;
@@ -481,6 +497,14 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.ConversionFunction = Convert_ByteFloat26,
 				.Units = NULL,
 				.Format = "%1.5f",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_CONTROLFLAG,
+				.Size = PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_STRING,
+				.ConversionFunction = Convert_ControlFlag,
+				.Units = "on\0off",
+				.Format = "%s",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORT,

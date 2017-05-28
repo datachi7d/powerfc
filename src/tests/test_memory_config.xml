@@ -495,12 +495,12 @@
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Flag</name>
-               <MemoryType>PFC_MEMORYTYPE_control_flag</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
                <Count>5</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Control</name>
-               <MemoryType>PFC_MEMORYTYPE_control_string</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_STRINGCONTROL</MemoryType>
                <Count>5</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
