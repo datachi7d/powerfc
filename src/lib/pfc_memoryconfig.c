@@ -155,7 +155,7 @@ void XML_PrintErrorChild(TreeNode parent, const char * name, const char * error)
 
 }
 
-pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root)
+pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root, int FCPOffset)
 {
     pfc_error Result = PFC_ERROR_UNSET;
 
@@ -181,8 +181,13 @@ pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root)
             {
                 memoryMap = PFC_Memory_NewMap(Memory, RegisterIDMin, RegisterIDMax, MemoryType, Columns, Rows, Name);
 
+                if(FCPOffset >= 0)
+                	PFC_MemoryMap_SetFCPOffset(memoryMap, FCPOffset);
+
                 if(memoryMap != NULL)
                 {
+                	PFC_MemoryMap_Malloc(memoryMap);
+
                     Result = PFC_ERROR_NONE;
                 }
                 else
@@ -330,12 +335,13 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
 
             while ((child = TreeNode_GetChild(root, child_number)))
             {
+                int FCPOffset =  XML_GetChild(child, XML_FCPOFFSET) != NULL ? XML_GetChildValueAsRawInt(child, XML_FCPOFFSET) : -1;
+
                 if(XML_NodeNameIs(child, XML_PFC_MEMORY_REGISTER))
                 {
                     const char * Name = XML_GetChildValue(child, XML_NAME);
                     uint16_t RegisterID = 0;
                     int Size = XML_GetChildValueAsRawInt(child, XML_SIZE);
-
 
                     PFC_MemoryRegister * MemoryRegister = NULL;
 
@@ -353,9 +359,14 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                         break;
                     }
 
-                    if(valuesNode != NULL && (MemoryRegister = PFC_Memory_NewRegister(MemoryConfig->Memory, RegisterID, Size, Name)) != NULL)
+                    if(valuesNode != NULL && (MemoryRegister = PFC_Memory_NewRegister(MemoryConfig->Memory, RegisterID, Name)) != NULL)
                     {
                         Result = MemoryConfig_LoadConfig_MemoryValue(MemoryRegister, valuesNode);
+
+                        if(FCPOffset >= 0)
+                        	PFC_MemoryRegister_SetFCPOffset(MemoryRegister, FCPOffset);
+
+                        PFC_MemoryRegister_Malloc(MemoryRegister);
 
                         if(Result != PFC_ERROR_NONE)
                         {
@@ -370,7 +381,7 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                 }
                 else if (XML_NodeNameIs(child, XML_PFC_MEMORY_MAP))
                 {
-                    Result = MemoryConfig_LoadConfig_MemoryMap(MemoryConfig->Memory, child);
+                    Result = MemoryConfig_LoadConfig_MemoryMap(MemoryConfig->Memory, child, FCPOffset);
 
                     if(Result != PFC_ERROR_NONE)
                     {

@@ -34,6 +34,7 @@ extern "C" {
 #define XML_ROWS "rows"
 #define XML_COLUMNS "columns"
 
+#define XML_FCPOFFSET "fcpoffset"
 
 typedef struct _PFC_MemoryConfig PFC_MemoryConfig;
 PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName);

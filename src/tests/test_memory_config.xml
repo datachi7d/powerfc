@@ -7,6 +7,7 @@
          <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
          <Rows>20</Rows>
          <Columns>20</Columns>
+         <FCPOffset>0</FCPOffset>
       </pfc_memory_map>
       <pfc_memory_map>
          <name>InjectorCorrection</name>
