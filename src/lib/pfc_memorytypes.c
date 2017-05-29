@@ -6,6 +6,19 @@
 #include "pfc_memorytypes.h"
 
 
+typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format);
+typedef struct
+{
+    pfc_memorytype MemoryType;
+    pfc_size Size;
+    pfc_basictype BasicType;
+    PFC_ConversionFunction ConversionFunction;
+    const char * Units;
+    const char * Format;
+} pfc_memorytype_conversioninfo;
+
+const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryType);
+
 const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTE",
             "PFC_MEMORYTYPE_BYTERPM",
@@ -31,6 +44,8 @@ const char * pfc_memorytype_str [] = {
 			"PFC_MEMORYTYPE_STRINGCONTROL",
 			"PFC_MEMORYTYPE_STRINGTYPE",
 			"PFC_MEMORYTYPE_STRINGVERSION",
+			"PFC_MEMORYTYPE_TPS_SETTING",
+			"PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING",
 };
 
 const char * PFC_MemoryType_ToString(pfc_memorytype memory_type)
@@ -185,7 +200,7 @@ int Convert_ControlFlag(pcf_conversion conversion, const void * value, int value
          conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
          conversion == PFC_CONVERSION_TOBASIC)
     {
-        char * controlValue = (*((uint8_t *)value)) == 0xFF ? &Units[0] : &Units[3];
+        const char * controlValue = (*((const uint8_t *)value)) == 0xFF ? &Units[0] : &Units[3];
         result = Convert_String(conversion, controlValue, valueSize, output, outputLength, Units, Format);
     }
 
@@ -402,20 +417,78 @@ int Convert_ShortBoost(pcf_conversion conversion, const void * value, int valueS
     return result;
 }
 
+
+int Convert_TPS(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+    const pfc_memorytype_conversioninfo * byteTemperatureConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTETEMPERATURE);
+    const pfc_memorytype_conversioninfo * float88Conversion = getConverstionInfo(PFC_MEMORYTYPE_SHORTFLOAT88);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT)
+    {
+
+    	if(float88Conversion != NULL && byteTemperatureConversion != NULL)
+    	{
+    		const uint8_t * byteValues = (const uint8_t *)value;
+    		char byteTemperatureString[256] = {0};
+
+			result = Convert_ByteTemperature(conversion, &byteValues[0], PFC_SIZE_BYTE, byteTemperatureString, sizeof(byteTemperatureString), byteTemperatureConversion->Units, byteTemperatureConversion->Format);
+
+			if(result > 0)
+			{
+				char float88String[256] = {0};
+
+				result = Convert_ShortFloat88(conversion, &byteValues[1], PFC_SIZE_SHORT, float88String, sizeof(float88String), float88Conversion->Units, float88Conversion->Format);
+
+				if(result > 0)
+				{
+					 result = snprintf((char *)output, outputLength, Format, byteTemperatureString, float88String);
+				}
+			}
+    	}
+    }
+
+    return result;
+}
+
+int Convert_IgnitionTemperature(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+    const pfc_memorytype_conversioninfo * byteTemperatureConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTETEMPERATURE);
+    const pfc_memorytype_conversioninfo * byteDegreeConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTEDEGREE);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT)
+    {
+
+    	if(byteDegreeConversion != NULL && byteTemperatureConversion != NULL)
+    	{
+    		const uint8_t * byteValues = (const uint8_t *)value;
+    		char byteTemperatureString[256] = {0};
+
+			result = Convert_ByteTemperature(conversion, &byteValues[0], PFC_SIZE_BYTE, byteTemperatureString, sizeof(byteTemperatureString), byteTemperatureConversion->Units, byteTemperatureConversion->Format);
+
+			if(result > 0)
+			{
+				char byteDegreeString[256] = {0};
+
+				result = Convert_Byte(conversion, &byteValues[1], PFC_SIZE_BYTE, byteDegreeString, sizeof(byteDegreeString), byteDegreeConversion->Units, byteDegreeConversion->Format);
+
+				if(result > 0)
+				{
+					 result = snprintf((char *)output, outputLength, Format, byteTemperatureString, byteDegreeString);
+				}
+			}
+    	}
+    }
+
+    return result;
+}
+
 /***********************************************************************************************************************************************
  * API Functions
  */
-
-typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format);
-typedef struct
-{
-    pfc_memorytype MemoryType;
-    pfc_size Size;
-    pfc_basictype BasicType;
-    PFC_ConversionFunction ConversionFunction;
-    const char * Units;
-    const char * Format;
-} pfc_memorytype_conversioninfo;
 
 static const pfc_memorytype_conversioninfo conversionTable[] = {
 		{
@@ -609,7 +682,24 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.ConversionFunction = Convert_String,
 				.Units = "",
 				.Format = "%s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_TPS_SETTING,
+				.Size = PFC_SIZE_BYTE + PFC_SIZE_SHORT,
+				.BasicType = PFC_BASICTYPE_STRING,
+				.ConversionFunction = Convert_TPS,
+				.Units = "",
+				.Format = "%s,%s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING,
+				.Size = PFC_SIZE_BYTE + PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_STRING,
+				.ConversionFunction = Convert_IgnitionTemperature,
+				.Units = "",
+				.Format = "%s,%s",
 		}
+
 };
 
 const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryType)
