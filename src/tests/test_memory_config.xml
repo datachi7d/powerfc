@@ -7,7 +7,7 @@
          <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
          <Rows>20</Rows>
          <Columns>20</Columns>
-         <FCPOffset>0</FCPOffset>
+         <FCPOffset>8</FCPOffset>
       </pfc_memory_map>
       <pfc_memory_map>
          <name>InjectorCorrection</name>
@@ -16,14 +16,16 @@
          <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT</MemoryType>
          <Rows>20</Rows>
          <Columns>20</Columns>
+         <FCPOffset>1608</FCPOffset>
       </pfc_memory_map>
       <pfc_memory_register>
          <name>MapReference</name>
          <RegisterID>0x8a</RegisterID>
+         <FCPOffset>2008</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
-               <name>Boost</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTBOOST</MemoryType>
+               <name>Load</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
                <Count>20</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
@@ -76,15 +78,16 @@
       <pfc_memory_register>
          <name>InjectorSizeCorrection</name>
          <RegisterID>0x8d</RegisterID>
+         <FCPOffset>2106</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
-               <name>Percentage</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <name>Lag</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTLAG</MemoryType>
                <Count>6</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
-               <name>Lag</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <name>Correction</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTCORRECTION</MemoryType>
                <Count>6</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -92,6 +95,7 @@
       <pfc_memory_register>
          <name>InjectorCrankingCorrection</name>
          <RegisterID>0x8e</RegisterID>
+         <FCPOffset>2130</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Cranking</name>
@@ -103,36 +107,17 @@
       <pfc_memory_register>
          <name>InjectorWaterTemperatureCorrection</name>
          <RegisterID>0x8f</RegisterID>
+         <FCPOffset>2142</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
-               <name>WaterTemp80C</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
-               <Count>2</Count>
+               <name>WaterTemp1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT17</MemoryType>
+               <Count>6</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
-               <name>WaterTemp50C</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
-            <pfc_memory_value_array>
-               <name>WaterTemp30C</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
-            <pfc_memory_value_array>
-               <name>WaterTemp10C</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
-            <pfc_memory_value_array>
-               <name>WaterTempN10C</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
-            <pfc_memory_value_array>
-               <name>WaterTempN30C</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
-               <Count>2</Count>
+               <name>WaterTemp2</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT17</MemoryType>
+               <Count>6</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>unkown</name>
@@ -328,6 +313,7 @@
       <pfc_memory_register>
          <name>AirflowVoltage</name>
          <RegisterID>0xa0</RegisterID>
+          <FCPOffset>2288</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Voltage</name>
@@ -618,6 +604,7 @@
       <pfc_memory_register>
          <name>TypeString</name>
          <RegisterID>0xf3</RegisterID>
+         <FCPOffset>0</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Type</name>

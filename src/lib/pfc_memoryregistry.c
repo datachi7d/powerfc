@@ -868,7 +868,10 @@ void PFC_Memory_Dump(PFC_Memory * Memory)
                 {
                     uint8_t * RegisterMemory = MemoryRegister->Memory;
 
-                    printf("%s [%02x]:\n", MemoryRegister->Name, MemoryRegister->ID);
+                    if(MemoryRegister->FCPRO_offset >= 0)
+                    	printf("%s [%d-%d %02x]:\n", MemoryRegister->Name, MemoryRegister->FCPRO_offset, MemoryRegister->FCPRO_offset + MemoryRegister->MemorySize, MemoryRegister->ID);
+                    else
+                    	printf("%s [%02x]:\n", MemoryRegister->Name, MemoryRegister->ID);
 
                     PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
                     do
