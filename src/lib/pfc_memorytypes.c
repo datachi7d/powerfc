@@ -22,6 +22,7 @@ const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryTy
 const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTE",
             "PFC_MEMORYTYPE_BYTERPM",
+			"PFC_MEMORYTYPE_BYTELOAD",
             "PFC_MEMORYTYPE_BYTETEMPERATURE",
             "PFC_MEMORYTYPE_BYTEDEGREE",
             "PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE",
@@ -232,6 +233,36 @@ int Convert_ByteTemperature(pcf_conversion conversion, const void * value, int v
          conversion == PFC_CONVERSION_TOBASIC)
     {
         int intValue = (*((uint8_t *)value)) - 80;
+        result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+int Convert_ByteRPM(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = ((int)(*((uint8_t *)value)))*40;
+        result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+int Convert_ByteLoad(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = ((uint16_t)(*((uint8_t *)value))) << 8;
         result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
     }
 
@@ -481,7 +512,7 @@ int Convert_TPS(pcf_conversion conversion, const void * value, int valueSize, vo
 			{
 				char float88String[256] = {0};
 
-				result = Convert_ShortFloat88(conversion, &byteValues[1], PFC_SIZE_SHORT, float88String, sizeof(float88String), float88Conversion->Units, float88Conversion->Format);
+				result = Convert_ShortFloat(conversion, &byteValues[1], PFC_SIZE_SHORT, float88String, sizeof(float88String), float88Conversion->Units, float88Conversion->Format);
 
 				if(result > 0)
 				{
@@ -550,10 +581,18 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.Format = "%d %s",
 		},
 		{
-				.MemoryType = PFC_MEMORYTYPE_BYTERPM, //TODO
+				.MemoryType = PFC_MEMORYTYPE_BYTERPM,
 				.Size = PFC_SIZE_BYTE,
 				.BasicType = PFC_BASICTYPE_INT,
-				.ConversionFunction = Convert_Byte,
+				.ConversionFunction = Convert_ByteRPM,
+				.Units = "rpm",
+				.Format = "%d %s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_BYTELOAD,
+				.Size = PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_INT,
+				.ConversionFunction = Convert_ByteLoad,
 				.Units = NULL,
 				.Format = "%d",
 		},

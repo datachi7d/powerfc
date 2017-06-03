@@ -38,13 +38,10 @@
       <pfc_memory_register>
          <name>RevIdle</name>
          <RegisterID>0x8b</RegisterID>
+          <FCPOffset>2088</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>RevLimit</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
-            </pfc_memory_value>
-            <pfc_memory_value>
-               <name>FuelCut</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
@@ -52,7 +49,11 @@
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
-               <name>Idle</name>
+               <name>Unused</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>FuelCut</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
@@ -60,7 +61,15 @@
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
-               <name>Unkown</name>
+               <name>Unused</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Idle</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>VTC</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
@@ -68,6 +77,7 @@
       <pfc_memory_register>
          <name>Unkown8C</name>
          <RegisterID>0x8c</RegisterID>
+         <FCPOffset>2104</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Unkown</name>
@@ -120,8 +130,8 @@
                <Count>6</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
-               <name>unkown</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <name>Load</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTELOAD</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -129,6 +139,7 @@
       <pfc_memory_register>
          <name>InjectorWaterBoostCorrection</name>
          <RegisterID>0x90</RegisterID>
+         <FCPOffset>2156</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Temperature</name>
@@ -137,12 +148,12 @@
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Correction</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT17</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
-               <name>Boost</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEBOOST</MemoryType>
+               <name>Load</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTELOAD</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -150,6 +161,7 @@
       <pfc_memory_register>
          <name>InjectorAirBoostCorrection</name>
          <RegisterID>0x91</RegisterID>
+         <FCPOffset>2162</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Temperature</name>
@@ -158,12 +170,12 @@
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Correction</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT17</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT</MemoryType>
                <Count>3</Count>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Boost</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_BYTELOAD</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -171,6 +183,7 @@
       <pfc_memory_register>
          <name>InjectorPrimaryLag</name>
          <RegisterID>0x92</RegisterID>
+         <FCPOffset>2194</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Lag</name>
@@ -182,6 +195,7 @@
       <pfc_memory_register>
          <name>InjectorAccelerationRPMCorrection</name>
          <RegisterID>0x93</RegisterID>
+         <FCPOffset>2206</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>RPM</name>
@@ -203,10 +217,16 @@
       <pfc_memory_register>
          <name>InjectorAccelerationTPSCorrection</name>
          <RegisterID>0x94</RegisterID>
+         <FCPOffset>2231</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
-               <name>Values</name>
-               <MemoryType>PFC_MEMORYTYPE_TPS_SETTING</MemoryType>
+               <name>Voltage</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEVOLTAGE</MemoryType>
+               <Count>3</Count>
+            </pfc_memory_value_array>
+            <pfc_memory_value_array>
+               <name>Correction</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
                <Count>3</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -423,6 +443,7 @@
       <pfc_memory_register>
          <name>O2Feedback</name>
          <RegisterID>0xaa</RegisterID>
+         <FCPOffset>2706</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Unkown</name>
@@ -430,7 +451,7 @@
             </pfc_memory_value>
             <pfc_memory_value>
                <name>Feedback</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT88</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
