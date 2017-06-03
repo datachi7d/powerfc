@@ -22,6 +22,7 @@ const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryTy
 const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTE",
             "PFC_MEMORYTYPE_BYTERPM",
+			"PFC_MEMORYTYPE_BYTERPMCRANK",
 			"PFC_MEMORYTYPE_BYTELOAD",
             "PFC_MEMORYTYPE_BYTETEMPERATURE",
             "PFC_MEMORYTYPE_BYTEDEGREE",
@@ -254,6 +255,21 @@ int Convert_ByteRPM(pcf_conversion conversion, const void * value, int valueSize
     return result;
 }
 
+int Convert_ByteRPMCrank(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = ((int)(*((uint8_t *)value)))*10;
+        result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
 int Convert_ByteLoad(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
@@ -262,7 +278,7 @@ int Convert_ByteLoad(pcf_conversion conversion, const void * value, int valueSiz
          conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
          conversion == PFC_CONVERSION_TOBASIC)
     {
-        int intValue = ((uint16_t)(*((uint8_t *)value))) << 8;
+        int intValue = ((uint32_t)(*((uint8_t *)value))) << 8;
         result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
     }
 
@@ -585,6 +601,14 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.Size = PFC_SIZE_BYTE,
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ByteRPM,
+				.Units = "rpm",
+				.Format = "%d %s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_BYTERPMCRANK,
+				.Size = PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_INT,
+				.ConversionFunction = Convert_ByteRPMCrank,
 				.Units = "rpm",
 				.Format = "%d %s",
 		},

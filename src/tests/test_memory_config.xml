@@ -232,34 +232,63 @@
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>Unkown95</name>
+         <name>CrankTiming</name>
          <RegisterID>0x95</RegisterID>
+         <FCPOffset>2240</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
-               <name>Unkown</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
+               <name>RPM</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTERPMCRANK</MemoryType>
+               <Count>2</Count>
+            </pfc_memory_value_array>
+            <pfc_memory_value_array>
+               <name>Ignition</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>IgnitionAirTemperatureColdCorrection</name>
+         <name>ColdWaterIgnitionCorrection</name>
          <RegisterID>0x96</RegisterID>
+         <FCPOffset>2244</FCPOffset>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Values</name>
-               <MemoryType>PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
+            <pfc_memory_value>
+               <name>Ignition60</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value_array>            
+            <pfc_memory_value>
+               <name>Ignition30</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value_array>            
+            <pfc_memory_value>
+               <name>Ignition0</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value_array>            
+            <pfc_memory_value>
+               <name>IgnitionN30</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value_array>            
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>IgnitionBoostSF01Correction</name>
+         <name>HotWaterIgnitionCorrection</name>
          <RegisterID>0x97</RegisterID>
-         <pfc_memory_values>
+         <FCPOffset>2248</FCPOffset>
+         <pfc_memory_values>          
             <pfc_memory_value_array>
-               <name>boost</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEBOOST</MemoryType>
+               <name>Temperature</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
+               <Count>2</Count>
+            </pfc_memory_value_array>
+            <pfc_memory_value_array>
+               <name>Ignition</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+               <Count>2</Count>
+            </pfc_memory_value_array>
+            <pfc_memory_value_array>
+               <name>Load</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTELOAD</MemoryType>
                <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
