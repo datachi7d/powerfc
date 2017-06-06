@@ -145,11 +145,13 @@
                <name>Temperature</name>
                <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
                <Count>2</Count>
+               <wrong></wrong>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Correction</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT</MemoryType>
                <Count>2</Count>
+               <wrong></wrong>
             </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Load</name>
@@ -256,15 +258,15 @@
             <pfc_memory_value>
                <name>Ignition60</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
-            </pfc_memory_value_array>            
+            </pfc_memory_value>            
             <pfc_memory_value>
                <name>Ignition30</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
-            </pfc_memory_value_array>            
+            </pfc_memory_value>            
             <pfc_memory_value>
                <name>Ignition0</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
-            </pfc_memory_value_array>            
+            </pfc_memory_value>            
             <pfc_memory_value>
                <name>IgnitionN30</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
@@ -272,20 +274,10 @@
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>HotWaterIgnitionCorrection</name>
+         <name>IgnitionBoostSF12Correction</name>
          <RegisterID>0x97</RegisterID>
-         <FCPOffset>2248</FCPOffset>
+         <FCPOffset>2252</FCPOffset>
          <pfc_memory_values>          
-            <pfc_memory_value_array>
-               <name>Temperature</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
-            <pfc_memory_value_array>
-               <name>Ignition</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
             <pfc_memory_value_array>
                <name>Load</name>
                <MemoryType>PFC_MEMORYTYPE_BYTELOAD</MemoryType>
@@ -296,21 +288,29 @@
       <pfc_memory_register>
          <name>IgnitionWaterTemperatureCorrection</name>
          <RegisterID>0x98</RegisterID>
+         <FCPOffset>2248</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Values</name>
                <MemoryType>PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING</MemoryType>
                <Count>2</Count>
+               <wrong></wrong>
             </pfc_memory_value_array>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>Unkown99</name>
+         <name>IgnitionTPSCorrection</name>
          <RegisterID>0x99</RegisterID>
+         <FCPOffset>2262</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
-               <name>Unkown</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
+               <name>Voltage</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEVOLTAGE</MemoryType>
+               <Count>4</Count>
+            </pfc_memory_value_array>
+            <pfc_memory_value_array>
+               <name>Retard</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
                <Count>4</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -318,17 +318,20 @@
       <pfc_memory_register>
          <name>IgnitionAirTemperatureWarmCorrection</name>
          <RegisterID>0x9a</RegisterID>
+         <FCPOffset>2270</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Values</name>
                <MemoryType>PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING</MemoryType>
                <Count>3</Count>
+               <wrong></wrong>
             </pfc_memory_value_array>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
          <name>IgnitionDwell</name>
          <RegisterID>0x9b</RegisterID>
+         <FCPOffset>2276</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Ignition</name>
@@ -340,22 +343,12 @@
       <pfc_memory_register>
          <name>IgnitionBatteryVoltageCorrection</name>
          <RegisterID>0x9c</RegisterID>
+          <FCPOffset>2282</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Ignition</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT26</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT17</MemoryType>
                <Count>6</Count>
-            </pfc_memory_value_array>
-         </pfc_memory_values>
-      </pfc_memory_register>
-      <pfc_memory_register>
-         <name>IgnitionBoostSF12Correction</name>
-         <RegisterID>0x9d</RegisterID>
-         <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>boost</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTEBOOST</MemoryType>
-               <Count>2</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
       </pfc_memory_register>
@@ -374,10 +367,11 @@
       <pfc_memory_register>
          <name>AirflowCurve0</name>
          <RegisterID>0xa1</RegisterID>
+         <FCPOffset>2352</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
                <Count>32</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -385,10 +379,11 @@
       <pfc_memory_register>
          <name>AirflowCurve1</name>
          <RegisterID>0xa2</RegisterID>
+         <FCPOffset>2416</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
                <Count>32</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -396,10 +391,11 @@
       <pfc_memory_register>
          <name>AirflowCurve2</name>
          <RegisterID>0xa3</RegisterID>
+         <FCPOffset>2480</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
                <Count>32</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -407,10 +403,11 @@
       <pfc_memory_register>
          <name>AirflowCurve3</name>
          <RegisterID>0xa4</RegisterID>
+         <FCPOffset>2544</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
                <Count>32</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
@@ -418,20 +415,22 @@
       <pfc_memory_register>
          <name>AirflowCurve4</name>
          <RegisterID>0xa5</RegisterID>
+         <FCPOffset>2608</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
                <Count>32</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>UnkownA6</name>
+         <name>AirflowCurce</name>
          <RegisterID>0xa6</RegisterID>
+         <FCPOffset>2672</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
-               <name>Unkown</name>
+               <name>Curve</name>
                <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
@@ -439,34 +438,58 @@
       <pfc_memory_register>
          <name>AirflowWarning</name>
          <RegisterID>0xa7</RegisterID>
+         <FCPOffset>2694</FCPOffset>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
-               <Count>4</Count>
-            </pfc_memory_value_array>
+            <pfc_memory_value>
+               <name>StopDisplay</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Voltage</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTMILLIVOLTAGE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>BlinkTime</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEMILLISECOND</MemoryType>
+            </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
          <name>InjectorWarning</name>
          <RegisterID>0xa8</RegisterID>
+         <FCPOffset>2698</FCPOffset>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
-               <Count>4</Count>
-            </pfc_memory_value_array>
+            <pfc_memory_value>
+               <name>StopDisplay</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>OpenRate</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>BlinkTime</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEMILLISECOND</MemoryType>
+            </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
          <name>KnockWarning</name>
          <RegisterID>0xa9</RegisterID>
+         <FCPOffset>2702</FCPOffset>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
-               <Count>4</Count>
-            </pfc_memory_value_array>
+            <pfc_memory_value>
+               <name>StopDisplay</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Level</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORT</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>BlinkTime</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEMILLISECOND</MemoryType>
+            </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>

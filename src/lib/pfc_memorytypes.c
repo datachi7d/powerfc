@@ -22,6 +22,7 @@ const pfc_memorytype_conversioninfo * getConverstionInfo(pfc_memorytype MemoryTy
 const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTE",
             "PFC_MEMORYTYPE_BYTERPM",
+			"PFC_MEMORYTYPE_BYTEMILLISECOND",
 			"PFC_MEMORYTYPE_BYTERPMCRANK",
 			"PFC_MEMORYTYPE_BYTELOAD",
             "PFC_MEMORYTYPE_BYTETEMPERATURE",
@@ -41,6 +42,7 @@ const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_SHORTVOLTAGE",
             "PFC_MEMORYTYPE_SHORTBOOST",
             "PFC_MEMORYTYPE_SHORTMILLISECOND",
+			"PFC_MEMORYTYPE_SHORTMILLIVOLTAGE",
             "PFC_MEMORYTYPE_SHORTPERCENTAGE",
 			"PFC_MEMORYTYPE_SHORTLAG",
 			"PFC_MEMORYTYPE_SHORTCORRECTION",
@@ -203,7 +205,7 @@ int Convert_ControlFlag(pcf_conversion conversion, const void * value, int value
          conversion == PFC_CONVERSION_TOBASIC)
     {
         const char * controlValue = (*((const uint8_t *)value)) == 0xFF ? &Units[0] : &Units[3];
-        result = Convert_String(conversion, controlValue, valueSize, output, outputLength, Units, Format);
+        result = Convert_String(conversion, controlValue, strlen(controlValue), output, outputLength, Units, Format);
     }
 
     return result;
@@ -249,6 +251,22 @@ int Convert_ByteRPM(pcf_conversion conversion, const void * value, int valueSize
          conversion == PFC_CONVERSION_TOBASIC)
     {
         int intValue = ((int)(*((uint8_t *)value)))*40;
+        result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
+
+int Convert_ByteMillisecond(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = ((int)(*((uint8_t *)value)))*20;
         result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
     }
 
@@ -477,6 +495,21 @@ int Convert_ShortVoltage(pcf_conversion conversion, const void * value, int valu
     return result;
 }
 
+int Convert_ShortBlink(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        int intValue = ((int)*((uint16_t *)value))*5;
+        result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
 int Convert_ShortBoost(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
@@ -589,19 +622,27 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.Format = "%d",
 		},
 		{
-				.MemoryType = PFC_MEMORYTYPE_BYTETEMPERATURE,
-				.Size = PFC_SIZE_BYTE,
-				.BasicType = PFC_BASICTYPE_INT,
-				.ConversionFunction = Convert_ByteTemperature,
-				.Units = "°C",
-				.Format = "%d %s",
-		},
-		{
 				.MemoryType = PFC_MEMORYTYPE_BYTERPM,
 				.Size = PFC_SIZE_BYTE,
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ByteRPM,
 				.Units = "rpm",
+				.Format = "%d %s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_BYTEMILLISECOND,
+				.Size = PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_INT,
+				.ConversionFunction = Convert_ByteMillisecond,
+				.Units = "ms",
+				.Format = "%d %s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_BYTETEMPERATURE,
+				.Size = PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_INT,
+				.ConversionFunction = Convert_ByteTemperature,
+				.Units = "°C",
 				.Format = "%d %s",
 		},
 		{
@@ -715,6 +756,14 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.ConversionFunction = Convert_ShortFloat,
 				.Units = "ms",
 				.Format = "%3.3f %s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_SHORTMILLIVOLTAGE,
+				.Size = PFC_SIZE_SHORT,
+				.BasicType = PFC_BASICTYPE_INT,
+				.ConversionFunction = Convert_ShortBlink,
+				.Units = "mV",
+				.Format = "%d %s",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTPERCENTAGE,
