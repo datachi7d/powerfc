@@ -1,7 +1,7 @@
 <pfc_memory_config>
    <pfc_memory>
       <pfc_memory_map>
-         <name>IgnitionTrailing</name>
+         <name>Ignition</name>
          <RegisterIDMin>0x81</RegisterIDMin>
          <RegisterIDMax>0x84</RegisterIDMax>
          <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
@@ -498,11 +498,11 @@
          <FCPOffset>2706</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
-               <name>Unkown</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <name>StopO2Feedback</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
-               <name>Feedback</name>
+               <name>FeedbackThreshold</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTFLOAT</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
@@ -510,12 +510,20 @@
       <pfc_memory_register>
          <name>BoostControl</name>
          <RegisterID>0xab</RegisterID>
+         <FCPOffset>2706</FCPOffset>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Unkown</name>
+            <pfc_memory_value>
+               <name>StopBoostControl</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>SolenoidDuty</name>
                <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
-               <Count>3</Count>
-            </pfc_memory_value_array>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>BoostSetting</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
             <pfc_memory_value_array>
                <name>Boost</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEBOOST</MemoryType>
@@ -532,11 +540,46 @@
          <name>Protection</name>
          <RegisterID>0xac</RegisterID>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Value</name>
-               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
-               <Count>10</Count>
-            </pfc_memory_value_array>
+            <pfc_memory_value>
+               <name>IgnitionMap</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>InjectorMap</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>AirFlow</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Injector</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Boost</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Acceleration</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>IgnitionInjection</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Cranking</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>WaterTemperature</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>RevIdle</name>
+               <MemoryType>PFC_MEMORYTYPE_CONTROLFLAG</MemoryType>
+            </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
