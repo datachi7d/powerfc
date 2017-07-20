@@ -3,7 +3,8 @@ set (pfclib_SOURCES
 	pfc_memory.c
 	pfc_memorytypes.c
 	pfc_memoryregistry.c
-	pfc_memoryconfig.c)
+	pfc_memoryconfig.c
+	serial.c )
 
 set (pfclib_INCLUDE_DIRS
 	${PFCLIB_INCLUDE_DIR})

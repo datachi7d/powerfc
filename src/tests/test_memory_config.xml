@@ -748,5 +748,15 @@
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
+      <pfc_memory_register>
+         <name>FCEdit</name>
+         <RegisterID>0xf6</RegisterID>
+         <pfc_memory_values>
+            <pfc_memory_value>
+               <name>Data</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+         </pfc_memory_values>
+      </pfc_memory_register>
    </pfc_memory>
 </pfc_memory_config>
