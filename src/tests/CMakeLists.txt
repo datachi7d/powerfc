@@ -4,9 +4,11 @@ set (test_pfclib_runner_SOURCES
 	test_memorytypes.cc
 	test_memoryregistry.cc
 	test_memoryconfig.cc
-	test_serial.cc)
+	test_serial.cc
+	support/process.cc)
 
 set (test_pfclib_runner_INCLUDE_DIRS
+	support
 	${GTEST_INCLUDE_DIR}
 	${PFCLIB_INCLUDE_DIR})
 
@@ -17,6 +19,8 @@ set (test_pfclib_runner_LIBRARIES
 
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -g -std=c++11")
+
+add_definitions (-D__STDC_FORMAT_MACROS)
 
 add_executable (test_pfclib_runner ${test_pfclib_runner_SOURCES})
 target_include_directories (test_pfclib_runner PRIVATE ${test_pfclib_runner_INCLUDE_DIRS})

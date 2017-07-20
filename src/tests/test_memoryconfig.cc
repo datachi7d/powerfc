@@ -35,7 +35,7 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_Load)
 
     PFC_Memroy_LoadFCPRO(PFC_MemoryConfig_GetMemory(memoryConfig), "src/tests/FCPRO.hd1");
 
-    PFC_Memory_Dump(PFC_MemoryConfig_GetMemory(memoryConfig));
+    //PFC_Memory_Dump(PFC_MemoryConfig_GetMemory(memoryConfig));
 
     PFC_MemoryConfig_Free(memoryConfig);
 }
