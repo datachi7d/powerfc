@@ -29,9 +29,9 @@ TEST_F(PFC_MemoryRegistry, test_Memory_Invalid)
 
     ASSERT_TRUE(memory != NULL);
 
-    EXPECT_TRUE(PFC_Memory_GetMemoryRegister(memory, PFC_ID_MIN) == NULL);
-    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_MIN) == NULL);
-    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterSize(memory, PFC_ID_MIN) == 0);
+    EXPECT_TRUE(PFC_Memory_GetMemoryRegister(memory, 0) == NULL);
+    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) == NULL);
+    EXPECT_TRUE(PFC_Memory_GetMemoryRegisterSize(memory, 0) == 0);
 
     PFC_Memory_Free(memory);
 }
@@ -42,7 +42,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryRegister_New)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -56,7 +56,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryRegister_AddValue)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -81,7 +81,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryRegister_AddValue_Invalid)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -103,7 +103,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_GetMemoryRegister)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MIN, "Test");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "Test");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -121,8 +121,8 @@ TEST_F(PFC_MemoryRegistry, test_Memory_GetMemoryRegister)
 
     ASSERT_EQ(PFC_SIZE_SHORT*2, PFC_MemoryRegister_Malloc(Register));
 
-    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_MIN) != NULL);
-    ASSERT_EQ(PFC_SIZE_SHORT * 2, PFC_Memory_GetMemoryRegisterSize(memory, PFC_ID_MIN));
+    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) != NULL);
+    ASSERT_EQ(PFC_SIZE_SHORT * 2, PFC_Memory_GetMemoryRegisterSize(memory, 0));
 
 
     PFC_Memory_Free(memory);
@@ -134,7 +134,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_NewMap)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryMap * memoryMap = PFC_Memory_NewMap(memory, PFC_ID_InjectorCorrection_0, PFC_ID_InjectorCorrection_3, PFC_MEMORYTYPE_BYTEDEGREE, 20, 20, "InjectorCorrection");
+    PFC_MemoryMap * memoryMap = PFC_Memory_NewMap(memory, 0, 3, PFC_MEMORYTYPE_BYTEDEGREE, 20, 20, "InjectorCorrection");
 
     ASSERT_TRUE(memoryMap != NULL);
 
@@ -147,7 +147,7 @@ TEST_F(PFC_MemoryRegistry, test_MemoryMap_GetXY)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryMap * memoryMap = PFC_Memory_NewMap(memory, PFC_ID_InjectorCorrection_0, PFC_ID_InjectorCorrection_3, PFC_MEMORYTYPE_BYTEDEGREE, 20, 20, "InjectorCorrection");
+    PFC_MemoryMap * memoryMap = PFC_Memory_NewMap(memory, 0, 3, PFC_MEMORYTYPE_BYTEDEGREE, 20, 20, "InjectorCorrection");
 
     ASSERT_TRUE(memoryMap != NULL);
 
@@ -178,7 +178,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_Advanced)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_Advanced, "Advanced");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "Advanced");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -203,8 +203,8 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_Advanced)
     ASSERT_TRUE(PFC_MemoryRegister_AddValue(Register, PFC_MEMORYTYPE_SHORTVOLTAGE,      "Throttle")         != NULL);
 
     ASSERT_EQ(30, PFC_MemoryRegister_Malloc(Register));
-    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_Advanced) != NULL);
-    ASSERT_EQ(30, PFC_Memory_GetMemoryRegisterSize(memory, PFC_ID_Advanced));
+    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) != NULL);
+    ASSERT_EQ(30, PFC_Memory_GetMemoryRegisterSize(memory, 0));
 
     PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(Register);
 
@@ -214,7 +214,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_Advanced)
 
     ASSERT_EQ(19, Count);
 
-    uint8_t * RegisterMemory = (uint8_t*)PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_Advanced);
+    uint8_t * RegisterMemory = (uint8_t*)PFC_Memory_GetMemoryRegisterPointer(memory, 0);
 
     ASSERT_TRUE(RegisterMemory != NULL);
 
@@ -253,7 +253,7 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_MapReference)
 
     ASSERT_TRUE(memory != NULL);
 
-    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, PFC_ID_MapReference, "MapReference");
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "MapReference");
 
     ASSERT_TRUE(Register != NULL);
 
@@ -264,14 +264,14 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_MapReference)
 
     ASSERT_EQ(80, PFC_MemoryRegister_Malloc(Register));
 
-    uint8_t * RegisterMemory = (uint8_t*)PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_MapReference);
+    uint8_t * RegisterMemory = (uint8_t*)PFC_Memory_GetMemoryRegisterPointer(memory, 0);
 
     ASSERT_TRUE(RegisterMemory != NULL);
 
     memset(RegisterMemory, 1, 80);
 
-    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, PFC_ID_MapReference) != NULL);
-    ASSERT_EQ(80, PFC_Memory_GetMemoryRegisterSize(memory, PFC_ID_MapReference));
+    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) != NULL);
+    ASSERT_EQ(80, PFC_Memory_GetMemoryRegisterSize(memory, 0));
 
     PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(Register);
 

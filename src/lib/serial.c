@@ -9,13 +9,32 @@
 #include <termios.h>
 #include <unistd.h>
 
+#define PFC_MAX_MESSAGE_LENGTH 0xff
+#define PFC_MAX_DATA_LENGTH (PFC_MAX_MESSAGE_LENGTH - sizeof(PFC_Header) - 1)
+
 struct _Serial
 {
 	int serialfd;
 };
 
+typedef struct __attribute__((__packed__))
+{
+    PFC_ID ID;
+    pfc_size Length;
+} PFC_Header;
 
-int set_interface_attribs(int fd, int speed)
+uint8_t CheckSum(uint8_t * buffer, uint8_t length)
+{
+    uint8_t * ptr = buffer;
+    uint8_t sum = 0xFF;
+
+    for(; ptr < (buffer+length); ptr++)
+        sum -= *ptr;
+
+    return sum;
+}
+
+int SetInterfaceAttributes(int fd, int speed)
 {
     struct termios tty;
 
@@ -72,7 +91,7 @@ Serial * Serial_New(const char * path)
 
 			if (serial->serialfd >= 0)
 			{
-				set_interface_attribs(serial->serialfd, B19200);
+				SetInterfaceAttributes(serial->serialfd, B19200);
 				lseek(serial->serialfd, 0, SEEK_END);
 			}
 			else
@@ -124,4 +143,125 @@ void Serial_Free(Serial * serial)
 		PFC_free(serial);
 	}
 }
+
+pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pfc_size * size)
+{
+	pfc_error result = PFC_ERROR_UNSET;
+
+	if(serial != NULL && ID != NULL && data != NULL && size != NULL)
+	{
+		uint8_t data_buffer[PFC_MAX_MESSAGE_LENGTH] = {0};
+		PFC_Header * header = (PFC_Header *)&data_buffer[0];
+		int readLen = 0;
+
+		readLen = Serial_Read(serial, (uint8_t *)header, sizeof(*header));
+
+		if(readLen == sizeof(*header))
+		{
+			if(header->Length < PFC_MAX_MESSAGE_LENGTH)
+			{
+				*size = header->Length - sizeof(*header);
+				uint8_t RecvChecksum = 0;
+
+				if(header->Length > sizeof(*header))
+				{
+					readLen = Serial_Read(serial, &data_buffer[sizeof(*header)], *size);
+				}
+				else
+				{
+					readLen = 0;
+				}
+
+				if(readLen == *size
+				   && Serial_Read(serial, &RecvChecksum, 1) == 1)
+				{
+					if(CheckSum(data_buffer, header->Length) == RecvChecksum)
+					{
+						*ID = header->ID;
+						memcpy(data, &data_buffer[sizeof(*header)], *size);
+						result = PFC_ERROR_NONE;
+					}
+					else
+					{
+						*size = 0;
+						result = PFC_ERROR_CHECKSUM;
+					}
+				}
+				else
+				{
+					*size = 0;
+					result = PFC_ERROR_TIMEOUT;
+				}
+
+			}
+			else
+			{
+				result = PFC_ERROR_MESSAGE_LENGTH;
+			}
+		}
+		else
+		{
+			result = PFC_ERROR_TIMEOUT;
+		}
+	}
+	else
+	{
+		result = PFC_ERROR_NULL_PARAMETER;
+	}
+
+	return result;
+}
+
+
+pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc_size size)
+{
+	pfc_error result = PFC_ERROR_UNSET;
+
+	if(serial != NULL)
+	{
+		uint8_t data_buffer[PFC_MAX_MESSAGE_LENGTH] = {0};
+		PFC_Header * header = (PFC_Header *)data_buffer;
+
+	    header->ID = ID;
+	    header->Length = sizeof(*header);
+
+	    if(data != NULL
+	       && size > 0
+		   && size < PFC_MAX_MESSAGE_LENGTH)
+	    {
+	        header->Length += size;
+	        memcpy(&data_buffer[sizeof(*header)], data, size);
+	        result = PFC_ERROR_NONE;
+	    }
+	    else
+	    {
+	    	if(size != 0)
+	    	{
+	    		result = PFC_ERROR_LENGTH;
+	    	}
+	    	else
+	    	{
+	    		result = PFC_ERROR_NONE;
+	    	}
+	    }
+
+	    if	(result == PFC_ERROR_NONE)
+	    {
+	    	data_buffer[header->Length+1] = CheckSum(data_buffer, header->Length);
+	    	Serial_Write(serial, data_buffer, header->Length + 1);
+	    }
+	}
+	else
+	{
+		result = PFC_ERROR_NULL_PARAMETER;
+	}
+
+	return result;
+}
+
+pfc_error Serial_WritePFCAcknowledge(Serial * serial, PFC_ID ID)
+{
+	return Serial_WritePFCMessage(serial, ID, NULL, 0);
+}
+
 
