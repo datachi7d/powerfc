@@ -18,9 +18,9 @@ namespace PFC
 		pid_t _pid;
 		std::string TestSerialPath;
 		std::string SerialPath;
-		std::fstream SerialStream;
-
 protected:
+
+		std::fstream SerialStream;
 
 		PFC_Serial(): _pid(-1), TestSerialPath("/tmp/PFCTestSerial"), SerialPath("/tmp/PFCSerial") {}
 
@@ -45,7 +45,7 @@ protected:
 				counter++;
 			}
 
-			EXPECT_TRUE(SerialStream);
+			ASSERT_TRUE(SerialStream);
 		}
 		void TearDown()
 		{
@@ -68,6 +68,63 @@ protected:
 		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		ASSERT_TRUE(serial != NULL);
+
+		Serial_Free(serial);
+	}
+
+
+	TEST_F(PFC_Serial, test_Serial_Write)
+	{
+		Serial * serial = Serial_New("/tmp/PFCSerial");
+
+		EXPECT_TRUE(serial != NULL);
+
+		uint8_t writeData[] = {0x01, 0x02, 0x03, 0x13, 0x11, 0xe0};
+		char testReadData[sizeof(writeData)] = {0};
+
+		ASSERT_EQ(Serial_Write(serial, writeData, sizeof(writeData)), sizeof(writeData));
+
+		SerialStream.read(testReadData, sizeof(testReadData));
+
+		ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
+
+		Serial_Free(serial);
+	}
+
+	TEST_F(PFC_Serial, test_Serial_Read)
+	{
+		Serial * serial = Serial_New("/tmp/PFCSerial");
+
+		EXPECT_TRUE(serial != NULL);
+
+		char writeData[] = {0x01, 0x02, 0x03, 0x13, 0x11, -100};
+		uint8_t testReadData[sizeof(writeData)] = {0};
+
+		SerialStream.write(writeData, sizeof(writeData));
+		SerialStream.flush();
+
+		ASSERT_EQ(Serial_Read(serial, testReadData, sizeof(testReadData)), sizeof(testReadData));
+
+		ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
+
+		Serial_Free(serial);
+	}
+
+	TEST_F(PFC_Serial, test_Serial_Read_Timeout)
+	{
+		Serial * serial = Serial_New("/tmp/PFCSerial");
+
+		EXPECT_TRUE(serial != NULL);
+
+		char writeData[] = {0x01, 0x02, 0x03, 0x13, 0x11, -100};
+		uint8_t testReadData[sizeof(writeData)] = {0};
+
+		SerialStream.write(writeData, sizeof(writeData) - 1);
+		SerialStream.flush();
+
+		ASSERT_EQ(Serial_Read(serial, testReadData, sizeof(testReadData)), 0);
+
+		ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) != 0);
 
 		Serial_Free(serial);
 	}
