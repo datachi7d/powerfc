@@ -46,6 +46,7 @@ pfc_size  PFC_Memory_GetMemoryRegisterSize(PFC_Memory * Memory, PFC_ID RegisterI
 void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName);
 void PFC_Memory_Dump(PFC_Memory * Memory);
 
+pfc_size PFC_MemoryMap_Malloc(PFC_MemoryMap * MemoryMap);
 PFC_MemoryValue * PFC_MemoryMap_GetMemoryValue(PFC_MemoryMap * MemoryMap, int Row, int Column);
 void PFC_MemoryMap_SetFCPOffset(PFC_MemoryMap * MemoryMap, uint16_t FCPOffset);
 
