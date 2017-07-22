@@ -17,6 +17,7 @@ void * PFC_ValueList_NextItemValue(PFC_ValueList ** List);
 pfc_error PFC_ValueList_AddItem(PFC_ValueList * List, void * Value);
 pfc_error PFC_ValueList_RemoveItem(PFC_ValueList * List, void * Value);
 void * PFC_ValueList_GetValue(PFC_ValueList * List);
+int PFC_ValueList_Count(PFC_ValueList * List);
 
 #ifdef __cplusplus
 }

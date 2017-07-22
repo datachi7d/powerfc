@@ -130,6 +130,18 @@ uint8_t Serial_Write(Serial * serial, uint8_t * buffer, uint8_t size)
     return ((ret < 0) | (ret != size)) ? 0 : size;
 }
 
+int Serial_GetFD(Serial * serial)
+{
+	int result = -1;
+
+	if(serial != NULL)
+	{
+		result = serial->serialfd;
+	}
+
+	return result;
+}
+
 void Serial_Free(Serial * serial)
 {
 

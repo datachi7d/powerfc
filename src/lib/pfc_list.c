@@ -170,3 +170,19 @@ void * PFC_ValueList_GetValue(PFC_ValueList * List)
     return Value;
 }
 
+int PFC_ValueList_Count(PFC_ValueList * List)
+{
+	int count = 0;
+
+	if(List)
+	{
+		PFC_ValueList * item = List;
+        while(item->next != NULL && item->value != NULL)
+        {
+        	item = item->next;
+        	count++;
+        }
+	}
+
+	return count;
+}

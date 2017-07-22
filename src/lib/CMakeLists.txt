@@ -4,6 +4,7 @@ set (pfclib_SOURCES
 	pfc_memorytypes.c
 	pfc_memoryregistry.c
 	pfc_memoryconfig.c
+	pfc_process.c
 	serial.c )
 
 set (pfclib_INCLUDE_DIRS
