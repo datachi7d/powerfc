@@ -1,4 +1,6 @@
 #include <sys/poll.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "pfc_memoryregistry.h"
 #include "pfc_memorytypes.h"
@@ -26,9 +28,18 @@ PFC_Process * PFC_Process_New(const char * memoryConfig)
 
 		if(Process->MemoryConfig != NULL)
 		{
-			Process->clients = PFC_ValueList_New();
+			if(PFC_MemoryConfig_Load(Process->MemoryConfig) == PFC_ERROR_NONE)
+			{
 
-			if(Process->clients == NULL)
+				Process->clients = PFC_ValueList_New();
+
+				if(Process->clients == NULL)
+				{
+					PFC_Process_Free(Process);
+					Process = NULL;
+				}
+			}
+			else
 			{
 				PFC_Process_Free(Process);
 				Process = NULL;
@@ -55,6 +66,7 @@ pfc_error PFC_Process_LoadFCPro(PFC_Process * process, const char * FCProFile)
 		if(Memory != NULL)
 		{
 			PFC_Memroy_LoadFCPRO(Memory, FCProFile);
+			result = PFC_ERROR_NONE;
 		}
 		else
 		{
@@ -179,7 +191,31 @@ void PFC_Process_Run(PFC_Process * process)
 
 					if(result == PFC_ERROR_NONE)
 					{
+						PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
+						uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(memory, id);
+						pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(memory, id);
 
+						if(size == 0)
+						{
+							printf("Read for %02x\n", id);
+
+							if(memory_data != NULL && memory_size != 0)
+							{
+								Serial_WritePFCMessage(serial, id, memory_data, memory_size);
+							}
+
+						}
+						else
+						{
+							printf("Write for %02x\n", id);
+
+							if(size == memory_size)
+							{
+								memcpy(memory_data, data, size);
+
+								Serial_WritePFCAcknowledge(serial, id);
+							}
+						}
 					}
 				}
 			}

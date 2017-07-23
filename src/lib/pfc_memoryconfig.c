@@ -111,6 +111,50 @@ pfc_error XML_GetChildValueAsHex(TreeNode node, const char * name, uint16_t * he
     return Result;
 }
 
+pfc_error XML_GetChildValueAsHexArray(TreeNode node, const char * name, uint8_t * hex, pfc_size hex_size)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+    const char * value = XML_GetChildValue(node, name);
+
+    if(value != NULL)
+    {
+        unsigned int i = 0;
+
+        do
+        {
+            int res = sscanf(value, "0x%x ", &(i));
+
+			if(res == 1)
+			{
+				hex_size--;
+				*(hex++) = i;
+				Result = PFC_ERROR_NONE;
+			}
+			else
+			{
+				Result = PFC_ERROR_XML;
+			}
+
+            if(strlen(value) >= 5)
+            {
+            	value+=5;
+            }
+            else if (hex_size != 0)
+            {
+            	Result = PFC_ERROR_XML;
+            }
+
+        }while(Result == PFC_ERROR_NONE && hex_size > 0);
+    }
+    else
+    {
+        Result = PFC_ERROR_XML;
+    }
+
+    return Result;
+}
+
+
 int XML_GetChildValueAsRawInt(TreeNode node, const char * name)
 {
     int Result = 0;
@@ -367,6 +411,26 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                         	PFC_MemoryRegister_SetFCPOffset(MemoryRegister, FCPOffset);
 
                         PFC_MemoryRegister_Malloc(MemoryRegister);
+
+                        if(XML_GetChild(child, XML_DEFAULTVALUE) != NULL)
+                        {
+                        	pfc_size dest_size = PFC_Memory_GetMemoryRegisterSize(MemoryConfig->Memory, RegisterID);
+
+                        	if(dest_size > 0)
+                        	{
+								uint8_t * buffer = (uint8_t *)PFC_malloc(dest_size);
+
+								if(XML_GetChildValueAsHexArray(child, XML_DEFAULTVALUE, buffer, PFC_MemoryRegister_GetSize(MemoryRegister)) == PFC_ERROR_NONE)
+								{
+									void * dest = PFC_Memory_GetMemoryRegisterPointer(MemoryConfig->Memory, RegisterID);
+
+									if(dest != NULL)
+									{
+										memcpy(dest, buffer, dest_size);
+									}
+								}
+                        	}
+                        }
 
                         if(Result != PFC_ERROR_NONE)
                         {

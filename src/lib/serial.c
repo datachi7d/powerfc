@@ -125,6 +125,7 @@ uint8_t Serial_Write(Serial * serial, uint8_t * buffer, uint8_t size)
     if(serial != NULL)
     {
     	ret = write(serial->serialfd, buffer, size);
+    	fsync(serial->serialfd);
     }
 
     return ((ret < 0) | (ret != size)) ? 0 : size;
@@ -154,6 +155,15 @@ void Serial_Free(Serial * serial)
 
 		PFC_free(serial);
 	}
+}
+
+
+void printHex(uint8_t * buffer, uint8_t len)
+{
+    uint8_t pos = 0;
+
+    for(; pos < len; pos++)
+        printf("%02x ", buffer[pos]);
 }
 
 pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pfc_size * size)
@@ -191,6 +201,9 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 					{
 						*ID = header->ID;
 						memcpy(data, &data_buffer[sizeof(*header)], *size);
+						printf("Recv Message: ");
+						printHex(data_buffer,*size + header->Length);
+						printf("\n");
 						result = PFC_ERROR_NONE;
 					}
 					else
@@ -259,8 +272,12 @@ pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc
 
 	    if	(result == PFC_ERROR_NONE)
 	    {
-	    	data_buffer[header->Length+1] = CheckSum(data_buffer, header->Length);
+	    	data_buffer[header->Length] = CheckSum(data_buffer, header->Length);
 	    	Serial_Write(serial, data_buffer, header->Length + 1);
+			printf("Send Message: ");
+			printHex(data_buffer,header->Length + 1);
+			printf("\n");
+
 	    }
 	}
 	else
@@ -273,7 +290,7 @@ pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc
 
 pfc_error Serial_WritePFCAcknowledge(Serial * serial, PFC_ID ID)
 {
-	return Serial_WritePFCMessage(serial, ID, NULL, 0);
+	return Serial_WritePFCMessage(serial, 0xf2, NULL, 0);
 }
 
 

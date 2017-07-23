@@ -177,10 +177,20 @@ int PFC_ValueList_Count(PFC_ValueList * List)
 	if(List)
 	{
 		PFC_ValueList * item = List;
+
+		if(item->value != NULL)
+		{
+			count = 1;
+		}
+
         while(item->next != NULL && item->value != NULL)
         {
+    		if(item->value != NULL)
+    		{
+    			count++;
+    		}
+
         	item = item->next;
-        	count++;
         }
 	}
 

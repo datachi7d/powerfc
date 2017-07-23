@@ -585,6 +585,7 @@
       <pfc_memory_register>
          <name>TunerString</name>
          <RegisterID>0xad</RegisterID>
+         <DefaultValue>0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20</DefaultValue>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Tuner</name>
@@ -595,6 +596,7 @@
       <pfc_memory_register>
          <name>WarningControlFlagsStrings</name>
          <RegisterID>0xd6</RegisterID>
+         <FCPOffset>2725</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Flag</name>
@@ -611,6 +613,7 @@
       <pfc_memory_register>
          <name>SensorStrings</name>
          <RegisterID>0xdd</RegisterID>
+         <FCPOffset>2810</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Sensor</name>
@@ -741,6 +744,7 @@
       <pfc_memory_register>
          <name>VersionString</name>
          <RegisterID>0xf5</RegisterID>
+         <DefaultValue>0x35 0x2e 0x30 0x33 0x20</DefaultValue>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Version</name>
@@ -749,8 +753,19 @@
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
-         <name>FCEdit</name>
+         <name>FCPro</name>
          <RegisterID>0xf6</RegisterID>
+         <pfc_memory_values>
+            <pfc_memory_value>
+               <name>Data</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+         </pfc_memory_values>
+       </pfc_memory_register>
+       <pfc_memory_register>
+         <name>FCEdit1</name>
+         <RegisterID>0x01</RegisterID>
+         <DefaultValue>0x01</DefaultValue>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>Data</name>
