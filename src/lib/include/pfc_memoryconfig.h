@@ -35,6 +35,7 @@ extern "C" {
 #define XML_COLUMNS "columns"
 
 #define XML_FCPOFFSET "fcpoffset"
+#define XML_FCPREORDER "fcpreorder"
 #define XML_DEFAULTVALUE "defaultvalue"
 
 typedef struct _PFC_MemoryConfig PFC_MemoryConfig;

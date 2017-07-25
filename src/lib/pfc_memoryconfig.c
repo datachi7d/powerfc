@@ -386,6 +386,7 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                     const char * Name = XML_GetChildValue(child, XML_NAME);
                     uint16_t RegisterID = 0;
                     int Size = XML_GetChildValueAsRawInt(child, XML_SIZE);
+                    pfc_size RegisterSize = 0;
 
                     PFC_MemoryRegister * MemoryRegister = NULL;
 
@@ -410,26 +411,39 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                         if(FCPOffset >= 0)
                         	PFC_MemoryRegister_SetFCPOffset(MemoryRegister, FCPOffset);
 
-                        PFC_MemoryRegister_Malloc(MemoryRegister);
+                        RegisterSize = PFC_MemoryRegister_Malloc(MemoryRegister);
 
                         if(XML_GetChild(child, XML_DEFAULTVALUE) != NULL)
                         {
-                        	pfc_size dest_size = PFC_Memory_GetMemoryRegisterSize(MemoryConfig->Memory, RegisterID);
-
-                        	if(dest_size > 0)
+                        	if(RegisterSize > 0)
                         	{
-								uint8_t * buffer = (uint8_t *)PFC_malloc(dest_size);
+								uint8_t * buffer = (uint8_t *)PFC_malloc(RegisterSize);
 
-								if(XML_GetChildValueAsHexArray(child, XML_DEFAULTVALUE, buffer, PFC_MemoryRegister_GetSize(MemoryRegister)) == PFC_ERROR_NONE)
+								if(XML_GetChildValueAsHexArray(child, XML_DEFAULTVALUE, buffer, RegisterSize) == PFC_ERROR_NONE)
 								{
 									void * dest = PFC_Memory_GetMemoryRegisterPointer(MemoryConfig->Memory, RegisterID);
 
 									if(dest != NULL)
 									{
-										memcpy(dest, buffer, dest_size);
+										memcpy(dest, buffer, RegisterSize);
 									}
 								}
                         	}
+                        }
+
+                        if(XML_GetChild(child, XML_FCPREORDER) != NULL && FCPOffset >= 0)
+                        {
+                        	uint8_t * PFCReorder = (uint8_t *)PFC_malloc(RegisterSize);
+
+                        	if(PFCReorder)
+                        	{
+                        		if(XML_GetChildValueAsHexArray(child, XML_FCPREORDER, PFCReorder, RegisterSize) == PFC_ERROR_NONE)
+                        		{
+                        			PFC_MemoryRegister_SetFCPReorder(MemoryRegister, PFCReorder, RegisterSize);
+                        		}
+                        	}
+
+                        	PFC_free(PFCReorder);
                         }
 
                         if(Result != PFC_ERROR_NONE)

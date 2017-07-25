@@ -38,14 +38,11 @@
       <pfc_memory_register>
          <name>RevIdle</name>
          <RegisterID>0x8b</RegisterID>
-          <FCPOffset>2088</FCPOffset>
+         <FCPOffset>2088</FCPOffset>
+         <FCPReorder>0x00 0x01 0x06 0x07 0x02 0x03 0x08 0x09 0x0c 0x0d 0x0e 0x0f</FCPReorder>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>RevLimit</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
-            </pfc_memory_value>
-            <pfc_memory_value>
-               <name>FuelCutAC</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
@@ -53,11 +50,15 @@
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
-               <name>IdleAC</name>
+               <name>FuelCutAC</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
                <name>Idle</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>IdleAC</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
@@ -502,7 +503,7 @@
       <pfc_memory_register>
          <name>BoostControl</name>
          <RegisterID>0xab</RegisterID>
-         <FCPOffset>2706</FCPOffset>
+         <FCPOffset>2709</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>StopBoostControl</name>

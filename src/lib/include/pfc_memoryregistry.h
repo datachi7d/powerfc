@@ -33,6 +33,7 @@ int PFC_MemoryRegister_GetCount(PFC_MemoryRegister * memoryRegister);
 int PFC_MemoryRegister_GetOffsetOfValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue * memoryValue);
 PFC_MemoryRegister * PFC_MemoryRegister_Get(PFC_Memory * Memory, PFC_ID RegisterID);
 void PFC_MemoryRegister_SetFCPOffset(PFC_MemoryRegister * memoryRegister, uint16_t offset);
+pfc_error PFC_MemoryRegister_SetFCPReorder(PFC_MemoryRegister * memoryRegister, uint8_t * reorder, pfc_size reorderSize);
 pfc_size PFC_MemoryRegister_Malloc(PFC_MemoryRegister * memoryRegister);
 void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister);
 

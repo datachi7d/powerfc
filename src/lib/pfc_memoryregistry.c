@@ -20,6 +20,7 @@ struct _PFC_MemoryRegister
     uint16_t MemorySize;
     char * Name;
     int FCPRO_offset;
+    uint8_t * FCPRO_reorder;
 };
 
 struct _PFC_MemoryValue
@@ -540,6 +541,31 @@ void PFC_MemoryRegister_SetFCPOffset(PFC_MemoryRegister * memoryRegister, uint16
     }
 }
 
+pfc_error PFC_MemoryRegister_SetFCPReorder(PFC_MemoryRegister * memoryRegister, uint8_t * reorder, pfc_size reorderSize)
+{
+	pfc_error result = PFC_ERROR_UNSET;
+
+    if(memoryRegister && reorderSize == memoryRegister->MemorySize)
+    {
+    	memoryRegister->FCPRO_reorder = (uint8_t *)PFC_malloc(memoryRegister->MemorySize);
+
+    	if(memoryRegister->FCPRO_reorder)
+    	{
+    		memcpy(memoryRegister->FCPRO_reorder, reorder, reorderSize);
+    	}
+    	else
+    	{
+    		result = PFC_ERROR_MEMORY;
+    	}
+    }
+    else
+    {
+    	result = reorderSize == memoryRegister->MemorySize ? PFC_ERROR_LENGTH : PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return result;
+}
+
 pfc_size PFC_MemoryRegister_Malloc(PFC_MemoryRegister * memoryRegister)
 {
 	pfc_size Result = 0;
@@ -581,6 +607,9 @@ void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
 
         if(memoryRegister->Name)
             PFC_free(memoryRegister->Name);
+
+        if(memoryRegister->FCPRO_reorder)
+            PFC_free(memoryRegister->FCPRO_reorder);
 
         PFC_free(memoryRegister);
     }
@@ -879,7 +908,19 @@ void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName)
 									{
 										if(MemoryRegister->Memory != NULL && MemoryRegister->FCPRO_offset >= 0)
 										{
-											memcpy(MemoryRegister->Memory, &file_buffer[MemoryRegister->FCPRO_offset], MemoryRegister->MemorySize);
+											if(MemoryRegister->FCPRO_reorder != NULL)
+											{
+												int i = 0;
+												for(i = 0; i < MemoryRegister->MemorySize; i++)
+												{
+													int calcFCPOffset = MemoryRegister->FCPRO_offset + MemoryRegister->FCPRO_reorder[i];
+													MemoryRegister->Memory[i] = file_buffer[calcFCPOffset];
+												}
+											}
+											else
+											{
+												memcpy(MemoryRegister->Memory, &file_buffer[MemoryRegister->FCPRO_offset], MemoryRegister->MemorySize);
+											}
 										}
 									}
 									MemoryRegister = PFC_ValueList_NextItemValue(&list);
