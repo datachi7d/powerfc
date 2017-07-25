@@ -192,7 +192,7 @@ protected:
 
 		ASSERT_USECS(SerialStream.read(testReadData, sizeof(expectedData)), 100000);
 
-		ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) != 0);
+		ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
 
 		Serial_Free(serial);
 	}
