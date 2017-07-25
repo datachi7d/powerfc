@@ -216,6 +216,16 @@ void PFC_Process_Run(PFC_Process * process)
 								Serial_WritePFCAcknowledge(serial, id);
 							}
 						}
+
+						if(memory)
+						{
+							PFC_MemoryRegister * memoryRegister = PFC_Memory_GetMemoryRegister(memory, id);
+
+							if(memoryRegister)
+							{
+								PFC_MemoryRegister_DumpValue(memoryRegister, memory);
+							}
+						}
 					}
 				}
 			}
