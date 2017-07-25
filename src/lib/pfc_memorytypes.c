@@ -31,6 +31,7 @@ const char * pfc_memorytype_str [] = {
             "PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE",
             "PFC_MEMORYTYPE_BYTEVOLTAGE",
             "PFC_MEMORYTYPE_BYTEBOOST",
+			"PFC_MEMORYTYPE_BYTEBOOSTSOLENOID",
             "PFC_MEMORYTYPE_BYTEFLOAT",
             "PFC_MEMORYTYPE_BYTEFLOAT17",
             "PFC_MEMORYTYPE_BYTEFLOAT26",
@@ -334,6 +335,21 @@ int Convert_ByteVoltage(pcf_conversion conversion, const void * value, int value
     return result;
 }
 
+int Convert_ByteBoostSolenoid(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+{
+    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
+
+    if  (conversion == PFC_CONVERSION_TOSTRING ||
+         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
+         conversion == PFC_CONVERSION_TOBASIC)
+    {
+        float floatValue = (*((uint8_t *)value)) * 0.05f;
+        result = Convert_Float(conversion, &floatValue, valueSize, output, outputLength, Units, Format);
+    }
+
+    return result;
+}
+
 int Convert_ByteFloat(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
@@ -364,6 +380,7 @@ int Convert_ByteFloat17(pcf_conversion conversion, const void * value, int value
 
     return result;
 }
+
 int Convert_ByteFloat26(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
@@ -693,6 +710,14 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.ConversionFunction = Convert_ByteFloat17,
 				.Units = "kg/cm²",
 				.Format = "%1.5f %s",
+		},
+		{
+				.MemoryType = PFC_MEMORYTYPE_BYTEBOOSTSOLENOID,
+				.Size = PFC_SIZE_BYTE,
+				.BasicType = PFC_BASICTYPE_FLOAT,
+				.ConversionFunction = Convert_ByteBoostSolenoid,
+				.Units = "kg/cm²",
+				.Format = "%1.2f %s",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEFLOAT,
