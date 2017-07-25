@@ -378,6 +378,46 @@ PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRe
     return value;
 }
 
+void PFC_MemoryRegister_DumpValue(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory)
+{
+	if(MemoryRegister != NULL && Memory != NULL)
+	{
+		PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
+
+		if(MemoryRegister->FCPRO_offset >= 0)
+			printf("%s [%d-%d %02x]:\n", MemoryRegister->Name, MemoryRegister->FCPRO_offset, MemoryRegister->FCPRO_offset + MemoryRegister->MemorySize, MemoryRegister->ID);
+		else
+			printf("%s [%02x]:\n", MemoryRegister->Name, MemoryRegister->ID);
+
+
+		do
+		{
+			if(value != NULL)
+			{
+				uint8_t * ptr = PFC_Memory_GetMemoryRegisterPointer(Memory,MemoryRegister->ID);
+
+				if(ptr != NULL)
+				{
+					char valueBuffer[256] = {0};
+
+					ptr += PFC_MemoryRegister_GetOffsetOfValue(MemoryRegister,value);
+
+					PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), true, ptr, valueBuffer, sizeof(valueBuffer));
+
+					if(value->ArrayItem)
+					{
+						printf("\t %s[%d]: %s\n", value->Name, value->Row, valueBuffer);
+					}
+					else
+					{
+						printf("\t %s: %s\n", value->Name, valueBuffer);
+					}
+				}
+			}
+		} while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+	}
+}
+
 
 pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue ** value)
 {
@@ -853,6 +893,7 @@ void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName)
 	}
 }
 
+
 void PFC_Memory_Dump(PFC_Memory * Memory)
 {
     if(Memory != NULL)
@@ -868,39 +909,10 @@ void PFC_Memory_Dump(PFC_Memory * Memory)
                 {
                     uint8_t * RegisterMemory = MemoryRegister->Memory;
 
-                    if(MemoryRegister->FCPRO_offset >= 0)
-                    	printf("%s [%d-%d %02x]:\n", MemoryRegister->Name, MemoryRegister->FCPRO_offset, MemoryRegister->FCPRO_offset + MemoryRegister->MemorySize, MemoryRegister->ID);
-                    else
-                    	printf("%s [%02x]:\n", MemoryRegister->Name, MemoryRegister->ID);
+                    PFC_MemoryRegister_DumpValue(MemoryRegister, Memory);
 
-                    PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
-                    do
-                    {
-                        if(value != NULL)
-                        {
-                            uint8_t * ptr = PFC_Memory_GetMemoryRegisterPointer(Memory,MemoryRegister->ID);
-
-                            if(ptr != NULL)
-                            {
-								char valueBuffer[256] = {0};
-
-								ptr += PFC_MemoryRegister_GetOffsetOfValue(MemoryRegister,value);
-
-								PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), true, ptr, valueBuffer, sizeof(valueBuffer));
-
-								if(value->ArrayItem)
-								{
-									printf("\t %s[%d]: %s\n", value->Name, value->Row, valueBuffer);
-								}
-								else
-								{
-									printf("\t %s: %s\n", value->Name, valueBuffer);
-								}
-                            }
-                        }
-                    } while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+                    MemoryRegister = PFC_ValueList_NextItemValue(&list);
                 }
-                MemoryRegister = PFC_ValueList_NextItemValue(&list);
             }while( MemoryRegister != NULL );
         }
     }
