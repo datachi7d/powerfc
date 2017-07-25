@@ -133,19 +133,24 @@
          <name>InjectorWaterBoostCorrection</name>
          <RegisterID>0x90</RegisterID>
          <FCPOffset>2156</FCPOffset>
+         <FCPReorder>0x00 0x02 0x01 0x03 0x04 0x05</FCPReorder>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Temperature</name>
+             <pfc_memory_value>
+               <name>Temperature1</name>
                <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
-               <Count>2</Count>
-               <wrong></wrong>
-            </pfc_memory_value_array>
-            <pfc_memory_value_array>
-               <name>Correction</name>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Correction1</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT</MemoryType>
-               <Count>2</Count>
-               <wrong></wrong>
-            </pfc_memory_value_array>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Temperature1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Correction1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEFLOAT</MemoryType>
+            </pfc_memory_value>
             <pfc_memory_value_array>
                <name>Load</name>
                <MemoryType>PFC_MEMORYTYPE_BYTELOAD</MemoryType>
