@@ -1,0 +1,14 @@
+package "pfc_sim"
+version ""
+
+option "memory-config" c
+    "Memory configuration XML"
+    string
+
+option "serial" s
+    "Serial port device path"
+    string
+    
+option "fcpro" f
+    "FCPRO data file"
+    string
