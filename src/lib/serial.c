@@ -290,7 +290,7 @@ pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc
 
 pfc_error Serial_WritePFCAcknowledge(Serial * serial, PFC_ID ID)
 {
-	return Serial_WritePFCMessage(serial, 0xf2, NULL, 0);
+	return Serial_WritePFCMessage(serial, PFC_ID_ACK, NULL, 0);
 }
 
 
