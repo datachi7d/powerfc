@@ -15,6 +15,7 @@ extern "C" {
 typedef struct _PFC_MemoryRegister PFC_MemoryRegister;
 typedef struct _PFC_MemoryValue PFC_MemoryValue;
 typedef struct _PFC_MemoryMap PFC_MemoryMap;
+typedef struct _PFC_MemoryTable PFC_MemoryTable;
 typedef struct _PFC_Memory PFC_Memory;
 
 PFC_MemoryValue * PFC_MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name);

@@ -44,6 +44,16 @@ struct _PFC_MemoryMap
     int Columns;
 };
 
+
+struct _PFC_MemoryTable
+{
+    PFC_Memory * Memory;
+    char * Name;
+    pfc_memorytype Column1Type;
+    pfc_memorytype Column2Type;
+    int Rows;
+};
+
 PFC_MemoryValue * PFC_MemoryValue_New(pfc_size Size)
 {
     PFC_MemoryValue * memoryValue = NULL;
@@ -261,7 +271,6 @@ void PFC_MemoryMap_SetFCPOffset(PFC_MemoryMap * MemoryMap, uint16_t FCPOffset)
             	FCPOffset += MemoryRegister->MemorySize;
             }
         }
-
     }
 }
 
@@ -724,6 +733,56 @@ PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID Register
 
     return memoryRegister;
 }
+
+
+PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pfc_memorytype Column1, pfc_memorytype Column2, uint8_t rows, const char * registerName, const char * Column1name, const char * Column2name)
+{
+    PFC_MemoryTable * Result = NULL;
+
+    if(Memory != NULL)
+    {
+        int column1Size = PFC_Convert_PFCValueSize(Column1);
+        int column2Size = PFC_Convert_PFCValueSize(Column2);
+
+        if(column1Size > 0 && column2Size > 0)
+        {
+            int TotalSize = ((int)rows) * (column1Size + column2Size);
+            int X = 0;
+            int Y = 0;
+
+            if(TotalSize <= PFC_MAX_REGISTER_SIZE)
+            {
+                int registerCount = 0;
+                PFC_MemoryRegister * registerN = PFC_Memory_NewRegister(Memory, registerID, registerName);
+
+                if(registerN != NULL)
+                {
+                    bool failed = false;
+
+
+                    for(registerCount = 0; registerCount < rows; registerCount++)
+                    {
+                        if(PFC_MemoryRegister_AddValueXY(registerN, Column1, Column1name, 1, registerCount) == NULL ||
+                                PFC_MemoryRegister_AddValueXY(registerN, Column2, Column2name, 2, registerCount) == NULL)
+                        {
+                            failed = true;
+                            break;
+                        }
+                    }
+
+                    if(failed == false)
+                    {
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    return Result;
+}
+
 
 PFC_MemoryMap * PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name)
 {
