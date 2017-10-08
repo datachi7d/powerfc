@@ -442,70 +442,134 @@ pfc_error MemoryConfig_LoadConfig_MemoryRegister(PFC_Memory * Memory, TreeNode r
 }
 
 
+pfc_error MemoryConfig_LoadConfig_TableColumns(TreeNode root, pfc_memorytype * Columns, char ** ColumnNames, int ColumsSize)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+
+    if(XML_NodeNameIs(root, XML_PFC_MEMORY_VALUES))
+    {
+        int child_number = 0;
+        TreeNode child;
+
+        while ((child = TreeNode_GetChild(root, child_number)))
+        {
+            if(XML_NodeNameIs(child, XML_PFC_MEMORY_VALUE))
+            {
+                const char * Name = XML_GetChildValue(child, XML_NAME);
+                const char * MemroyTypeRaw = XML_GetChildValue(child, XML_MEMORY_TYPE);
+                pfc_memorytype MemoryType = PFC_MemoryType_FromString(MemroyTypeRaw);
+                PFC_MemoryValue * memoryValue = NULL;
+
+                if(MemoryType == PFC_MEMORYTYPE_LAST)
+                {
+                    //TODO:
+                    printf("Unkown memory type: %s\n", MemroyTypeRaw);
+                    XML_PrintErrorChild(child, XML_MEMORY_TYPE, "test");
+                    Result = PFC_ERROR_NONE;
+                    break;
+                }
+                else if(child_number < ColumsSize)
+                {
+                	Columns[child_number] = MemoryType;
+                	ColumnNames[child_number] = Name;
+                	Result = PFC_ERROR_NONE;
+                }
+                else
+                {
+                    Result = PFC_ERROR_MEMORY;
+                    break;
+                }
+
+            }
+            else
+            {
+                Result = PFC_ERROR_XML;
+                break;
+            }
+
+            child_number++;
+        }
+    }
+    else
+    {
+    	Result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return Result;
+}
+
 pfc_error MemoryConfig_LoadConfig_MemoryTable(PFC_Memory * Memory, TreeNode root, int FCPOffset)
 {
     pfc_error Result = PFC_ERROR_UNSET;
 
     const char * Name = XML_GetChildValue(root, XML_NAME);
+    int TableRows =  XML_GetChild(root, XML_ROWS) != NULL ? XML_GetChildValueAsRawInt(root, XML_ROWS) : -1;
     uint16_t RegisterID = 0;
     pfc_size RegisterSize = 0;
 
-    PFC_MemoryRegister * MemoryRegister = NULL;
+    PFC_MemoryTable * MemoryTable = NULL;
 
     TreeNode valuesNode = XML_GetChild(root, XML_PFC_MEMORY_VALUES);
 
     Result = XML_GetChildValueAsHex(root, XML_REGISTERID, &RegisterID);
 
-    if(Result == PFC_ERROR_NONE)
+    if(Result == PFC_ERROR_NONE && TableRows >= 1)
     {
-        if(valuesNode != NULL && (MemoryRegister = PFC_Memory_NewRegister(Memory, RegisterID, Name)) != NULL)
-        {
-            Result = MemoryConfig_LoadConfig_MemoryValue(MemoryRegister, valuesNode);
+		pfc_memorytype Columns[256] = { 0 };
+		char * ColumnNames[256] = { 0 };
 
-            if(FCPOffset >= 0)
-                PFC_MemoryRegister_SetFCPOffset(MemoryRegister, FCPOffset);
+		Result = MemoryConfig_LoadConfig_TableColumns(valuesNode, &Columns, &ColumnNames, 256);
 
-            RegisterSize = PFC_MemoryRegister_Malloc(MemoryRegister);
+		if(Result == PFC_ERROR_NONE &&
+				(MemoryTable = PFC_Memory_NewTable(Memory, RegisterID, Columns[0], Columns[1], TableRows, Name, ColumnNames[0], ColumnNames[1])) != NULL	)
+		{
+			PFC_MemoryRegister * MemoryRegister = PFC_MemoryTable_GetRegister(MemoryTable);
 
-            if(XML_GetChild(root, XML_DEFAULTVALUE) != NULL)
-            {
-                if(RegisterSize > 0)
-                {
-                    uint8_t * buffer = (uint8_t *)PFC_malloc(RegisterSize);
+			if(FCPOffset >= 0)
+				PFC_MemoryRegister_SetFCPOffset(MemoryRegister, FCPOffset);
 
-                    if(XML_GetChildValueAsHexArray(root, XML_DEFAULTVALUE, buffer, RegisterSize) == PFC_ERROR_NONE)
-                    {
-                        void * dest = PFC_Memory_GetMemoryRegisterPointer(Memory, RegisterID);
+			RegisterSize = PFC_MemoryRegister_Malloc(MemoryRegister);
 
-                        if(dest != NULL)
-                        {
-                            memcpy(dest, buffer, RegisterSize);
-                        }
-                    }
-                }
-            }
+			if(XML_GetChild(root, XML_DEFAULTVALUE) != NULL)
+			{
+				if(RegisterSize > 0)
+				{
+					uint8_t * buffer = (uint8_t *)PFC_malloc(RegisterSize);
 
-            if(XML_GetChild(root, XML_FCPREORDER) != NULL && FCPOffset >= 0)
-            {
-                uint8_t * PFCReorder = (uint8_t *)PFC_malloc(RegisterSize);
+					if(XML_GetChildValueAsHexArray(root, XML_DEFAULTVALUE, buffer, RegisterSize) == PFC_ERROR_NONE)
+					{
+						void * dest = PFC_Memory_GetMemoryRegisterPointer(Memory, RegisterID);
 
-                if(PFCReorder)
-                {
-                    if(XML_GetChildValueAsHexArray(root, XML_FCPREORDER, PFCReorder, RegisterSize) == PFC_ERROR_NONE)
-                    {
-                        PFC_MemoryRegister_SetFCPReorder(MemoryRegister, PFCReorder, RegisterSize);
-                    }
-                }
+						if(dest != NULL)
+						{
+							memcpy(dest, buffer, RegisterSize);
+						}
+					}
+				}
+			}
 
-                PFC_free(PFCReorder);
-            }
+			if(XML_GetChild(root, XML_FCPREORDER) != NULL && FCPOffset >= 0)
+			{
+				uint8_t * PFCReorder = (uint8_t *)PFC_malloc(RegisterSize);
 
-            Result = PFC_ERROR_NONE;
-        }
-        else
-        {
-            Result = PFC_ERROR_XML;
-        }
+				if(PFCReorder)
+				{
+					if(XML_GetChildValueAsHexArray(root, XML_FCPREORDER, PFCReorder, RegisterSize) == PFC_ERROR_NONE)
+					{
+						PFC_MemoryRegister_SetFCPReorder(MemoryRegister, PFCReorder, RegisterSize);
+					}
+				}
+
+				PFC_free(PFCReorder);
+			}
+
+			Result = PFC_ERROR_NONE;
+
+		}
+	    else
+	    {
+	        Result = PFC_ERROR_XML;
+	    }
     }
     else
     {

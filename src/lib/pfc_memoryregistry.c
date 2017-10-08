@@ -48,6 +48,7 @@ struct _PFC_MemoryMap
 struct _PFC_MemoryTable
 {
     PFC_Memory * Memory;
+    PFC_MemoryRegister * Register;
     char * Name;
     pfc_memorytype Column1Type;
     pfc_memorytype Column2Type;
@@ -762,8 +763,14 @@ PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pf
 
                     for(registerCount = 0; registerCount < rows; registerCount++)
                     {
-                        if(PFC_MemoryRegister_AddValueXY(registerN, Column1, Column1name, 1, registerCount) == NULL ||
-                                PFC_MemoryRegister_AddValueXY(registerN, Column2, Column2name, 2, registerCount) == NULL)
+                        char valueName1[256] = {0};
+                        char valueName2[256] = {0};
+
+                        snprintf(valueName1, sizeof(valueName1), "%s[%d]", Column1name, registerCount);
+                        snprintf(valueName2, sizeof(valueName2), "%s[%d]", Column2name, registerCount);
+
+                        if(PFC_MemoryRegister_AddValueXY(registerN, Column1, valueName1, 1, registerCount) == NULL ||
+                                PFC_MemoryRegister_AddValueXY(registerN, Column2, valueName2, 2, registerCount) == NULL)
                         {
                             failed = true;
                             break;
@@ -772,7 +779,8 @@ PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pf
 
                     if(failed == false)
                     {
-
+                    	Result =  (PFC_MemoryTable*)PFC_malloc(sizeof(*Result));
+                    	Result->Register = registerN;
                     }
                 }
             }
@@ -781,6 +789,17 @@ PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pf
 
 
     return Result;
+}
+
+PFC_MemoryRegister * PFC_MemoryTable_GetRegister(PFC_MemoryTable * Table)
+{
+	PFC_MemoryRegister * Result = NULL;
+	if(Table != NULL && Table->Register != NULL)
+	{
+		Result = Table->Register;
+	}
+
+	return Result;
 }
 
 

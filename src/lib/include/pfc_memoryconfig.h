@@ -20,7 +20,7 @@ extern "C" {
 
 #define XML_PFC_MEMORY_MAP "pfc_memory_map"
 #define XML_PFC_MEMORY_TABLE "pfc_memory_table"
-
+#define XML_ROWS "rows"
 
 #define XML_NAME "name"
 

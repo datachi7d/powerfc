@@ -41,6 +41,9 @@ void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister);
 PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID RegisterID, const char * name);
 PFC_MemoryMap * PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name);
 
+PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pfc_memorytype Column1, pfc_memorytype Column2, uint8_t rows, const char * registerName, const char * Column1name, const char * Column2name);
+PFC_MemoryRegister * PFC_MemoryTable_GetRegister(PFC_MemoryTable * Table);
+
 PFC_Memory * PFC_Memory_New();
 void PFC_Memory_Free(PFC_Memory * memory);
 PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID RegisterID);
