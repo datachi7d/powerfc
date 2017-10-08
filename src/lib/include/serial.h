@@ -9,6 +9,9 @@ extern "C" {
 
 #include "pfc_types.h"
 
+#define PFC_ID_ACK 0xf2
+
+
 typedef struct _Serial Serial;
 
 Serial * Serial_New(const char * path);

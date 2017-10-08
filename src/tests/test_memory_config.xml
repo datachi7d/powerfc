@@ -289,11 +289,22 @@
          <FCPOffset>2248</FCPOffset>
          <FCPReorder>0x00 0x02 0x01 0x03</FCPReorder>
          <pfc_memory_values>
-            <pfc_memory_value_array>
-               <name>Values</name>
-               <MemoryType>PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING</MemoryType>
-               <Count>2</Count>
-            </pfc_memory_value_array>
+            <pfc_memory_value>
+               <name>Temperature1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Ignition1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Temperature2</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Ignition2</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
@@ -349,7 +360,7 @@
       <pfc_memory_register>
          <name>AirflowVoltage</name>
          <RegisterID>0xa0</RegisterID>
-          <FCPOffset>2288</FCPOffset>
+         <FCPOffset>2288</FCPOffset>
          <pfc_memory_values>
             <pfc_memory_value_array>
                <name>Voltage</name>

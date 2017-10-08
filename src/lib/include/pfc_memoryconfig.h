@@ -16,7 +16,10 @@ extern "C" {
 #define XML_PFC_MEMORY_VALUES "pfc_memory_values"
 #define XML_PFC_MEMORY_VALUE "pfc_memory_value"
 #define XML_PFC_MEMORY_VALUE_ARRAY "pfc_memory_value_array"
+
+
 #define XML_PFC_MEMORY_MAP "pfc_memory_map"
+#define XML_PFC_MEMORY_TABLE "pfc_memory_table"
 
 
 #define XML_NAME "name"
