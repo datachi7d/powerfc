@@ -247,6 +247,83 @@ TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_Advanced)
 }
 
 
+
+TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_Mirror)
+{
+    PFC_Memory * memory = PFC_Memory_New();
+
+    ASSERT_TRUE(memory != NULL);
+
+    PFC_MemoryRegister * Register = PFC_Memory_NewRegister(memory, 0, "Register");
+
+    ASSERT_TRUE(Register != NULL);
+
+    ASSERT_TRUE(PFC_MemoryRegister_AddValue(Register, PFC_MEMORYTYPE_SHORTRPM,          "RPM")              != NULL);
+
+    ASSERT_EQ(2, PFC_MemoryRegister_Malloc(Register));
+    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 0) != NULL);
+    ASSERT_EQ(2, PFC_Memory_GetMemoryRegisterSize(memory, 0));
+
+    PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(Register);
+    ASSERT_TRUE(value != NULL);
+
+    int Count = PFC_MemoryRegister_GetCount(Register);
+    ASSERT_EQ(1, Count);
+
+
+    PFC_MemoryRegister * RegisterMirror = PFC_Memory_NewMirrorRegister(memory, 0, 1, "Mirror");
+    ASSERT_TRUE(PFC_MemoryRegister_AddValue(RegisterMirror, PFC_MEMORYTYPE_SHORTRPM,          "RPM")              != NULL);
+
+    ASSERT_EQ(2, PFC_MemoryRegister_Malloc(RegisterMirror));
+    ASSERT_TRUE(PFC_Memory_GetMemoryRegisterPointer(memory, 1) != NULL);
+    ASSERT_EQ(2, PFC_Memory_GetMemoryRegisterSize(memory, 1));
+
+    PFC_MemoryValue * mirrorValue = PFC_MemoryRegister_GetFirstValue(RegisterMirror);
+    ASSERT_TRUE(mirrorValue != NULL);
+
+    int MirrorCount = PFC_MemoryRegister_GetCount(RegisterMirror);
+    ASSERT_EQ(1, MirrorCount);
+
+
+
+
+    uint8_t * RegisterMemory = (uint8_t*)PFC_Memory_GetMemoryRegisterPointer(memory, 0);
+    ASSERT_TRUE(RegisterMemory != NULL);
+
+    uint8_t * mirrorRegisterMemory = (uint8_t*)PFC_Memory_GetMemoryRegisterPointer(memory, 1);
+    ASSERT_TRUE(mirrorRegisterMemory != NULL);
+
+//
+//    memset(RegisterMemory, 1, 30);
+//
+//    for(int i = 0; i < Count; i ++)
+//    {
+//        int offset = PFC_MemoryRegister_GetOffsetOfValue(Register, value);
+//        char valueBuffer[256] = {0};
+//
+//        PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), true, RegisterMemory + offset, valueBuffer, sizeof(valueBuffer));
+//
+//
+//        printf("\t%s = %s\n", PFC_MemoryValue_GetName(value), valueBuffer);
+//
+//        if(i != (Count-1))
+//        {
+//            ASSERT_EQ(PFC_ERROR_NONE, PFC_MemoryRegister_GetNextValue(Register, &value));
+//            ASSERT_TRUE(value != NULL);
+//        }
+//        else
+//        {
+//            ASSERT_EQ(PFC_ERROR_NOT_FOUND, PFC_MemoryRegister_GetNextValue(Register, &value));
+//            ASSERT_TRUE(value == NULL);
+//        }
+//
+//    }
+
+    PFC_Memory_Free(memory);
+}
+
+
+
 TEST_F(PFC_MemoryRegistry, test_Memory_MemoryRegister_MapReference)
 {
     PFC_Memory * memory = PFC_Memory_New();

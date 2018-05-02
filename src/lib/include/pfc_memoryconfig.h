@@ -25,6 +25,7 @@ extern "C" {
 #define XML_NAME "name"
 
 #define XML_REGISTERID "registerid"
+#define XML_MIRRORREGISTERID "mirrorregisterid"
 
 #define XML_REGISTERIDMIN "registeridmin"
 #define XML_REGISTERIDMAX "registeridmax"

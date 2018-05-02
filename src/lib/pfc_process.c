@@ -308,11 +308,14 @@ void Process_ClientRequest(PFC_Memory * memory, Serial * serial)
 
             if(size == 0)
             {
-                printf("Read for %02x\n", id);
+                printf("Read for %02x[%p:%d]\n", id, memory_data, memory_size);
 
                 if(memory_data != NULL && memory_size != 0)
                 {
-                    Serial_WritePFCMessage(serial, id, memory_data, memory_size);
+                    if(Serial_WritePFCMessage(serial, id, memory_data, memory_size) != PFC_ERROR_NONE)
+                    {
+                        printf("Serial write error");
+                    }
                 }
 
             }
@@ -323,6 +326,7 @@ void Process_ClientRequest(PFC_Memory * memory, Serial * serial)
                 if(size == memory_size)
                 {
                     memcpy(memory_data, data, size);
+                    PFC_Memory_UpdateMemoryRegisterPointer(memory, id);
 
                     Serial_WritePFCAcknowledge(serial, id);
                 }

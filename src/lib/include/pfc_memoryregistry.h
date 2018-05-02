@@ -32,12 +32,14 @@ pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, P
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister);
 int PFC_MemoryRegister_GetCount(PFC_MemoryRegister * memoryRegister);
 int PFC_MemoryRegister_GetOffsetOfValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue * memoryValue);
+int PFC_MemoryRegister_GetOffsetOfValueByName(PFC_MemoryRegister * memoryRegister, const char * name);
 PFC_MemoryRegister * PFC_MemoryRegister_Get(PFC_Memory * Memory, PFC_ID RegisterID);
 void PFC_MemoryRegister_SetFCPOffset(PFC_MemoryRegister * memoryRegister, uint16_t offset);
 pfc_error PFC_MemoryRegister_SetFCPReorder(PFC_MemoryRegister * memoryRegister, uint8_t * reorder, pfc_size reorderSize);
 pfc_size PFC_MemoryRegister_Malloc(PFC_MemoryRegister * memoryRegister);
 void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister);
 
+PFC_MemoryRegister *  PFC_Memory_NewMirrorRegister(PFC_Memory * Memory, PFC_ID RegisterID, PFC_ID MirrorRegisterID, const char * name);
 PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID RegisterID, const char * name);
 PFC_MemoryMap * PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name);
 
@@ -48,6 +50,7 @@ PFC_Memory * PFC_Memory_New();
 void PFC_Memory_Free(PFC_Memory * memory);
 PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID RegisterID);
 void *  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID);
+pfc_error  PFC_Memory_UpdateMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID);
 pfc_size  PFC_Memory_GetMemoryRegisterSize(PFC_Memory * Memory, PFC_ID RegisterID);
 void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName);
 void PFC_Memory_Dump(PFC_Memory * Memory);

@@ -1,5 +1,28 @@
 <pfc_memory_config>
    <pfc_memory>
+      <pfc_memory_register>
+         <name>DataLogIt</name>
+         <RegisterID>0x00</RegisterID>
+         <DefaultValue>0x00 0x00 0x00 0x00</DefaultValue>
+         <pfc_memory_values>
+            <pfc_memory_value>
+               <name>AN1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEVOLTAGE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>AN2</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEVOLTAGE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>AN3</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEVOLTAGE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>AN4</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEVOLTAGE</MemoryType>
+            </pfc_memory_value>
+         </pfc_memory_values>
+      </pfc_memory_register>
       <pfc_memory_map>
          <name>Ignition</name>
          <RegisterIDMin>0x81</RegisterIDMin>
@@ -600,6 +623,45 @@
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
+         <name>UnkownD0</name>
+         <RegisterID>0xd0</RegisterID>
+         <DefaultValue>0x00 0x40 0x00 0x40 0x00 0x40 0x00 0x40 0x00 0x80 0x00 0x80 0x00 0x80 0x00 0x80 0x00 0x80 0x00 0x80 0x00 0x80 0x00 0x80</DefaultValue>
+         <pfc_memory_values>
+            <pfc_memory_value_array>
+               <name>Value</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <Count>24</Count>
+            </pfc_memory_value_array>
+         </pfc_memory_values>
+      </pfc_memory_register>
+      <pfc_memory_register>
+         <name>RevIdle_HC</name>
+         <RegisterID>0xd4</RegisterID>
+         <MirrorRegisterID>0x8b</MirrorRegisterID>
+         <pfc_memory_values>
+            <pfc_memory_value>
+               <name>RevLimit</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>FuelCut</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>FuelCutAC</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Idle</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>IdleAC</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+         </pfc_memory_values>
+      </pfc_memory_register>
+      <pfc_memory_register>
          <name>UnkownD5</name>
          <RegisterID>0xd5</RegisterID>
          <DefaultValue>0x03 0x0e 0x10 0x14 0x16 0xff 0xff 0xf2 0xc8 0x34 0x38 0x42 0x46</DefaultValue>
@@ -629,6 +691,42 @@
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
+         <name>UnkownD7</name>
+         <RegisterID>0xd7</RegisterID>
+         <DefaultValue>0x07 0x07 0x09 0x01 0x06 0x07 0x02 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x03 0x91 0x01</DefaultValue>
+         <pfc_memory_values>
+            <pfc_memory_value_array>
+               <name>Value</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <Count>18</Count>
+            </pfc_memory_value_array>
+         </pfc_memory_values>
+      </pfc_memory_register>
+      <pfc_memory_register>
+         <name>UnkownD8</name>
+         <RegisterID>0xd8</RegisterID>
+         <DefaultValue>0x28</DefaultValue>
+         <pfc_memory_values>
+            <pfc_memory_value_array>
+               <name>Value</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <Count>1</Count>
+            </pfc_memory_value_array>
+         </pfc_memory_values>
+      </pfc_memory_register>          
+      <pfc_memory_register>
+         <name>UnkownD9</name>
+         <RegisterID>0xd9</RegisterID>
+         <DefaultValue>0x14</DefaultValue>
+         <pfc_memory_values>
+            <pfc_memory_value_array>
+               <name>Value</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <Count>1</Count>
+            </pfc_memory_value_array>
+         </pfc_memory_values>
+      </pfc_memory_register>          
+      <pfc_memory_register>
          <name>SensorStrings</name>
          <RegisterID>0xdd</RegisterID>
          <FCPOffset>2810</FCPOffset>
@@ -656,6 +754,18 @@
          <Rows>20</Rows>
          <Columns>20</Columns>
       </pfc_memory_map>
+      <pfc_memory_register>
+         <name>UnkownCA</name>
+         <RegisterID>0xca</RegisterID>
+         <DefaultValue>0x00 0x00 0x8B 0x05 0xDE 0x08 0x17 0x0B 0x4D 0x0D 0x85 0x0F 0xBC 0x11 0x2C 0x16 0x9B 0x1A 0x0C 0x1F 0x79 0x23 0xE8 0x27 0x57 0x2C 0x36 0x35 0x14 0x3E 0xF2 0x46 0xD0 0x4F 0xAF 0x58 0x8D 0x61 0x6B 0x6A 0x20 0x03 0xB0 0x04 0x40 0x06 0xD0 0x07 0x60 0x09 0xF0 0x0A 0x80 0x0C 0x42 0x0E 0xA0 0x0F 0x30 0x11 0xC0 0x12 0x50 0x14 0xE0 0x15 0x70 0x17 0x00 0x19 0x90 0x1A 0x20 0x1C 0xB0 0x1D 0x40 0x1F 0xD0 0x20</DefaultValue>
+         <pfc_memory_values>
+            <pfc_memory_value_array>
+               <name>Value</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+               <Count>80</Count>
+            </pfc_memory_value_array>
+         </pfc_memory_values>
+      </pfc_memory_register>
       <pfc_memory_register>
          <name>UnkownCE</name>
          <RegisterID>0xce</RegisterID>

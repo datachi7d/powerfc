@@ -21,6 +21,9 @@ struct _PFC_MemoryRegister
     char * Name;
     int FCPRO_offset;
     uint8_t * FCPRO_reorder;
+    bool Mirrored;
+    PFC_MemoryRegister * MirroredRegister;
+
 };
 
 struct _PFC_MemoryValue
@@ -274,6 +277,7 @@ void PFC_MemoryMap_SetFCPOffset(PFC_MemoryMap * MemoryMap, uint16_t FCPOffset)
         }
     }
 }
+
 
 PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
 {
@@ -543,6 +547,32 @@ int PFC_MemoryRegister_GetOffsetOfValue(PFC_MemoryRegister * memoryRegister, PFC
     return found ? Size : -1;
 }
 
+int PFC_MemoryRegister_GetOffsetOfValueByName(PFC_MemoryRegister * memoryRegister, const char * name)
+{
+    int Size = 0;
+    bool found = false;
+
+    if(memoryRegister)
+    {
+        PFC_ValueList * list = PFC_ValueList_GetFirst(memoryRegister->Values);
+        PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
+
+        while( value != NULL )
+        {
+            if(strcmp(value->Name, name) == 0)
+            {
+                found = true;
+                break;
+            }
+
+            Size += PFC_Convert_PFCValueSize(value->Type);
+            value = PFC_ValueList_NextItemValue(&list);
+        }
+    }
+
+    return found ? Size : -1;
+}
+
 void PFC_MemoryRegister_SetFCPOffset(PFC_MemoryRegister * memoryRegister, uint16_t offset)
 {
     if(memoryRegister)
@@ -694,6 +724,28 @@ void PFC_Memory_Free(PFC_Memory * memory)
     }
 }
 
+PFC_MemoryRegister *  PFC_Memory_NewMirrorRegister(PFC_Memory * Memory, PFC_ID MirrorRegisterID, PFC_ID RegisterID, const char * name)
+{
+    PFC_MemoryRegister * memoryRegister = NULL;
+    PFC_MemoryRegister * memoryMirrorRegister = NULL;
+
+    if (Memory != NULL && Memory->MemoryRegisters != NULL)
+    {
+        if((memoryRegister = PFC_Memory_GetMemoryRegister(Memory, MirrorRegisterID)) != NULL)
+        {
+            if(memoryRegister->Memory != NULL && memoryRegister->MemorySize != 0)
+
+                if((memoryMirrorRegister = PFC_Memory_NewRegister(Memory, RegisterID, name)) != NULL)
+                {
+                    memoryMirrorRegister->Mirrored = true;
+                    memoryMirrorRegister->MirroredRegister = memoryRegister;
+                }
+        }
+    }
+
+    return memoryMirrorRegister;
+}
+
 PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID RegisterID, const char * name)
 {
     PFC_MemoryRegister * memoryRegister = NULL;
@@ -716,6 +768,8 @@ PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID Register
 						memoryRegister->MemorySize = 0;
 						memoryRegister->Name = PFC_strdup(name);
 						memoryRegister->FCPRO_offset = -1;
+						memoryRegister->Mirrored = false;
+						memoryRegister->MirroredRegister = NULL;
 					}
 					else
 					{
@@ -920,6 +974,65 @@ PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID Re
     return result;
 }
 
+pfc_error MemoryRegister_MirrorUpdate(PFC_Memory * Memory, PFC_ID RegisterID, bool MirrorUpdate)
+{
+    pfc_error error = PFC_ERROR_UNSET;
+    PFC_MemoryRegister * memoryRegister = PFC_Memory_GetMemoryRegister(Memory, RegisterID);
+
+    if(memoryRegister->Mirrored )
+    {
+        if(memoryRegister->MirroredRegister != NULL && memoryRegister->MirroredRegister->MemorySize >= memoryRegister->MemorySize)
+        {
+            int Count = PFC_MemoryRegister_GetCount(memoryRegister);
+            int i = 0;
+
+            PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(memoryRegister);
+
+            do
+            {
+                int dataMirrorOffset = PFC_MemoryRegister_GetOffsetOfValue(memoryRegister,value);
+                int dataOffset = PFC_MemoryRegister_GetOffsetOfValueByName(memoryRegister->MirroredRegister, value->Name);
+                pfc_size dataSize = PFC_MemoryValue_GetSize(value);
+
+
+                if(dataMirrorOffset >= 0 && dataOffset >= 0 &&
+                        dataMirrorOffset + dataSize <= memoryRegister->MemorySize &&
+                        dataOffset + dataSize <= memoryRegister->MirroredRegister->MemorySize)
+                {
+                    uint8_t * dataMirror = memoryRegister->Memory + dataMirrorOffset;
+                    uint8_t * data = memoryRegister->MirroredRegister->Memory + dataOffset;
+
+                    if(MirrorUpdate)
+                        memcpy(dataMirror, data, dataSize);
+                    else
+                        memcpy(data, dataMirror, dataSize);
+                }
+                else
+                {
+                    error = PFC_ERROR_MEMORY;
+                    break;
+                }
+                i++;
+
+            } while((error = PFC_MemoryRegister_GetNextValue(memoryRegister, &value)) == PFC_ERROR_NONE);
+
+            if(i == Count)
+            {
+                error = PFC_ERROR_NONE;
+
+                //PFC_MemoryRegister_DumpValue(memoryRegister->MirroredRegister, Memory);
+            }
+
+        }
+        else
+        {
+            error = PFC_ERROR_MEMORY;
+        }
+    }
+
+    return error;
+}
+
 void *  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID)
 {
     void * ptr = NULL;
@@ -928,9 +1041,39 @@ void *  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID Register
     if(memoryRegister != NULL)
     {
         ptr = memoryRegister->Memory;
+
+        if(memoryRegister->Mirrored)
+        {
+            MemoryRegister_MirrorUpdate(Memory, RegisterID, true);
+        }
     }
 
     return ptr;
+}
+
+
+pfc_error  PFC_Memory_UpdateMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID)
+{
+    pfc_error error = PFC_ERROR_UNSET;
+    PFC_MemoryRegister * memoryRegister = PFC_Memory_GetMemoryRegister(Memory, RegisterID);
+
+    if(memoryRegister != NULL)
+    {
+        if(memoryRegister->Mirrored)
+        {
+            error = MemoryRegister_MirrorUpdate(Memory, RegisterID, false);
+        }
+        else
+        {
+            error = PFC_ERROR_NONE;
+        }
+    }
+    else
+    {
+        error = PFC_ERROR_NOT_FOUND;
+    }
+
+    return error;
 }
 
 pfc_size  PFC_Memory_GetMemoryRegisterSize(PFC_Memory * Memory, PFC_ID RegisterID)

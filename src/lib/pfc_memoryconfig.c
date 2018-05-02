@@ -374,6 +374,8 @@ pfc_error MemoryConfig_LoadConfig_MemoryRegister(PFC_Memory * Memory, TreeNode r
 
     const char * Name = XML_GetChildValue(root, XML_NAME);
     uint16_t RegisterID = 0;
+    uint16_t MirrorRegisterID;
+    pfc_error MirrorRegisterNodeResult = PFC_ERROR_UNSET;
     pfc_size RegisterSize = 0;
 
     PFC_MemoryRegister * MemoryRegister = NULL;
@@ -382,9 +384,21 @@ pfc_error MemoryConfig_LoadConfig_MemoryRegister(PFC_Memory * Memory, TreeNode r
 
     Result = XML_GetChildValueAsHex(root, XML_REGISTERID, &RegisterID);
 
+    MirrorRegisterNodeResult = XML_GetChildValueAsHex(root, XML_MIRRORREGISTERID, &MirrorRegisterID);
+
     if(Result == PFC_ERROR_NONE)
     {
-        if(valuesNode != NULL && (MemoryRegister = PFC_Memory_NewRegister(Memory, RegisterID, Name)) != NULL)
+        if(MirrorRegisterNodeResult == PFC_ERROR_NONE)
+        {
+            MemoryRegister = PFC_Memory_NewMirrorRegister(Memory, MirrorRegisterID, RegisterID, Name);
+        }
+        else
+        {
+            MemoryRegister = PFC_Memory_NewRegister(Memory, RegisterID, Name);
+        }
+
+
+        if(valuesNode != NULL && MemoryRegister != NULL)
         {
             Result = MemoryConfig_LoadConfig_MemoryValue(MemoryRegister, valuesNode);
 
@@ -442,7 +456,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryRegister(PFC_Memory * Memory, TreeNode r
 }
 
 
-pfc_error MemoryConfig_LoadConfig_TableColumns(TreeNode root, pfc_memorytype * Columns, char ** ColumnNames, int ColumsSize)
+pfc_error MemoryConfig_LoadConfig_TableColumns(TreeNode root, pfc_memorytype * Columns,const char ** ColumnNames, int ColumsSize)
 {
     pfc_error Result = PFC_ERROR_UNSET;
 
@@ -518,7 +532,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryTable(PFC_Memory * Memory, TreeNode root
 		pfc_memorytype Columns[256] = { 0 };
 		char * ColumnNames[256] = { 0 };
 
-		Result = MemoryConfig_LoadConfig_TableColumns(valuesNode, &Columns, &ColumnNames, 256);
+		Result = MemoryConfig_LoadConfig_TableColumns(valuesNode, &Columns, &ColumnNames[0], 256);
 
 		if(Result == PFC_ERROR_NONE &&
 				(MemoryTable = PFC_Memory_NewTable(Memory, RegisterID, Columns[0], Columns[1], TableRows, Name, ColumnNames[0], ColumnNames[1])) != NULL	)
