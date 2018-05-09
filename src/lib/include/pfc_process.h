@@ -9,7 +9,7 @@ extern "C" {
 
 typedef struct _PFC_Process PFC_Process;
 
-PFC_Process * PFC_Process_New();
+PFC_Process * PFC_Process_NewFromConfig();
 pfc_error PFC_Process_LoadFCPro(PFC_Process * process, const char * FCProFile);
 pfc_error PFC_Process_AddClient(PFC_Process * process, const char * serialPath);
 pfc_error PFC_Process_SetServer(PFC_Process * process, const char * serialPath);

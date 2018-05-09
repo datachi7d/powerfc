@@ -13,6 +13,7 @@ struct _PFC_MemoryConfig
 	char * FileName;
 	FILE * FileP;
 	PFC_Memory * Memory;
+	bool MemoryDump;
 };
 
 char * XML_ToLower(const char * str)
@@ -168,7 +169,7 @@ int XML_GetChildValueAsRawInt(TreeNode node, const char * name)
     return Result;
 }
 
-PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName)
+PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName, bool memoryDump)
 {
     PFC_MemoryConfig * memoryConfig = NULL;
 
@@ -179,6 +180,7 @@ PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName)
     		memoryConfig->FileName = (char *)PFC_strdup(fileName);
     		memoryConfig->FileP = NULL;
     		memoryConfig->Memory = NULL;
+    		memoryConfig->MemoryDump = memoryDump;
 
     		if(memoryConfig->FileName == NULL)
     		{
@@ -662,7 +664,7 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
     return Result;
 }
 
-pfc_error PFC_MemoryConfig_LoadString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length)
+pfc_error PFC_MemoryConfig_LoadConfigString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length)
 {
     pfc_error Result = PFC_ERROR_UNSET;
     TreeNode * root = TreeNode_ParseXML((char *)string, length, true);
@@ -670,7 +672,97 @@ pfc_error PFC_MemoryConfig_LoadString(PFC_MemoryConfig * MemoryConfig, const cha
     if(root != NULL && XML_NodeNameIs(root, XML_PFC_MEMORY_CONFIG))
     {
         Result = MemoryConfig_LoadConfig_Memory(MemoryConfig, TreeNode_GetChild(root, 0));
-        //TODO: free TreeNode
+        TreeNode_DeleteSingle(root);
+    }
+    else
+    {
+        Result = PFC_ERROR_XML;
+    }
+
+    return Result;
+}
+
+pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length)
+{
+    pfc_error Result = PFC_ERROR_UNSET;
+    MemoryConfig->Memory = PFC_Memory_New();
+
+
+    if(string != NULL)
+    {
+        char * token = strtok(string, "\n");
+
+        while(token != NULL)
+        {
+
+            int strLen = strlen(token);
+            int pos = 0;
+            uint8_t * memoryValue = (uint8_t *)calloc(strLen >> 1, sizeof(uint8_t));
+            uint8_t memoryLen = 0;
+
+            for(pos = 0; pos < strLen; pos+=2)
+            {
+                if(pos+1 < strLen)
+                {
+                    unsigned int value = 0;
+                    if(sscanf(&token[pos], "%02x", &value) == 1)
+                    {
+                        memoryValue[pos >> 1] = value;
+                        memoryLen++;
+                    }
+                }
+                else
+                {
+                    Result = PFC_ERROR_LENGTH;
+                    break;
+                }
+            }
+
+
+            if(memoryLen == strLen >> 1)
+            {
+                char valueName[128] = {0};
+
+                if(snprintf(valueName, sizeof(valueName), "0x%0X", memoryValue[0]) > 0)
+                {
+                    PFC_MemoryRegister * MemoryRegister = PFC_Memory_NewRegister(MemoryConfig->Memory, memoryValue[0], "");
+
+                    PFC_MemoryRegister_AddValueArray(MemoryRegister, PFC_MEMORYTYPE_BYTE, "", memoryLen - 1);
+
+                    if( PFC_MemoryRegister_Malloc(MemoryRegister) == memoryLen - 1)
+                    {
+                        void * dest = PFC_Memory_GetMemoryRegisterPointer(MemoryConfig->Memory, memoryValue[0]);
+
+                        if(dest != NULL)
+                        {
+                            memcpy(dest, &memoryValue[1], memoryLen - 1);
+                        }
+                        else
+                        {
+                            Result = PFC_ERROR_MEMORY;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Result = PFC_ERROR_MEMORY;
+                        break;
+                    }
+                }
+                else
+                {
+                    Result = PFC_ERROR_MEMORY;
+                    break;
+                }
+            }
+
+            free(memoryValue);
+
+            token = strtok(NULL, "\n");
+        }
+
+
+        Result = PFC_ERROR_NONE;
     }
     else
     {
@@ -702,7 +794,14 @@ pfc_error  MemoryConfig_ReadFile(PFC_MemoryConfig * MemoryConfig)
                 {
                     if(fread(file_buffer, file_buffer_size, 1, MemoryConfig->FileP) > 0)
                     {
-                        Result = PFC_MemoryConfig_LoadString(MemoryConfig, file_buffer, file_buffer_size);
+                        if(MemoryConfig->MemoryDump)
+                        {
+                            Result = PFC_MemoryConfig_LoadDumpString(MemoryConfig, file_buffer, file_buffer_size);
+                        }
+                        else
+                        {
+                            Result = PFC_MemoryConfig_LoadConfigString(MemoryConfig, file_buffer, file_buffer_size);
+                        }
                     }
 
                     PFC_free(file_buffer);

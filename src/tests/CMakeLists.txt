@@ -27,6 +27,7 @@ target_include_directories (test_pfclib_runner PRIVATE ${test_pfclib_runner_INCL
 target_link_libraries (test_pfclib_runner ${test_pfclib_runner_LIBRARIES})
 
 configure_file(test_memory_config.xml test_memory_config.xml COPYONLY)
+configure_file(test_memory_dump.dat test_memory_dump.dat COPYONLY)
 configure_file(FCPRO.hd1 FCPRO.hd1 COPYONLY)
 
 add_custom_command (

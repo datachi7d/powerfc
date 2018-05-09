@@ -43,11 +43,12 @@ extern "C" {
 #define XML_DEFAULTVALUE "defaultvalue"
 
 typedef struct _PFC_MemoryConfig PFC_MemoryConfig;
-PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName);
+PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName, bool memoryDump);
 PFC_Memory * PFC_MemoryConfig_GetMemory(PFC_MemoryConfig * MemoryConfig);
 void PFC_MemoryConfig_Free(PFC_MemoryConfig * MemoryConfig);
 
-pfc_error PFC_MemoryConfig_LoadString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length);
+pfc_error PFC_MemoryConfig_LoadConfigString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length);
+pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length);
 pfc_error PFC_MemoryConfig_Load(PFC_MemoryConfig * MemoryConfig);
 
 #ifdef __cplusplus

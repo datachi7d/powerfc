@@ -32,7 +32,7 @@ typedef struct
     uint8_t dataSize;
 } PFC_Server_Queue_Item;
 
-PFC_Process * PFC_Process_New(const char * memoryConfig)
+PFC_Process * PFC_Process_NewFromConfig(const char * memoryConfig)
 {
 	PFC_Process * Process = NULL;
 
@@ -40,7 +40,7 @@ PFC_Process * PFC_Process_New(const char * memoryConfig)
 	{
 		Process = (PFC_Process *)PFC_malloc(sizeof(PFC_Process));
 
-		Process->MemoryConfig = PFC_MemoryConfig_New(memoryConfig);
+		Process->MemoryConfig = PFC_MemoryConfig_New(memoryConfig, false);
 
 		if(Process->MemoryConfig != NULL)
 		{
@@ -69,6 +69,46 @@ PFC_Process * PFC_Process_New(const char * memoryConfig)
 	}
 
 	return Process;
+}
+
+
+PFC_Process * PFC_Process_NewFromDump(const char * memoryDump)
+{
+    PFC_Process * Process = NULL;
+
+    if(memoryDump != NULL)
+    {
+        Process = (PFC_Process *)PFC_malloc(sizeof(PFC_Process));
+
+        Process->MemoryConfig = PFC_MemoryConfig_New(memoryDump, true);
+
+        if(Process->MemoryConfig != NULL)
+        {
+            if(PFC_MemoryConfig_Load(Process->MemoryConfig) == PFC_ERROR_NONE)
+            {
+                Process->clients = PFC_ValueList_New();
+                Process->serverQueue = PFC_ValueList_New();
+
+                if(Process->clients == NULL || Process->serverQueue == NULL)
+                {
+                    PFC_Process_Free(Process);
+                    Process = NULL;
+                }
+            }
+            else
+            {
+                PFC_Process_Free(Process);
+                Process = NULL;
+            }
+        }
+        else
+        {
+            PFC_Process_Free(Process);
+            Process = NULL;
+        }
+    }
+
+    return Process;
 }
 
 pfc_error PFC_Process_LoadFCPro(PFC_Process * process, const char * FCProFile)

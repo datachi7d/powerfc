@@ -1,0 +1,10 @@
+package "pfc_sim_dump"
+version ""
+
+option "serial" s
+    "Serial port device path"
+    string
+    
+option "data" d
+    "data file"
+    string

@@ -10,7 +10,7 @@ int main(int argc, char * argv[])
 
     if (cmdline_parser(argc, argv, &ai) == 0)
     {
-          PFC_Process * process = PFC_Process_New(ai.memory_config_arg);
+          PFC_Process * process = PFC_Process_NewFromConfig(ai.memory_config_arg);
 
           if(process != NULL)
           {
