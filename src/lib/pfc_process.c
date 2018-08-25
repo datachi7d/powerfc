@@ -219,6 +219,49 @@ PFC_Server_Queue_Item * Process_GetQueueItemFromID(PFC_Process * process, PFC_ID
     return result;
 }
 
+
+pfc_error Process_NewServerQueueItem(PFC_Process * process, Serial * clientSerial, PFC_ID id,  PFC_ITEM_OPERATION operation, uint8_t * data, uint8_t dataSize)
+{
+    pfc_error result = PFC_ERROR_UNSET;
+    PFC_Server_Queue_Item * queueItem = (PFC_Server_Queue_Item *)PFC_malloc(sizeof(*queueItem));
+
+    if(queueItem != NULL)
+    {
+        queueItem->clients = PFC_ValueList_New();
+
+        if(queueItem->clients != NULL)
+        {
+            PFC_ValueList_AddItem(queueItem->clients, clientSerial);
+
+            queueItem->id = id;
+            queueItem->data = data;
+            queueItem->dataSize = dataSize;
+            queueItem->operation = operation;
+
+            result = PFC_ValueList_AddItem(process->serverQueue, queueItem);
+        }
+        else
+        {
+            result = PFC_ERROR_MEMORY;
+        }
+    }
+    else
+    {
+        result = PFC_ERROR_MEMORY;
+    }
+
+    return result;
+}
+
+void Process_FreeServerQueueItem(PFC_Server_Queue_Item * queueItem)
+{
+    if(queueItem != NULL)
+    {
+        PFC_ValueList_Free(queueItem->clients);
+        PFC_free(queueItem);
+    }
+}
+
 pfc_error Process_AddServerRequest(PFC_Process * process, Serial * clientSerial, PFC_ID id, PFC_ITEM_OPERATION operation, uint8_t * data, uint8_t dataSize)
 {
     pfc_error result = PFC_ERROR_UNSET;
@@ -233,32 +276,7 @@ pfc_error Process_AddServerRequest(PFC_Process * process, Serial * clientSerial,
             {
                 if((result = Serial_WritePFCMessage(process->server, id, operation == PFC_ITEM_OPERATION_WRITE ? data : NULL, operation == PFC_ITEM_OPERATION_WRITE ? dataSize : 0)) == PFC_ERROR_NONE)
                 {
-                    queueItem = (PFC_Server_Queue_Item *)PFC_malloc(sizeof(*queueItem));
-
-                    if(queueItem != NULL)
-                    {
-                        queueItem->clients = PFC_ValueList_New();
-
-                        if(queueItem->clients != NULL)
-                        {
-                            PFC_ValueList_AddItem(queueItem->clients, clientSerial);
-
-                            queueItem->id = id;
-                            queueItem->data = data;
-                            queueItem->dataSize = dataSize;
-                            queueItem->operation = operation;
-
-                            result = PFC_ValueList_AddItem(process->serverQueue, queueItem);
-                        }
-                        else
-                        {
-                            result = PFC_ERROR_MEMORY;
-                        }
-                    }
-                    else
-                    {
-                        result = PFC_ERROR_MEMORY;
-                    }
+                    result = Process_NewServerQueueItem(process, clientSerial, id, operation, data, dataSize);
                 }
             }
             else
@@ -556,6 +574,8 @@ void PFC_Process_Run(PFC_Process * process)
 			    }
 			}
 		}
+
+		PFC_free(pfd);
 	}
 }
 
@@ -588,10 +608,32 @@ void PFC_Process_Free(PFC_Process * process)
 	       PFC_ValueList_Free(process->clients);
 		}
 
+        if(process->serverQueue != NULL)
+        {
+            PFC_ValueList * list = PFC_ValueList_GetFirst(process->serverQueue);
+
+            if(list != NULL)
+            {
+                PFC_Server_Queue_Item * value = PFC_ValueList_GetValue(list);
+                do
+                {
+                    if(value)
+                    {
+                        Process_FreeServerQueueItem(value);
+                    }
+                    value = PFC_ValueList_NextItemValue(&list);
+                }while( value != NULL );
+            }
+
+           PFC_ValueList_Free(process->serverQueue);
+        }
+
         if(process->server != NULL)
         {
             Serial_Free(process->server);
             process->server = NULL;
         }
+
+        PFC_free(process);
 	}
 }

@@ -424,6 +424,8 @@ pfc_error MemoryConfig_LoadConfig_MemoryRegister(PFC_Memory * Memory, TreeNode r
                             memcpy(dest, buffer, RegisterSize);
                         }
                     }
+
+                    PFC_free(buffer);
                 }
             }
 
@@ -672,11 +674,15 @@ pfc_error PFC_MemoryConfig_LoadConfigString(PFC_MemoryConfig * MemoryConfig, con
     if(root != NULL && XML_NodeNameIs(root, XML_PFC_MEMORY_CONFIG))
     {
         Result = MemoryConfig_LoadConfig_Memory(MemoryConfig, TreeNode_GetChild(root, 0));
-        TreeNode_DeleteSingle(root);
     }
     else
     {
         Result = PFC_ERROR_XML;
+    }
+
+    if(root != NULL)
+    {
+        Tree_Delete(root);
     }
 
     return Result;
@@ -758,6 +764,7 @@ pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, const
 
             free(memoryValue);
 
+
             token = strtok(NULL, "\n");
         }
 
@@ -788,7 +795,7 @@ pfc_error  MemoryConfig_ReadFile(PFC_MemoryConfig * MemoryConfig)
             if(file_buffer_size >= 0)
             {
                 rewind(MemoryConfig->FileP);
-                file_buffer = PFC_malloc((uint32_t)file_buffer_size);
+                file_buffer = PFC_malloc((uint32_t)file_buffer_size+1);
 
                 if(file_buffer != NULL)
                 {

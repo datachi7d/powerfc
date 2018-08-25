@@ -9,6 +9,7 @@
 struct _PFC_Memory
 {
     PFC_ValueList * MemoryMaps;
+    PFC_ValueList * MemoryTables;
     PFC_ValueList * MemoryRegisters;
 };
 
@@ -149,13 +150,17 @@ PFC_MemoryMap * PFC_MemoryMap_New(PFC_Memory * Memory, const char * Name, PFC_ID
     {
         memoryMap = PFC_malloc(sizeof(*memoryMap));
 
+        if(memoryMap != NULL)
+        {
+            memoryMap->Memory = Memory;
+            memoryMap->Name = PFC_strdup(Name);
+            memoryMap->IDMin = IDMin;
+            memoryMap->IDMax = IDMax;
+            memoryMap->Rows = Rows;
+            memoryMap->Columns = Columns;
 
-        memoryMap->Memory = Memory;
-        memoryMap->Name = PFC_strdup(Name);
-        memoryMap->IDMin = IDMin;
-        memoryMap->IDMax = IDMax;
-        memoryMap->Rows = Rows;
-        memoryMap->Columns = Columns;
+            PFC_ValueList_AddItem(Memory->MemoryMaps, memoryMap);
+        }
     }
 
     return memoryMap;
@@ -667,7 +672,19 @@ PFC_Memory * PFC_Memory_New()
         {
             result->MemoryMaps = PFC_ValueList_New();
 
-            if(result->MemoryMaps == NULL)
+            if(result->MemoryMaps != NULL)
+            {
+                result->MemoryTables = PFC_ValueList_New();
+
+                if(result->MemoryTables == NULL)
+                {
+                    PFC_ValueList_Free(result->MemoryRegisters);
+                    PFC_ValueList_Free(result->MemoryTables);
+                    PFC_free(result);
+                    result = NULL;
+                }
+            }
+            else
             {
                 PFC_ValueList_Free(result->MemoryRegisters);
                 PFC_free(result);
@@ -719,6 +736,25 @@ void PFC_Memory_Free(PFC_Memory * memory)
                 value = PFC_ValueList_NextItemValue(&list);
             }while( value != NULL );
         }
+
+        PFC_ValueList_Free(memory->MemoryMaps);
+
+        list = PFC_ValueList_GetFirst(memory->MemoryTables);
+
+        if(list != NULL)
+        {
+            PFC_MemoryTable * value = PFC_ValueList_GetValue(list);
+            do
+            {
+                if(value)
+                {
+                    PFC_free(value);
+                }
+                value = PFC_ValueList_NextItemValue(&list);
+            }while( value != NULL );
+        }
+
+        PFC_ValueList_Free(memory->MemoryTables);
 
         PFC_free(memory);
     }
@@ -834,6 +870,7 @@ PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pf
                     if(failed == false)
                     {
                     	Result =  (PFC_MemoryTable*)PFC_malloc(sizeof(*Result));
+                    	PFC_ValueList_AddItem(Memory->MemoryTables, Result);
                     	Result->Register = registerN;
                     }
                 }
@@ -1148,9 +1185,13 @@ void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName)
 								}while( MemoryRegister != NULL );
 							}
 	                    }
+
+	                    PFC_free(file_buffer);
 					}
 				}
 			}
+
+			fclose(FileP);
 		}
 	}
 }

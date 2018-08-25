@@ -30,11 +30,12 @@ target_link_libraries (test_pfclib_runner ${test_pfclib_runner_LIBRARIES})
 configure_file(test_memory_config.xml test_memory_config.xml COPYONLY)
 configure_file(test_memory_dump.dat test_memory_dump.dat COPYONLY)
 configure_file(FCPRO.hd1 FCPRO.hd1 COPYONLY)
+configure_file(valgrind.suppress valgrind.suppress COPYONLY)
 
 add_custom_command (
   OUTPUT test_pfclib_runner_out.xml
-  COMMAND test_pfclib_runner --gtest_output=xml:test_pfclib_runner_out.xml
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMAND ${VALGRIND_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/test_pfclib_runner --gtest_output=xml:test_pfclib_runner_out.xml
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   VERBATIM
 )
 

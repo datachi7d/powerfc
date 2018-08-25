@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <pthread.h>
+
 #include "process.h"
 
 #include "pfc_process.h"
@@ -97,12 +99,25 @@ protected:
 			TerminateProcess(_pidClient);
 			TerminateProcess(_pidServer);
 		}
+
+
 	};
 
+	void * do_process(void * attr)
+	{
+	    PFC_Process * process = (PFC_Process *)attr;
+
+	    while(1)
+	    {
+	        PFC_Process_Run(process);
+	    }
+
+	    return NULL;
+	}
 
 	TEST_F(PFC_ProcessTest, test_Process_NewFree)
 	{
-	    PFC_Process * process = PFC_Process_NewFromConfig("src/tests/test_memory_config.xml");
+	    PFC_Process * process = PFC_Process_NewFromConfig("test_memory_config.xml");
 
 	    ASSERT_TRUE(process != NULL);
 
@@ -113,9 +128,9 @@ protected:
 	    PFC_Process_Free(process);
 	}
 
-    TEST_F(PFC_ProcessTest, test_Process_Client_Read)
+    TEST_F(PFC_ProcessTest, test_Process_Client_Write)
     {
-        PFC_Process * process = PFC_Process_NewFromConfig("src/tests/test_memory_config.xml");
+        PFC_Process * process = PFC_Process_NewFromConfig("test_memory_config.xml");
 
         ASSERT_TRUE(process != NULL);
 
@@ -123,21 +138,51 @@ protected:
 
         ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
 
-
         char writeData[] = {0xf6, 0x03, 0x00, 0x06};
 
         ClientSerialStream.write(writeData, sizeof(writeData));
         ClientSerialStream.flush();
 
-        PFC_Process_Run(process);
-        PFC_Process_Run(process);
-        PFC_Process_Run(process);
+        pthread_t processThread;
+        pthread_create(&processThread, NULL, do_process, (void *)process);
 
         char testReadData[255] = {0};
 
         ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 100000);
 
         ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
+
+        pthread_cancel(processThread);
+        pthread_join(processThread, NULL);
+
+        PFC_Process_Free(process);
+    }
+
+    TEST_F(PFC_ProcessTest, test_Process_SimMode_Client_Write)
+    {
+        PFC_Process * process = PFC_Process_NewFromConfig("test_memory_config.xml");
+
+        ASSERT_TRUE(process != NULL);
+
+        ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
+
+        char writeData[] = {0xf6, 0x03, 0x00, 0x06};
+
+        ClientSerialStream.write(writeData, sizeof(writeData));
+        ClientSerialStream.flush();
+
+        pthread_t processThread;
+        pthread_create(&processThread, NULL, do_process, (void *)process);
+
+        char testReadData[255] = {0};
+        char expectedData[] = {0xf2, 0x02, 0x0b};
+
+        ASSERT_USECS(ClientSerialStream.read(testReadData, sizeof(expectedData)), 100000);
+
+        ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
+
+        pthread_cancel(processThread);
+        pthread_join(processThread, NULL);
 
         PFC_Process_Free(process);
     }

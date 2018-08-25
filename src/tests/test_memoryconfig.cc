@@ -17,7 +17,7 @@ class PFC_MemoryConfiguration : public testing::Test
 
 TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_NewFree)
 {
-    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("src/tests/test_memory_config.xml", false);
+    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("test_memory_config.xml", false);
 
     ASSERT_TRUE(memoryConfig != NULL);
 
@@ -27,13 +27,13 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_NewFree)
 
 TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_LoadFCPro)
 {
-    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("src/tests/test_memory_config.xml", false);
+    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("test_memory_config.xml", false);
 
     ASSERT_TRUE(memoryConfig != NULL);
 
     PFC_MemoryConfig_Load(memoryConfig);
 
-    PFC_Memroy_LoadFCPRO(PFC_MemoryConfig_GetMemory(memoryConfig), "src/tests/FCPRO.hd1");
+    PFC_Memroy_LoadFCPRO(PFC_MemoryConfig_GetMemory(memoryConfig), "FCPRO.hd1");
 
     //PFC_Memory_Dump(PFC_MemoryConfig_GetMemory(memoryConfig));
 
@@ -48,7 +48,7 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_LoadFCPro)
 
 TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_LoadDump)
 {
-    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("src/tests/test_memory_dump.dat", true);
+    PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New("test_memory_dump.dat", true);
 
     ASSERT_TRUE(memoryConfig != NULL);
 
@@ -63,5 +63,5 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_LoadDump)
     ASSERT_TRUE(memory_data != NULL);
     ASSERT_TRUE(memory_size > 0);
 
-
+    PFC_MemoryConfig_Free(memoryConfig);
 }
