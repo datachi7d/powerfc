@@ -16,7 +16,7 @@
 namespace PFC
 {
 
-/*
+
 static jmp_buf jmp_env;
 
 static void catch_alarm(int sig)
@@ -34,7 +34,6 @@ static void catch_alarm(int sig)
     } else { \
         GTEST_FATAL_FAILURE_(#usecs " usecs timer tripped for " #fn); \
     } }
-*/
 
 	class PFC_ProcessTest : public testing::Test
 	{
@@ -74,7 +73,7 @@ protected:
 
             while ((!SerialStream.is_open()) && counter < 10)
             {
-                SerialStream.open(TestClientSerialPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+                SerialStream.open(serial1, std::ios::in | std::ios::out | std::ios::binary);
                 usleep(5000);
                 counter++;
             }
@@ -101,7 +100,7 @@ protected:
 	};
 
 
-	TEST_F(PFC_ProcessTest, test_Process_new_free)
+	TEST_F(PFC_ProcessTest, test_Process_NewFree)
 	{
 	    PFC_Process * process = PFC_Process_NewFromConfig("src/tests/test_memory_config.xml");
 
@@ -113,6 +112,35 @@ protected:
 
 	    PFC_Process_Free(process);
 	}
+
+    TEST_F(PFC_ProcessTest, test_Process_Client_Read)
+    {
+        PFC_Process * process = PFC_Process_NewFromConfig("src/tests/test_memory_config.xml");
+
+        ASSERT_TRUE(process != NULL);
+
+        ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
+
+        ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
+
+
+        char writeData[] = {0xf6, 0x03, 0x00, 0x06};
+
+        ClientSerialStream.write(writeData, sizeof(writeData));
+        ClientSerialStream.flush();
+
+        PFC_Process_Run(process);
+        PFC_Process_Run(process);
+        PFC_Process_Run(process);
+
+        char testReadData[255] = {0};
+
+        ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 100000);
+
+        ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
+
+        PFC_Process_Free(process);
+    }
 
 	/*
 	TEST_F(PFC_Serial, test_Serial_NewFree)
