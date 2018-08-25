@@ -22,6 +22,7 @@ typedef enum
   PFC_ERROR_ALREADY_SET,
   PFC_ERROR_ALREADY_IN_QUEUE,
   PFC_ERROR_UNSET,
+  PFC_ERROR_NO_SERVER,
 } pfc_error;
 
 typedef uint8_t pfc_size;

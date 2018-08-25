@@ -30,6 +30,7 @@ typedef struct
     PFC_ID id;
     uint8_t * data;
     uint8_t dataSize;
+    PFC_ValueList * clients;
 } PFC_Server_Queue_Item;
 
 PFC_Process * PFC_Process_NewFromConfig(const char * memoryConfig)
@@ -217,25 +218,56 @@ PFC_Server_Queue_Item * Process_GetQueueItemFromID(PFC_Process * process, PFC_ID
     return result;
 }
 
-pfc_error Process_AddServerRequest(PFC_Process * process, PFC_ID id, PFC_ITEM_OPERATION operation, uint8_t * data, uint8_t dataSize)
+pfc_error Process_AddServerRequest(PFC_Process * process, Serial * clientSerial, PFC_ID id, PFC_ITEM_OPERATION operation, uint8_t * data, uint8_t dataSize)
 {
     pfc_error result = PFC_ERROR_UNSET;
 
     if(process != NULL && data != NULL && dataSize)
     {
-        if(Process_GetQueueItemFromID(process, id) == NULL)
+        PFC_Server_Queue_Item * queueItem = NULL;
+
+        if((queueItem = Process_GetQueueItemFromID(process, id)) == NULL)
         {
-            PFC_Server_Queue_Item * newItem = (PFC_Server_Queue_Item *)PFC_malloc(sizeof(*newItem));
+            if(process->server != NULL)
+            {
+                if((result = Serial_WritePFCMessage(process->server, id, operation == PFC_ITEM_OPERATION_WRITE ? data : NULL, operation == PFC_ITEM_OPERATION_WRITE ? dataSize : 0)) == PFC_ERROR_NONE)
+                {
+                    queueItem = (PFC_Server_Queue_Item *)PFC_malloc(sizeof(*queueItem));
 
-            newItem->id = id;
-            newItem->data = data;
-            newItem->dataSize = dataSize;
-            newItem->operation = operation;
+                    if(queueItem != NULL)
+                    {
+                        queueItem->clients = PFC_ValueList_New();
 
-            result = PFC_ValueList_AddItem(process->serverQueue, newItem);
+                        if(queueItem->clients != NULL)
+                        {
+                            PFC_ValueList_AddItem(queueItem->clients, clientSerial);
+
+                            queueItem->id = id;
+                            queueItem->data = data;
+                            queueItem->dataSize = dataSize;
+                            queueItem->operation = operation;
+
+                            result = PFC_ValueList_AddItem(process->serverQueue, queueItem);
+                        }
+                        else
+                        {
+                            result = PFC_ERROR_MEMORY;
+                        }
+                    }
+                    else
+                    {
+                        result = PFC_ERROR_MEMORY;
+                    }
+                }
+            }
+            else
+            {
+                result = PFC_ERROR_NO_SERVER;
+            }
         }
         else
         {
+
             result = PFC_ERROR_ALREADY_IN_QUEUE;
         }
     }
@@ -248,7 +280,7 @@ pfc_error Process_AddServerRequest(PFC_Process * process, PFC_ID id, PFC_ITEM_OP
 }
 
 
-pfc_error PFC_Process_RequestServerRead(PFC_Process * process, PFC_ID id)
+pfc_error PFC_Process_RequestServerRead(PFC_Process * process, Serial * serial, PFC_ID id)
 {
     pfc_error result = PFC_ERROR_UNSET;
 
@@ -260,7 +292,7 @@ pfc_error PFC_Process_RequestServerRead(PFC_Process * process, PFC_ID id)
 
         if(memory_data != NULL && memory_size > 0)
         {
-            result = Process_AddServerRequest(process, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
+            result = Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
         }
         else
         {
@@ -329,7 +361,7 @@ Serial * GetClientFromFD(PFC_Process * process, int fd)
 	return serial;
 }
 
-void Process_ClientRequest(PFC_Memory * memory, Serial * serial)
+void Process_ClientRequest(PFC_Process * process, Serial * serial)
 {
     if(serial)
     {
@@ -342,7 +374,7 @@ void Process_ClientRequest(PFC_Memory * memory, Serial * serial)
 
         if(result == PFC_ERROR_NONE)
         {
-            //PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
+            PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
             uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(memory, id);
             pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(memory, id);
 
@@ -352,12 +384,19 @@ void Process_ClientRequest(PFC_Memory * memory, Serial * serial)
 
                 if(memory_data != NULL && memory_size != 0)
                 {
-                    if(Serial_WritePFCMessage(serial, id, memory_data, memory_size) != PFC_ERROR_NONE)
+                    if(process->server != NULL)
                     {
-                        printf("Serial write error");
+
+                        Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
+                    }
+                    else
+                    {
+                        if(Serial_WritePFCMessage(serial, id, memory_data, memory_size) != PFC_ERROR_NONE)
+                        {
+                            printf("Serial write error");
+                        }
                     }
                 }
-
             }
             else
             {
@@ -365,10 +404,17 @@ void Process_ClientRequest(PFC_Memory * memory, Serial * serial)
 
                 if(size == memory_size)
                 {
-                    memcpy(memory_data, data, size);
-                    PFC_Memory_UpdateMemoryRegisterPointer(memory, id);
+                    if(process->server)
+                    {
+                        Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_WRITE, memory_data, memory_size);
+                    }
+                    else
+                    {
+                        memcpy(memory_data, data, size);
+                        PFC_Memory_UpdateMemoryRegisterPointer(memory, id);
 
-                    Serial_WritePFCAcknowledge(serial, id);
+                        Serial_WritePFCAcknowledge(serial, id);
+                    }
                 }
             }
 
@@ -415,6 +461,7 @@ void Process_ServerQueue(PFC_Process * process)
                 {
                     //Read operation - copy data from packet.
                     memcpy(memory_data, data, size);
+                    PFC_Memory_UpdateMemoryRegisterPointer(memory, id);
                     queue_item_success = true;
                 }
                 else if(queue_item->operation == PFC_ITEM_OPERATION_WRITE &&
@@ -425,6 +472,7 @@ void Process_ServerQueue(PFC_Process * process)
                 {
                     //Write operation - copy data from queue.
                     memcpy(memory_data, queue_item->data, memory_size);
+                    PFC_Memory_UpdateMemoryRegisterPointer(memory, id);
                     queue_item_success = true;
                 }
                 else
@@ -432,16 +480,37 @@ void Process_ServerQueue(PFC_Process * process)
                     //TODO: something went wrong...
                 }
 
-                //TODO: Pop next item off queue.
+                // Send response back to client that requested it
                 if(queue_item_success)
                 {
+                    PFC_ValueList * clientList = PFC_ValueList_GetFirst(queue_item->clients);
+                    Serial * clientSerial = PFC_ValueList_GetValue(clientList);
 
+                    while( clientSerial != NULL )
+                    {
+                        if(queue_item->operation == PFC_ITEM_OPERATION_WRITE)
+                        {
+                            Serial_WritePFCAcknowledge(clientSerial, queue_item->id);
+                        }
+                        else
+                        {
+                            Serial_WritePFCMessage(clientSerial, queue_item->id, data, size);
+                        }
+
+                        clientSerial = PFC_ValueList_NextItemValue(&clientList);
+                    }
                 }
+
+                PFC_ValueList_RemoveItem(process->serverQueue, queue_item);
             }
             else
             {
                 //TODO: not in queue
             }
+        }
+        else
+        {
+            //TODO: read error
         }
     }
 }
@@ -482,7 +551,7 @@ void PFC_Process_Run(PFC_Process * process)
 			    {
                     Serial * serial = GetClientFromFD(process, pfd[pfdn].fd);
 
-                    Process_ClientRequest(PFC_MemoryConfig_GetMemory(process->MemoryConfig), serial);
+                    Process_ClientRequest(process, serial);
 			    }
 			}
 		}

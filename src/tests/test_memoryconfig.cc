@@ -55,7 +55,7 @@ TEST_F(PFC_MemoryConfiguration, test_MemoryConfig_LoadDump)
     PFC_MemoryConfig_Load(memoryConfig);
 
 
-    PFC_Memory_Dump(PFC_MemoryConfig_GetMemory(memoryConfig));
+    //PFC_Memory_Dump(PFC_MemoryConfig_GetMemory(memoryConfig));
 
     uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(PFC_MemoryConfig_GetMemory(memoryConfig), 0x81);
     pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(PFC_MemoryConfig_GetMemory(memoryConfig), 0x81);

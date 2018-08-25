@@ -421,7 +421,7 @@ void PFC_MemoryRegister_DumpValue(PFC_MemoryRegister * MemoryRegister, PFC_Memor
 
 					if(value->ArrayItem)
 					{
-						printf("\t %s[%d]: %s\n", value->Name, value->Row, valueBuffer);
+						printf("\t %s {%s}[%d]: %s\n", value->Name, PFC_MemoryType_ToString(value->Type), value->Row, valueBuffer);
 					}
 					else
 					{
