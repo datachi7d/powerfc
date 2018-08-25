@@ -11,11 +11,12 @@
 
 #include "process.h"
 
-#include "serial.h"
+#include "pfc_process.h"
 
 namespace PFC
 {
 
+/*
 static jmp_buf jmp_env;
 
 static void catch_alarm(int sig)
@@ -33,61 +34,90 @@ static void catch_alarm(int sig)
     } else { \
         GTEST_FATAL_FAILURE_(#usecs " usecs timer tripped for " #fn); \
     } }
+*/
 
-
-	class PFC_Serial : public testing::Test
+	class PFC_ProcessTest : public testing::Test
 	{
-		pid_t _pid;
-		std::string TestSerialPath;
+		pid_t _pidClient;
+		pid_t _pidServer;
+        std::string TestServerSerialPath;
+		std::string TestClientSerialPath;
 
 protected:
-        std::string SerialPath;
-		std::fstream SerialStream;
+        std::string ServerSerialPath;
+        std::string ClientSerialPath;
+		std::fstream ClientSerialStream;
+		std::fstream ServerSerialStream;
 
-		PFC_Serial(): _pid(-1), TestSerialPath("/tmp/PFCTestSerial"), SerialPath("/tmp/PFCSerial") {}
+		PFC_ProcessTest(): _pidClient(-1), _pidServer(-1),
+		        TestServerSerialPath("/tmp/PFCTestServerSerial"),
+		        TestClientSerialPath("/tmp/PFCTestClientSerial"),
+		        ServerSerialPath("/tmp/PFCServerSerial"),
+		        ClientSerialPath("/tmp/PFCClientSerial")
+		        {}
+
+		pid_t Setup_serial(std::fstream &SerialStream, const char * serial1, const char * serial2)
+		{
+
+		    pid_t _pid;
+
+            char pty1[256] = {0};
+            sprintf(pty1, "pty,raw,echo=0,link=%s", serial1);
+
+            char pty2[256] = {0};
+            sprintf(pty2, "pty,raw,echo=0,link=%s", serial2);
+
+            std::vector<const char *> commandVector { "/usr/bin/socat", "-d -d -d -d", pty1, pty2 };
+            _pid = SpawnProcess(commandVector, false, false);
+
+            int counter = 0;
+
+            while ((!SerialStream.is_open()) && counter < 10)
+            {
+                SerialStream.open(TestClientSerialPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+                usleep(5000);
+                counter++;
+            }
+
+            return _pid;
+		}
+
 
 		void SetUp()
 		{
-			char pty1[256] = {0};
-			sprintf(pty1, "pty,raw,echo=0,link=%s", TestSerialPath.c_str());
+		    _pidClient = Setup_serial(ClientSerialStream, TestClientSerialPath.c_str(), ClientSerialPath.c_str());
 
-			char pty2[256] = {0};
-			sprintf(pty2, "pty,raw,echo=0,link=%s", SerialPath.c_str());
+			ASSERT_TRUE(ClientSerialStream);
 
-			std::vector<const char *> commandVector { "/usr/bin/socat", "-d -d -d -d", pty1, pty2 };
-			_pid = SpawnProcess(commandVector, false, false);
+            _pidServer = Setup_serial(ServerSerialStream, TestServerSerialPath.c_str(), ServerSerialPath.c_str());
 
-			int counter = 0;
-
-
-			while ((!SerialStream.is_open()) && counter < 10)
-			{
-				SerialStream.open(TestSerialPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-				usleep(5000);
-				counter++;
-			}
-
-			ASSERT_TRUE(SerialStream);
+            ASSERT_TRUE(ServerSerialStream);
 		}
 		void TearDown()
 		{
-			TerminateProcess(_pid);
+			TerminateProcess(_pidClient);
+			TerminateProcess(_pidServer);
 		}
 	};
 
 
-	TEST_F(PFC_Serial, test_Serial_NewFree_no_path)
+	TEST_F(PFC_ProcessTest, test_Process_new_free)
 	{
-		Serial * serial = Serial_New("");
+	    PFC_Process * process = PFC_Process_NewFromConfig("src/tests/test_memory_config.xml");
 
-		ASSERT_TRUE(serial == NULL);
+	    ASSERT_TRUE(process != NULL);
 
-		Serial_Free(serial);
+	    ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
+
+	    ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
+
+	    PFC_Process_Free(process);
 	}
 
+	/*
 	TEST_F(PFC_Serial, test_Serial_NewFree)
 	{
-		Serial * serial = Serial_New(SerialPath.c_str());
+		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		ASSERT_TRUE(serial != NULL);
 
@@ -97,7 +127,7 @@ protected:
 
 	TEST_F(PFC_Serial, test_Serial_Write)
 	{
-		Serial * serial = Serial_New(SerialPath.c_str());
+		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		EXPECT_TRUE(serial != NULL);
 
@@ -115,7 +145,7 @@ protected:
 
 	TEST_F(PFC_Serial, test_Serial_Read)
 	{
-		Serial * serial = Serial_New(SerialPath.c_str());
+		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		EXPECT_TRUE(serial != NULL);
 
@@ -134,7 +164,7 @@ protected:
 
 	TEST_F(PFC_Serial, test_Serial_Read_Timeout)
 	{
-		Serial * serial = Serial_New(SerialPath.c_str());
+		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		EXPECT_TRUE(serial != NULL);
 
@@ -153,7 +183,7 @@ protected:
 
 	TEST_F(PFC_Serial, test_Serial_ReadMessage)
 	{
-		Serial * serial = Serial_New(SerialPath.c_str());
+		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		EXPECT_TRUE(serial != NULL);
 
@@ -177,7 +207,7 @@ protected:
 
 	TEST_F(PFC_Serial, test_Serial_WriteMessage)
 	{
-		Serial * serial = Serial_New(SerialPath.c_str());
+		Serial * serial = Serial_New("/tmp/PFCSerial");
 
 		EXPECT_TRUE(serial != NULL);
 
@@ -196,5 +226,6 @@ protected:
 
 		Serial_Free(serial);
 	}
+	*/
 
 }

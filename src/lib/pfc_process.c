@@ -173,6 +173,7 @@ pfc_error PFC_Process_SetServer(PFC_Process * process, const char * serialPath)
             if(process->server == NULL)
             {
                 process->server = serial;
+                result = PFC_ERROR_NONE;
             }
             else
             {
