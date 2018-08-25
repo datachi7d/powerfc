@@ -838,8 +838,6 @@ PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pf
         if(column1Size > 0 && column2Size > 0)
         {
             int TotalSize = ((int)rows) * (column1Size + column2Size);
-            int X = 0;
-            int Y = 0;
 
             if(TotalSize <= PFC_MAX_REGISTER_SIZE)
             {
@@ -1210,7 +1208,7 @@ void PFC_Memory_Dump(PFC_Memory * Memory)
             {
                 if(MemoryRegister)
                 {
-                    uint8_t * RegisterMemory = MemoryRegister->Memory;
+                    //uint8_t * RegisterMemory = MemoryRegister->Memory;
 
                     PFC_MemoryRegister_DumpValue(MemoryRegister, Memory);
 

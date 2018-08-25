@@ -16,6 +16,7 @@ struct _PFC_Process
 	PFC_ValueList * clients;
 	Serial * server;
 	PFC_ValueList * serverQueue;
+	bool running;
 };
 
 typedef enum
@@ -41,6 +42,7 @@ PFC_Process * PFC_Process_NewFromConfig(const char * memoryConfig)
 	{
 		Process = (PFC_Process *)PFC_malloc(sizeof(PFC_Process));
 
+		Process->running = true;
 		Process->MemoryConfig = PFC_MemoryConfig_New(memoryConfig, false);
 
 		if(Process->MemoryConfig != NULL)
@@ -81,6 +83,7 @@ PFC_Process * PFC_Process_NewFromDump(const char * memoryDump)
     {
         Process = (PFC_Process *)PFC_malloc(sizeof(PFC_Process));
 
+        Process->running = true;
         Process->MemoryConfig = PFC_MemoryConfig_New(memoryDump, true);
 
         if(Process->MemoryConfig != NULL)
@@ -357,7 +360,7 @@ Serial * GetClientFromFD(PFC_Process * process, int fd)
 	if(process->clients != NULL)
 	{
         PFC_ValueList * list = PFC_ValueList_GetFirst(process->clients);
-        int pfdn = 0;
+        //int pfdn = 0;
 
         if(list != NULL)
         {
@@ -637,3 +640,14 @@ void PFC_Process_Free(PFC_Process * process)
         PFC_free(process);
 	}
 }
+
+bool PFC_Process_Running(PFC_Process * process)
+{
+    return process->running;
+}
+
+void PFC_Process_Halt(PFC_Process * process)
+{
+    process->running = false;
+}
+

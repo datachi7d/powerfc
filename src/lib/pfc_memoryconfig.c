@@ -193,12 +193,11 @@ PFC_MemoryConfig * PFC_MemoryConfig_New(const char * fileName, bool memoryDump)
     return memoryConfig;
 }
 
-void XML_PrintErrorChild(TreeNode parent, const char * name, const char * error)
+void XML_PrintErrorChild(TreeNode parent, const char * name)
 {
     TreeNode errorNode = XML_GetChild(parent, name);
 
     printf("Node %s line:%d:%d\n", TreeNode_GetName(errorNode), TreeNode_GetLine(errorNode), TreeNode_GetCharacter(errorNode));
-
 }
 
 
@@ -225,7 +224,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
                 {
                     //TODO:
                     printf("Unkown memory type: %s\n", MemroyTypeRaw);
-                    XML_PrintErrorChild(child, XML_MEMORY_TYPE, "test");
+                    XML_PrintErrorChild(child, XML_MEMORY_TYPE);
                     Result = PFC_ERROR_NONE;
                     break;
                 }
@@ -343,8 +342,8 @@ pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root, 
             {
                 //TODO:
                 printf("Unkown memory type: %s for %s:\n", MemroyTypeRaw, Name);
-                TreeNode error = XML_GetChild(root, XML_MEMORY_TYPE);
-                XML_PrintErrorChild(root, XML_MEMORY_TYPE, "test");
+                //TreeNode error = XML_GetChild(root, XML_MEMORY_TYPE);
+                XML_PrintErrorChild(root, XML_MEMORY_TYPE);
 
                 Result = PFC_ERROR_XML;
             }
@@ -476,13 +475,13 @@ pfc_error MemoryConfig_LoadConfig_TableColumns(TreeNode root, pfc_memorytype * C
                 const char * Name = XML_GetChildValue(child, XML_NAME);
                 const char * MemroyTypeRaw = XML_GetChildValue(child, XML_MEMORY_TYPE);
                 pfc_memorytype MemoryType = PFC_MemoryType_FromString(MemroyTypeRaw);
-                PFC_MemoryValue * memoryValue = NULL;
+                //PFC_MemoryValue * memoryValue = NULL;
 
                 if(MemoryType == PFC_MEMORYTYPE_LAST)
                 {
                     //TODO:
                     printf("Unkown memory type: %s\n", MemroyTypeRaw);
-                    XML_PrintErrorChild(child, XML_MEMORY_TYPE, "test");
+                    XML_PrintErrorChild(child, XML_MEMORY_TYPE);
                     Result = PFC_ERROR_NONE;
                     break;
                 }
@@ -534,9 +533,9 @@ pfc_error MemoryConfig_LoadConfig_MemoryTable(PFC_Memory * Memory, TreeNode root
     if(Result == PFC_ERROR_NONE && TableRows >= 1)
     {
 		pfc_memorytype Columns[256] = { 0 };
-		char * ColumnNames[256] = { 0 };
+		const char * ColumnNames[256] = { 0 };
 
-		Result = MemoryConfig_LoadConfig_TableColumns(valuesNode, &Columns, &ColumnNames[0], 256);
+		Result = MemoryConfig_LoadConfig_TableColumns(valuesNode, Columns, ColumnNames, 256);
 
 		if(Result == PFC_ERROR_NONE &&
 				(MemoryTable = PFC_Memory_NewTable(Memory, RegisterID, Columns[0], Columns[1], TableRows, Name, ColumnNames[0], ColumnNames[1])) != NULL	)
@@ -688,7 +687,7 @@ pfc_error PFC_MemoryConfig_LoadConfigString(PFC_MemoryConfig * MemoryConfig, con
     return Result;
 }
 
-pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length)
+pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, char * string, uint32_t length)
 {
     pfc_error Result = PFC_ERROR_UNSET;
     MemoryConfig->Memory = PFC_Memory_New();

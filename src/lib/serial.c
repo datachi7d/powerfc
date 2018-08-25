@@ -93,7 +93,7 @@ Serial * Serial_New(const char * path)
 			{
 				SetInterfaceAttributes(serial->serialfd, B19200);
 				lseek(serial->serialfd, 0, SEEK_END);
-				printf("Serial [%p]: %s\n", serial, path);
+				printf("Serial [%p]: %s\n", (void *)serial, path);
 			}
 			else
 			{
@@ -202,7 +202,7 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 					{
 						*ID = header->ID;
 						memcpy(data, &data_buffer[sizeof(*header)], *size);
-						printf("Recv Message [%p]: ", serial);
+						printf("Recv Message [%p]: ", (void *)serial);
 						printHex(data_buffer,*size + header->Length);
 						printf("\n");
 						result = PFC_ERROR_NONE;
@@ -275,7 +275,7 @@ pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc
 	    {
 	    	data_buffer[header->Length] = CheckSum(data_buffer, header->Length);
 	    	Serial_Write(serial, data_buffer, header->Length + 1);
-			printf("Send Message [%p]: ", serial);
+			printf("Send Message [%p]: ", (void *)serial);
 			printHex(data_buffer,header->Length + 1);
 			printf("\n");
 

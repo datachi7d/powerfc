@@ -107,7 +107,7 @@ protected:
 	{
 	    PFC_Process * process = (PFC_Process *)attr;
 
-	    while(1)
+	    while(PFC_Process_Running(process))
 	    {
 	        PFC_Process_Run(process);
 	    }
@@ -152,7 +152,7 @@ protected:
 
         ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
 
-        pthread_cancel(processThread);
+        PFC_Process_Halt(process);
         pthread_join(processThread, NULL);
 
         PFC_Process_Free(process);
@@ -181,7 +181,7 @@ protected:
 
         ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
 
-        pthread_cancel(processThread);
+        PFC_Process_Halt(process);
         pthread_join(processThread, NULL);
 
         PFC_Process_Free(process);

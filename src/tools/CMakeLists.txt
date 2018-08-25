@@ -20,6 +20,8 @@ add_executable (pfc_sim_dump ${pfc_sim_dump_SRC})
 target_link_libraries(pfc_sim_dump pfclib_static)
 
 
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-error=unused-but-set-variable")
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 install (TARGETS pfc_sim pfc_sim_dump

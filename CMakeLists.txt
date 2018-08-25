@@ -18,5 +18,8 @@ endif (RUN_TESTS)
 
 add_compile_options (-g)
 
+set(CMAKE_C_FLAGS_DEBUG "-Wall -Werror -Wno-pointer-sign -g -pedantic")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Werror -g -std=c++11")
+
 add_subdirectory (lib)
 add_subdirectory (src)

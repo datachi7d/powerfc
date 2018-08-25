@@ -48,7 +48,7 @@ PFC_Memory * PFC_MemoryConfig_GetMemory(PFC_MemoryConfig * MemoryConfig);
 void PFC_MemoryConfig_Free(PFC_MemoryConfig * MemoryConfig);
 
 pfc_error PFC_MemoryConfig_LoadConfigString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length);
-pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, const char * string, uint32_t length);
+pfc_error PFC_MemoryConfig_LoadDumpString(PFC_MemoryConfig * MemoryConfig, char * string, uint32_t length);
 pfc_error PFC_MemoryConfig_Load(PFC_MemoryConfig * MemoryConfig);
 
 #ifdef __cplusplus
