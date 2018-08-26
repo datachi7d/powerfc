@@ -36,7 +36,7 @@ test:
 	make -C $(BUILD_DIR) test_pfclib_runner_TARGET
 
 ifeq ($(GCOV),1)
-gcov:
+gcov: all
 	make -C $(BUILD_DIR) test_pfclib_runner_gcov_TARGET
 endif
 

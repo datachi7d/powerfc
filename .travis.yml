@@ -11,6 +11,7 @@ addons:
    - g++-5
    - python-virtualenv
    - lcov
+   - socat
 compiler:
   - gcc
 before_install:
