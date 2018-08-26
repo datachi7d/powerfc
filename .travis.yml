@@ -13,6 +13,7 @@ addons:
    - lcov
    - socat
    - gengetopt
+   - valgrind
 compiler:
   - gcc
 before_install:
