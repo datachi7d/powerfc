@@ -12,6 +12,7 @@ addons:
    - python-virtualenv
    - lcov
    - socat
+   - gengetopt
 compiler:
   - gcc
 before_install:
