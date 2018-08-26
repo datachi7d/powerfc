@@ -6,6 +6,13 @@ enable_testing ()
 option (BUILD_TESTS "Build tests" ON)
 option (RUN_TESTS "Enable tests" ON)
 option (RUN_VALGRIND "Enable valgrind of tests" ON)
+option (ENABLE_GCOV "Enable gcov" OFF)
+
+
+set(CMAKE_C_FLAGS_DEBUG "-Wall -Werror -Wno-pointer-sign -g -pedantic")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Werror -g -std=c++11")
+
+
 
 if (RUN_TESTS)
   set (BUILD_TESTS ON)
@@ -16,10 +23,14 @@ if (RUN_TESTS)
   endif (RUN_VALGRIND)
 endif (RUN_TESTS)
 
+if (ENABLE_GCOV)
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
+  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
+  set (CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
+endif ()
+
 add_compile_options (-g)
 
-set(CMAKE_C_FLAGS_DEBUG "-Wall -Werror -Wno-pointer-sign -g -pedantic")
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Werror -g -std=c++11")
 
 add_subdirectory (lib)
 add_subdirectory (src)

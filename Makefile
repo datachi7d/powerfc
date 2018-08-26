@@ -1,9 +1,16 @@
 DEBUG?=1
+GCOV?=0
 
 ifeq ($(DEBUG),0)
   override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Release
 else
   override CMAKE_OPTIONS+=-DCMAKE_BUILD_TYPE=Debug
+endif
+
+ifeq ($(GCOV),0)
+  override CMAKE_OPTIONS+=-DENABLE_GCOV=OFF
+else
+  override CMAKE_OPTIONS+=-DENABLE_GCOV=ON
 endif
 
 
@@ -24,3 +31,12 @@ $(BUILD_DIR)/Makefile:
 clean:
 	rm -f $(BUILD_DIR)/Makefile
 	find $(BUILD_DIR) | grep runner_out.xml | xargs -r rm
+
+test:
+	make -C $(BUILD_DIR) test_pfclib_runner_TARGET
+
+ifeq ($(GCOV),1)
+gcov:
+	make -C $(BUILD_DIR) test_pfclib_runner_gcov_TARGET
+endif
+

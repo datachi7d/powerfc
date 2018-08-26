@@ -493,6 +493,13 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
                 }
             }
         }
+        else
+        {
+            if(result != PFC_ERROR_TIMEOUT)
+            {
+                printf("Error receiving message [%d]\n", result);
+            }
+        }
     }
 }
 

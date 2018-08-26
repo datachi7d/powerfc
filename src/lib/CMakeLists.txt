@@ -10,16 +10,24 @@ set (pfclib_SOURCES
 set (pfclib_INCLUDE_DIRS
 	${PFCLIB_INCLUDE_DIR})
 
+set (pfclib_LIBRARIES libxml_static m)
+
+if (ENABLE_GCOV)
+
+  #set(pfclib_LIBRARIES "${pfclib_LIBRARIES} gcov")
+endif ()
+
+
 add_library (pfclib_static STATIC ${pfclib_SOURCES})
 target_include_directories (pfclib_static PUBLIC ${pfclib_INCLUDE_DIRS})
 set_target_properties (pfclib_static PROPERTIES OUTPUT_NAME pfclib)
-target_link_libraries(pfclib_static libxml_static m)
+target_link_libraries(pfclib_static ${pfclib_LIBRARIES})
 
 add_library (pfclib_shared SHARED ${pfclib_SOURCES})
 target_include_directories (pfclib_shared PUBLIC ${pfclib_INCLUDE_DIRS})
 set_target_properties (pfclib_shared PROPERTIES OUTPUT_NAME pfclib)
 set_property (TARGET pfclib_shared PROPERTY POSITION_INDEPENDANT_CODE ON)
-target_link_libraries(pfclib_shared libxml_static m)
+target_link_libraries(pfclib_shared ${pfclib_LIBRARIES})
 
 install (TARGETS pfclib_static pfclib_shared 
 	ARCHIVE DESTINATION lib

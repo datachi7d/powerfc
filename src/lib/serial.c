@@ -184,21 +184,21 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 			if(header->Length < PFC_MAX_MESSAGE_LENGTH)
 			{
 				*size = header->Length - sizeof(*header);
-				uint8_t RecvChecksum = 0;
+				//uint8_t RecvChecksum = 0;
 
 				if(header->Length > sizeof(*header))
 				{
-					readLen = Serial_Read(serial, &data_buffer[sizeof(*header)], *size);
+					readLen = Serial_Read(serial, &data_buffer[sizeof(*header)], (*size) + 1);
 				}
 				else
 				{
 					readLen = 0;
 				}
 
-				if(readLen == *size
-				   && Serial_Read(serial, &RecvChecksum, 1) == 1)
+				if(readLen == (*size)+1)
+				   //&& Serial_Read(serial, &, 1) == 1)
 				{
-					if(CheckSum(data_buffer, header->Length) == RecvChecksum)
+					if(CheckSum(data_buffer, header->Length) == data_buffer[sizeof(*header) + (*size)])
 					{
 						*ID = header->ID;
 						memcpy(data, &data_buffer[sizeof(*header)], *size);

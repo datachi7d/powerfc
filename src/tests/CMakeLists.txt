@@ -18,7 +18,6 @@ set (test_pfclib_runner_LIBRARIES
 	pthread
 	pfclib_static)
 
-
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -g -std=c++11 -Wno-narrowing")
 
 add_definitions (-D__STDC_FORMAT_MACROS)
@@ -31,6 +30,13 @@ configure_file(test_memory_config.xml test_memory_config.xml COPYONLY)
 configure_file(test_memory_dump.dat test_memory_dump.dat COPYONLY)
 configure_file(FCPRO.hd1 FCPRO.hd1 COPYONLY)
 configure_file(valgrind.suppress valgrind.suppress COPYONLY)
+
+if (ENABLE_GCOV)
+  include(${CMAKE_SOURCE_DIR}/cmake/CodeCoverage.cmake)
+  setup_target_for_coverage(test_pfclib_runner_gcov_TARGET test_pfclib_runner coverage)
+endif ()
+
+
 
 add_custom_command (
   OUTPUT test_pfclib_runner_out.xml
