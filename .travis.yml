@@ -21,4 +21,4 @@ before_install:
 script:
   - make GCOV=1 gcov
 after_success:
-  - coveralls --exclude-pattern 'lib/xml/*' --exclude-pattern 'gtest-src/*' --exclude-pattern 'src/tests/*' --exclude-pattern '/usr/*' --gcov-options '\-lp' --verbose
+  - coveralls --exclude lib --exclude build --exclude src/tests --exclude src/tools --gcov-options '\-lp' --verbose
