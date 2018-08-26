@@ -9,8 +9,8 @@ option (RUN_VALGRIND "Enable valgrind of tests" ON)
 option (ENABLE_GCOV "Enable gcov" OFF)
 
 
-set(CMAKE_C_FLAGS_DEBUG "-Wall -Werror -Wno-pointer-sign -g -pedantic")
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Werror -g -std=c++11")
+set(CMAKE_C_FLAGS_DEBUG "-g -Wall -Werror -Wno-pointer-sign -pedantic --std=gnu11 ")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Werror -std=c++11")
 
 
 
