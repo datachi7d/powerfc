@@ -325,6 +325,41 @@ pfc_error PFC_Process_RequestServerRead(PFC_Process * process, Serial * serial, 
     return result;
 }
 
+pfc_error PFC_Process_RequestServerWrite(PFC_Process * process, Serial * serial, PFC_ID id, uint8_t * data, uint8_t dataSize)
+{
+    pfc_error result = PFC_ERROR_UNSET;
+
+    if(process != NULL)
+    {
+        PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
+        uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(memory, id);
+        pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(memory, id);
+
+        if(memory_data != NULL && memory_size > 0 &&
+           data != NULL && dataSize == memory_size)
+        {
+            result = Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_WRITE, data, dataSize);
+        }
+        else
+        {
+            if(dataSize != memory_size)
+            {
+                result = PFC_ERROR_MESSAGE_LENGTH;
+            }
+            else if(data == NULL)
+            {
+                result = PFC_ERROR_NULL_PARAMETER;
+            }
+            else
+            {
+                result = PFC_ERROR_NOT_FOUND;
+            }
+        }
+    }
+
+    return result;
+}
+
 void Setup_Client_PollFD(PFC_Process * process, struct pollfd * pfd)
 {
 	if(process->clients != NULL)
@@ -396,22 +431,37 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
 
         if(result == PFC_ERROR_NONE)
         {
-            PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
-            uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(memory, id);
-            pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(memory, id);
 
-            if(size == 0)
+            if(process->server != NULL)
             {
-                printf("Read for %02x[%p:%d]\n", id, memory_data, memory_size);
-
-                if(memory_data != NULL && memory_size != 0)
+                //Non sim mode - serial attached to PFC
+                if(size == 0)
                 {
-                    if(process->server != NULL)
+                    if(PFC_Process_RequestServerRead(process, serial, id) != PFC_ERROR_NONE)
                     {
-
-                        Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
+                        printf("Error adding read request\n");
                     }
-                    else
+                }
+                else
+                {
+                    if(PFC_Process_RequestServerWrite(process, serial, id, data, size) != PFC_ERROR_NONE)
+                    {
+                        printf("Error adding write requst\n");
+                    }
+                }
+            }
+            else
+            {
+                //Sim mode - no serial to PFC
+                PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
+                uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(memory, id);
+                pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(memory, id);
+
+                if(size == 0)
+                {
+                    printf("Read for %02x[%p:%d]\n", id, memory_data, memory_size);
+
+                    if(memory_data != NULL && memory_size != 0)
                     {
                         if(Serial_WritePFCMessage(serial, id, memory_data, memory_size) != PFC_ERROR_NONE)
                         {
@@ -419,18 +469,11 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
                         }
                     }
                 }
-            }
-            else
-            {
-                printf("Write for %02x\n", id);
-
-                if(size == memory_size)
+                else
                 {
-                    if(process->server)
-                    {
-                        Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_WRITE, memory_data, memory_size);
-                    }
-                    else
+                    printf("Write for %02x\n", id);
+
+                    if(size == memory_size)
                     {
                         memcpy(memory_data, data, size);
                         PFC_Memory_UpdateMemoryRegisterPointer(memory, id);
@@ -438,15 +481,15 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
                         Serial_WritePFCAcknowledge(serial, id);
                     }
                 }
-            }
 
-            if(memory)
-            {
-                PFC_MemoryRegister * memoryRegister = PFC_Memory_GetMemoryRegister(memory, id);
-
-                if(memoryRegister)
+                if(memory)
                 {
-                    PFC_MemoryRegister_DumpValue(memoryRegister, memory);
+                    PFC_MemoryRegister * memoryRegister = PFC_Memory_GetMemoryRegister(memory, id);
+
+                    if(memoryRegister)
+                    {
+                        PFC_MemoryRegister_DumpValue(memoryRegister, memory);
+                    }
                 }
             }
         }
