@@ -1,0 +1,22 @@
+language: c
+addons:
+ apt:
+  sources:
+   - george-edison55-precise-backports
+   - ubuntu-toolchain-r-test
+  packages:
+   - cmake
+   - cmake-data
+   - gcc-5
+   - g++-5
+   - python-virtualenv
+   - lcov
+   - gcov
+compiler:
+  - gcc
+before_install:
+  - pip install --user cpp-coveralls
+script:
+  - make GCOV=1 gcov
+after_success:
+  - coveralls --exclude lib --exclude tests --gcov-options '\-lp' --verbose
