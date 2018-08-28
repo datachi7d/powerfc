@@ -1044,8 +1044,12 @@ pfc_error MemoryRegister_MirrorUpdate(PFC_Memory * Memory, PFC_ID RegisterID, bo
                 }
                 else
                 {
-                    error = PFC_ERROR_MEMORY;
-                    break;
+                    //Special case - allows for empty blocks of "unkown" or blank regions of memory
+                    if(strncmp("Unkown", value->Name, 6) != 0)
+                    {
+                        error = PFC_ERROR_MEMORY;
+                        break;
+                    }
                 }
                 i++;
 
