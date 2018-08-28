@@ -23,6 +23,14 @@ typedef struct __attribute__((__packed__))
     pfc_size Length;
 } PFC_Header;
 
+void printHex(uint8_t * buffer, uint8_t len)
+{
+    uint8_t pos = 0;
+
+    for(; pos < len; pos++)
+        printf("%02x ", buffer[pos]);
+}
+
 uint8_t CheckSum(uint8_t * buffer, uint8_t length)
 {
     uint8_t * ptr = buffer;
@@ -66,8 +74,8 @@ int SetInterfaceAttributes(int fd, int speed)
     //tty.c_cc[VMIN] = 0;
     //tty.c_cc[VTIME] = 2;
 
-    tty.c_cc[VMIN] = 1;
-    tty.c_cc[VTIME] = 1;
+    tty.c_cc[VMIN] = 255;
+    tty.c_cc[VTIME] = 10;
 
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
@@ -116,6 +124,10 @@ uint8_t Serial_Read(Serial * serial, uint8_t * buffer, uint8_t size)
     	ret = read(serial->serialfd, buffer, size);
     }
 
+    printf("Read [%p,%d,%d]:", (void *)serial, size, (int)ret);
+    printHex(buffer, (uint8_t)ret);
+    printf("\n");
+
     return ((ret < 0) | (ret != size)) ? 0 : size;
 }
 
@@ -158,15 +170,6 @@ void Serial_Free(Serial * serial)
 	}
 }
 
-
-void printHex(uint8_t * buffer, uint8_t len)
-{
-    uint8_t pos = 0;
-
-    for(; pos < len; pos++)
-        printf("%02x ", buffer[pos]);
-}
-
 pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pfc_size * size)
 {
 	pfc_error result = PFC_ERROR_UNSET;
@@ -177,6 +180,7 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 		PFC_Header * header = (PFC_Header *)&data_buffer[0];
 		int readLen = 0;
 
+		printf("read1\n");
 		readLen = Serial_Read(serial, (uint8_t *)header, sizeof(*header));
 
 		if(readLen == sizeof(*header))
@@ -186,8 +190,9 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 				*size = header->Length - sizeof(*header);
 				//uint8_t RecvChecksum = 0;
 
-				if(header->Length > sizeof(*header))
+				if(header->Length >= sizeof(*header))
 				{
+				    printf("read2\n");
 					readLen = Serial_Read(serial, &data_buffer[sizeof(*header)], (*size) + 1);
 				}
 				else
@@ -292,6 +297,11 @@ pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc
 pfc_error Serial_WritePFCAcknowledge(Serial * serial, PFC_ID ID)
 {
 	return Serial_WritePFCMessage(serial, PFC_ID_ACK, NULL, 0);
+}
+
+void Serial_FlushInput(Serial * serial)
+{
+    tcflush(serial->serialfd, TCIFLUSH);
 }
 
 

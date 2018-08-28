@@ -291,7 +291,7 @@
             <pfc_memory_value>
                <name>IgnitionN30</name>
                <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
-            </pfc_memory_value_array>            
+            </pfc_memory_value>            
          </pfc_memory_values>
       </pfc_memory_register>
       <pfc_memory_register>
@@ -725,7 +725,7 @@
                <Count>1</Count>
             </pfc_memory_value_array>
          </pfc_memory_values>
-      </pfc_memory_register>          
+      </pfc_memory_register>
       <pfc_memory_register>
          <name>SensorStrings</name>
          <RegisterID>0xdd</RegisterID>
@@ -781,6 +781,7 @@
       <pfc_memory_register>
          <name>Advanced</name>
          <RegisterID>0xf0</RegisterID>
+         <DefaultValue>0x00 0x00 0x00 0x00 0x14 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x64 0x00 0xff 0xff 0x00 0x71 0x00 0x00 0x00 0x00 0x01 0x00 0x00 0x00</DefaultValue>
          <pfc_memory_values>
             <pfc_memory_value>
                <name>RPM</name>
@@ -857,6 +858,73 @@
             <pfc_memory_value>
                <name>ThrottleVoltage</name>
                <MemoryType>PFC_MEMORYTYPE_SHORTVOLTAGE</MemoryType>
+            </pfc_memory_value>
+         </pfc_memory_values>
+      </pfc_memory_register>
+      <pfc_memory_register>
+         <name>Simple</name>
+         <RegisterID>0xda</RegisterID>
+          <DefaultValue>0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x11 0x00</DefaultValue>
+          <pfc_memory_values>
+             <pfc_memory_value>
+               <name>Injector</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTMILLISECOND</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Ignition</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEDEGREE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>UnkownDA1</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>AirFlow1</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTMILLIVOLTAGE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>RPM</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTRPM</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Speed</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTSPEED</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>Boost</name>
+               <MemoryType>PFC_MEMORYTYPE_SHORTBOOST</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>KnockLevel</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>UnkownDA2</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>WaterTemperature</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>UnkownDA3</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>AirTemperature</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTETEMPERATURE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>UnkownDA4</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>BatteryVoltage</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE</MemoryType>
+            </pfc_memory_value>
+            <pfc_memory_value>
+               <name>UnkownDA5</name>
+               <MemoryType>PFC_MEMORYTYPE_BYTE</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>

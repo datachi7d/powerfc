@@ -16,6 +16,9 @@ struct _PFC_MemoryConfig
 	bool MemoryDump;
 };
 
+#define  print_XmlLineError(node) \
+    printf ("[%s:%d] Xml error on line: %d\n",__FILE__, __LINE__, TreeNode_GetLine(node))
+
 char * XML_ToLower(const char * str)
 {
     char * p = PFC_strdup(str);
@@ -101,6 +104,7 @@ pfc_error XML_GetChildValueAsHex(TreeNode node, const char * name, uint16_t * he
         }
         else
         {
+            print_XmlLineError(node);
             Result = PFC_ERROR_XML;
         }
     }
@@ -133,6 +137,7 @@ pfc_error XML_GetChildValueAsHexArray(TreeNode node, const char * name, uint8_t 
 			}
 			else
 			{
+			    print_XmlLineError(node);
 				Result = PFC_ERROR_XML;
 			}
 
@@ -142,6 +147,7 @@ pfc_error XML_GetChildValueAsHexArray(TreeNode node, const char * name, uint8_t 
             }
             else if (hex_size != 0)
             {
+                print_XmlLineError(node);
             	Result = PFC_ERROR_XML;
             }
 
@@ -149,6 +155,7 @@ pfc_error XML_GetChildValueAsHexArray(TreeNode node, const char * name, uint8_t 
     }
     else
     {
+        print_XmlLineError(node);
         Result = PFC_ERROR_XML;
     }
 
@@ -250,6 +257,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
                     }
                     else
                     {
+                        print_XmlLineError(child);
                         Result = PFC_ERROR_XML;
                         break;
                     }
@@ -262,12 +270,14 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
 
                 if(memoryValue == NULL)
                 {
+                    print_XmlLineError(child);
                     Result = PFC_ERROR_XML;
                     break;
                 }
             }
             else
             {
+                print_XmlLineError(child);
                 Result = PFC_ERROR_XML;
                 break;
             }
@@ -279,6 +289,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryValue(PFC_MemoryRegister * MemoryRegiste
     {
         if(MemoryRegister != NULL)
         {
+            print_XmlLineError(root);
             Result = PFC_ERROR_XML;
         }
         else
@@ -328,11 +339,13 @@ pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root, 
                 }
                 else
                 {
+                    print_XmlLineError(root);
                     Result = PFC_ERROR_XML;
                 }
             }
             else
             {
+                print_XmlLineError(root);
                 Result = PFC_ERROR_XML;
             }
         }
@@ -349,6 +362,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root, 
             }
             else
             {
+                XML_PrintErrorChild(root, XML_MEMORY_TYPE);
                 Result = PFC_ERROR_XML;
             }
         }
@@ -357,6 +371,7 @@ pfc_error MemoryConfig_LoadConfig_MemoryMap(PFC_Memory * Memory, TreeNode root, 
     {
         if(Memory != NULL)
         {
+            XML_PrintErrorChild(root, XML_MEMORY_TYPE);
             Result = PFC_ERROR_XML;
         }
         else
@@ -447,11 +462,13 @@ pfc_error MemoryConfig_LoadConfig_MemoryRegister(PFC_Memory * Memory, TreeNode r
         }
         else
         {
+            print_XmlLineError(root);
             Result = PFC_ERROR_XML;
         }
     }
     else
     {
+        print_XmlLineError(root);
         Result = PFC_ERROR_XML;
     }
 
@@ -628,6 +645,7 @@ pfc_error MemoryConfig_LoadConfig_Memory(PFC_MemoryConfig * MemoryConfig, TreeNo
                 }
                 else
                 {
+
                     Result = PFC_ERROR_XML;
                 }
 
@@ -843,6 +861,7 @@ pfc_error PFC_MemoryConfig_Load(PFC_MemoryConfig * MemoryConfig)
         if(MemoryConfig->FileP != NULL)
         {
             Result = MemoryConfig_ReadFile(MemoryConfig);
+            printf("Error %d\n", Result);
         }
         else
         {

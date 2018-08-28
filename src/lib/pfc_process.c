@@ -1,6 +1,7 @@
 #include <sys/poll.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "pfc_memoryregistry.h"
 #include "pfc_memorytypes.h"
@@ -495,10 +496,19 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
         }
         else
         {
+            if(result == PFC_ERROR_CHECKSUM || result == PFC_ERROR_TIMEOUT)
+            {
+                printf("Error encountered %s.\n", strerror(errno));
+                Serial_FlushInput(serial);
+
+            }
+
+
             if(result != PFC_ERROR_TIMEOUT)
             {
                 printf("Error receiving message [%d]\n", result);
             }
+
         }
     }
 }

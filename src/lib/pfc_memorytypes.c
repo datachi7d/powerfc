@@ -514,7 +514,7 @@ int Convert_ShortVoltage(pcf_conversion conversion, const void * value, int valu
     return result;
 }
 
-int Convert_ShortBlink(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
+int Convert_ShortMilliVoltage(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
 {
     int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
 
@@ -522,7 +522,7 @@ int Convert_ShortBlink(pcf_conversion conversion, const void * value, int valueS
          conversion == PFC_CONVERSION_TOSTRING_WITHUNIT ||
          conversion == PFC_CONVERSION_TOBASIC)
     {
-        int intValue = ((int)*((uint16_t *)value))*5;
+        int intValue = ((int)*((uint16_t *)value));
         result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
     }
 
@@ -823,7 +823,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.MemoryType = PFC_MEMORYTYPE_SHORTMILLIVOLTAGE,
 				.Size = PFC_SIZE_SHORT,
 				.BasicType = PFC_BASICTYPE_INT,
-				.ConversionFunction = Convert_ShortBlink,
+				.ConversionFunction = Convert_ShortMilliVoltage,
 				.Units = "mV",
 				.Format = "%d %s",
 		},

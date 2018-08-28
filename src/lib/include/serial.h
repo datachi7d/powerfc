@@ -17,6 +17,7 @@ typedef struct _Serial Serial;
 Serial * Serial_New(const char * path);
 uint8_t Serial_Read(Serial * serial, uint8_t * buffer, uint8_t size);
 uint8_t Serial_Write(Serial * serial, uint8_t * buffer, uint8_t size);
+void Serial_FlushInput(Serial * serial);
 int Serial_GetFD(Serial * serial);
 void Serial_Free(Serial * serial);
 
