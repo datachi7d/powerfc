@@ -52,9 +52,6 @@ const char * pfc_memorytype_str [] = {
 			"PFC_MEMORYTYPE_STRINGCONTROL",
 			"PFC_MEMORYTYPE_STRINGTYPE",
 			"PFC_MEMORYTYPE_STRINGVERSION",
-			"PFC_MEMORYTYPE_TPS_SETTING",
-			"PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING",
-			"PFC_MEMORYTYPE_IGNITIONVOLTAGE_SETTING",
 };
 
 const char * PFC_MemoryType_ToString(pfc_memorytype memory_type)
@@ -558,110 +555,6 @@ int Convert_ShortBoost(pcf_conversion conversion, const void * value, int valueS
     return result;
 }
 
-
-int Convert_TPS(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
-{
-    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
-    const pfc_memorytype_conversioninfo * byteTemperatureConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTETEMPERATURE);
-    const pfc_memorytype_conversioninfo * float88Conversion = getConverstionInfo(PFC_MEMORYTYPE_SHORTFLOAT88);
-
-    if  (conversion == PFC_CONVERSION_TOSTRING ||
-         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT)
-    {
-
-    	if(float88Conversion != NULL && byteTemperatureConversion != NULL)
-    	{
-    		const uint8_t * byteValues = (const uint8_t *)value;
-    		char byteTemperatureString[256] = {0};
-
-			result = Convert_ByteTemperature(conversion, &byteValues[0], PFC_SIZE_BYTE, byteTemperatureString, sizeof(byteTemperatureString), byteTemperatureConversion->Units, byteTemperatureConversion->Format);
-
-			if(result > 0)
-			{
-				char float88String[256] = {0};
-
-				result = Convert_ShortFloat(conversion, &byteValues[1], PFC_SIZE_SHORT, float88String, sizeof(float88String), float88Conversion->Units, float88Conversion->Format);
-
-				if(result > 0)
-				{
-					 result = snprintf((char *)output, outputLength, Format, byteTemperatureString, float88String);
-				}
-			}
-    	}
-    }
-
-    return result;
-}
-
-int Convert_IgnitionTemperature(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
-{
-    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
-    const pfc_memorytype_conversioninfo * byteTemperatureConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTETEMPERATURE);
-    const pfc_memorytype_conversioninfo * byteDegreeConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTEDEGREE);
-
-    if  (conversion == PFC_CONVERSION_TOSTRING ||
-         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT)
-    {
-
-    	if(byteDegreeConversion != NULL && byteTemperatureConversion != NULL)
-    	{
-    		const uint8_t * byteValues = (const uint8_t *)value;
-    		char byteTemperatureString[256] = {0};
-
-			result = Convert_ByteTemperature(conversion, &byteValues[0], PFC_SIZE_BYTE, byteTemperatureString, sizeof(byteTemperatureString), byteTemperatureConversion->Units, byteTemperatureConversion->Format);
-
-			if(result > 0)
-			{
-				char byteDegreeString[256] = {0};
-
-				result = Convert_Byte(conversion, &byteValues[1], PFC_SIZE_BYTE, byteDegreeString, sizeof(byteDegreeString), byteDegreeConversion->Units, byteDegreeConversion->Format);
-
-				if(result > 0)
-				{
-					 result = snprintf((char *)output, outputLength, Format, byteTemperatureString, byteDegreeString);
-				}
-			}
-    	}
-    }
-
-    return result;
-}
-
-
-int Convert_IgnitionVoltage(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format)
-{
-    int result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_NONSET);
-    const pfc_memorytype_conversioninfo * byteVoltageConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTEVOLTAGE);
-    const pfc_memorytype_conversioninfo * byteDegreeConversion = getConverstionInfo(PFC_MEMORYTYPE_BYTEDEGREE);
-
-    if  (conversion == PFC_CONVERSION_TOSTRING ||
-         conversion == PFC_CONVERSION_TOSTRING_WITHUNIT)
-    {
-
-    	if(byteDegreeConversion != NULL && byteVoltageConversion != NULL)
-    	{
-    		const uint8_t * byteValues = (const uint8_t *)value;
-    		char byteVoltageString[256] = {0};
-
-			result = Convert_ByteVoltage(conversion, &byteValues[0], PFC_SIZE_BYTE, byteVoltageString, sizeof(byteVoltageString), byteVoltageConversion->Units, byteVoltageConversion->Format);
-
-			if(result > 0)
-			{
-				char byteDegreeString[256] = {0};
-
-				result = Convert_Byte(conversion, &byteValues[1], PFC_SIZE_BYTE, byteDegreeString, sizeof(byteDegreeString), byteDegreeConversion->Units, byteDegreeConversion->Format);
-
-				if(result > 0)
-				{
-					 result = snprintf((char *)output, outputLength, Format, byteVoltageString, byteDegreeString);
-				}
-			}
-    	}
-    }
-
-    return result;
-}
-
 /***********************************************************************************************************************************************
  * API Functions
  */
@@ -914,30 +807,6 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.ConversionFunction = Convert_String,
 				.Units = "",
 				.Format = "%s",
-		},
-		{
-				.MemoryType = PFC_MEMORYTYPE_TPS_SETTING,
-				.Size = PFC_SIZE_BYTE + PFC_SIZE_SHORT,
-				.BasicType = PFC_BASICTYPE_STRING,
-				.ConversionFunction = Convert_TPS,
-				.Units = "",
-				.Format = "%s,%s",
-		},
-		{
-				.MemoryType = PFC_MEMORYTYPE_IGNITIONTEMPERATURE_SETTING,
-				.Size = PFC_SIZE_BYTE + PFC_SIZE_BYTE,
-				.BasicType = PFC_BASICTYPE_STRING,
-				.ConversionFunction = Convert_IgnitionTemperature,
-				.Units = "",
-				.Format = "%s, %s",
-		},
-		{
-				.MemoryType = PFC_MEMORYTYPE_IGNITIONVOLTAGE_SETTING,
-				.Size = PFC_SIZE_BYTE + PFC_SIZE_BYTE,
-				.BasicType = PFC_BASICTYPE_STRING,
-				.ConversionFunction = Convert_IgnitionVoltage,
-				.Units = "",
-				.Format = "%s, %s",
 		}
 
 };
