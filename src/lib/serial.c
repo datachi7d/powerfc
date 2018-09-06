@@ -74,8 +74,8 @@ int SetInterfaceAttributes(int fd, int speed)
     //tty.c_cc[VMIN] = 0;
     //tty.c_cc[VTIME] = 2;
 
-    tty.c_cc[VMIN] = 255;
-    tty.c_cc[VTIME] = 10;
+    tty.c_cc[VMIN] = 0;
+    tty.c_cc[VTIME] = 0;
 
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
