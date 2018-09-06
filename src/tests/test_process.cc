@@ -179,13 +179,13 @@ protected:
 
         ClientSerialStream.write(writeData, sizeof(writeData)-1);
         ClientSerialStream.flush();
-        usleep(20000);
+        usleep(110000);
         ClientSerialStream.write(writeData, sizeof(writeData));
         ClientSerialStream.flush();
 
         char testReadData[255] = {0};
 
-        ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 500000);
+        ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 1000000);
 
         ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
 

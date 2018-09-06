@@ -75,8 +75,27 @@ int SetInterfaceAttributes(int fd, int speed)
     //tty.c_cc[VTIME] = 2;
 
     tty.c_cc[VMIN] = 0;
-    tty.c_cc[VTIME] = 0;
+    tty.c_cc[VTIME] = 1;
 
+
+    if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+        printf("Error from tcsetattr: %s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+int SetInterfaceVMIN(int fd, uint8_t vmin)
+{
+    struct termios tty;
+
+    if (tcgetattr(fd, &tty) < 0) {
+        printf("Error from tcgetattr: %s\n", strerror(errno));
+        return -1;
+    }
+
+    tty.c_cc[VMIN] = vmin;
+    tty.c_cc[VTIME] = 1;
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
         printf("Error from tcsetattr: %s\n", strerror(errno));
@@ -121,12 +140,19 @@ uint8_t Serial_Read(Serial * serial, uint8_t * buffer, uint8_t size)
 
     if(serial != NULL)
     {
-    	ret = read(serial->serialfd, buffer, size);
+        ret = SetInterfaceVMIN(serial->serialfd, size);
+        if(ret >= 0)
+        {
+            ret = read(serial->serialfd, buffer, size);
+        }
     }
 
-    printf("Read [%p,%d,%d]:", (void *)serial, size, (int)ret);
-    printHex(buffer, (uint8_t)ret);
-    printf("\n");
+    if(ret > 0)
+    {
+        printf("Read [%p,%d,%d]:", (void *)serial, size, (int)ret);
+        printHex(buffer, (uint8_t)ret);
+        printf("\n");
+    }
 
     return ((ret < 0) | (ret != size)) ? 0 : size;
 }
