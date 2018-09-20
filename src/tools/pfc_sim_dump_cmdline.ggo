@@ -3,7 +3,7 @@ version ""
 
 option "serial" s
     "Serial port device path"
-    string
+    required string
     
 option "data" d
     "data file"

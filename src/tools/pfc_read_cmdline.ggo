@@ -9,6 +9,7 @@ option "serial" s
     "Serial port device path"
     required string
     
-option "fcpro" f
-    "FCPRO data file"
-    string
+option "pfcid" i
+    "ID(s) of resource(s) to read"
+    multiple(1-)
+    required int
