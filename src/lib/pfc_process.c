@@ -207,9 +207,38 @@ PFC_Server_Queue_Item * Process_GetQueueItemFromID(PFC_Process * process, PFC_ID
             PFC_Server_Queue_Item * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                     if(value->id == id)
+                    {
+                        result = value;
+                        break;
+                    }
+                }
+                value = PFC_ValueList_NextItemValue(&list);
+            }while( value != NULL );
+        }
+    }
+
+    return result;
+}
+
+PFC_Server_Queue_Item * Process_GetWriteItem(PFC_Process * process)
+{
+    PFC_Server_Queue_Item * result = NULL;
+
+    if(process != NULL)
+    {
+        PFC_ValueList * list = PFC_ValueList_GetFirst(process->serverQueue);
+
+        if(list != NULL)
+        {
+            PFC_Server_Queue_Item * value = PFC_ValueList_GetValue(list);
+            do
+            {
+            	if(value != NULL)
+                {
+                    if(value->operation == PFC_ITEM_OPERATION_WRITE)
                     {
                         result = value;
                         break;
@@ -313,12 +342,24 @@ pfc_error PFC_Process_RequestServerRead(PFC_Process * process, Serial * serial, 
         uint8_t * memory_data = (uint8_t *)PFC_Memory_GetMemoryRegisterPointer(memory, id);
         pfc_size memory_size = PFC_Memory_GetMemoryRegisterSize(memory, id);
 
+        printf("%p %x\n", (void *)serial, id);
+
         if(memory_data != NULL && memory_size > 0)
         {
             result = Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
         }
         else
         {
+//        	if(id == PFC_ID_ACK)
+//        	{
+//        		PFC_Server_Queue_Item * writeItem = NULL;
+//        		if((writeItem = Process_GetWriteItem(process)) != NULL)
+//        		{
+//        			Serial_WritePFCAcknowledge(writeItem->clients, writeItem->id);
+//        			PFC_ValueList_RemoveItem(process->serverQueue, writeItem);
+//        		}
+//        	}
+
             result = PFC_ERROR_NOT_FOUND;
         }
     }
@@ -373,7 +414,7 @@ void Setup_Client_PollFD(PFC_Process * process, struct pollfd * pfd)
         	Serial * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                 	int fd = Serial_GetFD(value);
                 	if(fd >= 0)
@@ -403,11 +444,12 @@ Serial * GetClientFromFD(PFC_Process * process, int fd)
         	Serial * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                 	if(Serial_GetFD(value) == fd)
                 	{
                 		serial = value;
+                		Serial_Reset(serial);
                 		break;
                 	}
                 }
@@ -523,10 +565,21 @@ void Process_ServerQueue(PFC_Process * process)
         pfc_error result = PFC_ERROR_UNSET;
 
         result = Serial_ReadPFCMessage(process->server, &id, data, &size);
+        printf("Trace: %s:%d\n", __FILE__, __LINE__);
 
         if(result == PFC_ERROR_NONE)
         {
-            PFC_Server_Queue_Item * queue_item = (PFC_Server_Queue_Item *)PFC_ValueList_GetFirst(process->serverQueue);
+        	PFC_Server_Queue_Item * queue_item = NULL;
+			if(id == PFC_ID_ACK)
+			{
+				queue_item = Process_GetWriteItem(process);
+			}
+			else
+			{
+				queue_item = (PFC_Server_Queue_Item *)PFC_ValueList_GetFirst(process->serverQueue);
+			}
+
+            printf("Trace: %s:%d\n", __FILE__, __LINE__);
 
             if(queue_item != NULL)
             {
@@ -583,15 +636,18 @@ void Process_ServerQueue(PFC_Process * process)
                     }
                 }
 
+                Process_FreeServerQueueItem(queue_item);
                 PFC_ValueList_RemoveItem(process->serverQueue, queue_item);
             }
             else
             {
-                //TODO: not in queue
+				printf("Error not in queue\n");
+				//TODO: not in queue
             }
         }
         else
         {
+        	printf("Serial read error for server\n");
             //TODO: read error
         }
     }
@@ -617,9 +673,10 @@ void PFC_Process_Run(PFC_Process * process)
 		{
 		    pfd[pfd_count - 1].fd = Serial_GetFD(process->server);
 		    pfd[pfd_count - 1].events = POLLIN;
+		    Serial_Reset(process->server);
 		}
 
-		poll(pfd, pfd_count, 100);
+		poll(pfd, pfd_count, 150);
 
 		for(pfdn = 0; pfdn < pfd_count; pfdn++)
 		{
@@ -660,7 +717,7 @@ void PFC_Process_Free(PFC_Process * process)
 	        	Serial * value = PFC_ValueList_GetValue(list);
 	            do
 	            {
-	                if(value)
+	                if(value != NULL)
 	                {
 	                	Serial_Free(value);
 	                }
@@ -680,7 +737,7 @@ void PFC_Process_Free(PFC_Process * process)
                 PFC_Server_Queue_Item * value = PFC_ValueList_GetValue(list);
                 do
                 {
-                    if(value)
+                	if(value != NULL)
                     {
                         Process_FreeServerQueueItem(value);
                     }

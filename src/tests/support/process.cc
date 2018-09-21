@@ -29,7 +29,7 @@ namespace PFC
 		if (c_pid == 0)
 		{
 			// child
-			//std::cout << "Child: executing " << commandVector[0] << std::endl;
+			std::cout << "Child: executing " << commandVector[0] << std::endl;
 
 			FILE * fd = NULL;
 			if (silent)
@@ -38,6 +38,8 @@ namespace PFC
 				fd = fopen("/dev/null", "at");
 				dup2(fileno(fd), STDOUT_FILENO);
 			}
+
+			dup2(STDOUT_FILENO, STDERR_FILENO);
 
 			// convert the const char * vector to a char * array, required by execvp
 			std::vector<char *> argv(commandVector.size() + 1);    // one extra for the null

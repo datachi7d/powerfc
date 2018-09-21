@@ -15,6 +15,7 @@ extern "C" {
 typedef struct _Serial Serial;
 
 Serial * Serial_New(const char * path);
+void Serial_Reset(Serial * serial);
 uint8_t Serial_Read(Serial * serial, uint8_t * buffer, uint8_t size);
 uint8_t Serial_Write(Serial * serial, uint8_t * buffer, uint8_t size);
 void Serial_FlushInput(Serial * serial);

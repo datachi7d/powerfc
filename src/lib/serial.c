@@ -47,7 +47,7 @@ int SetInterfaceAttributes(int fd, int speed)
     struct termios tty;
 
     if (tcgetattr(fd, &tty) < 0) {
-        printf("Error from tcgetattr: %s\n", strerror(errno));
+        printf("Error from tcgetattr [%d]: %s\n", fd, strerror(errno));
         return -1;
     }
 
@@ -79,7 +79,7 @@ int SetInterfaceAttributes(int fd, int speed)
 
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
-        printf("Error from tcsetattr: %s\n", strerror(errno));
+        printf("Error from tcsetattr [%d]: %s\n", fd, strerror(errno));
         return -1;
     }
     return 0;
@@ -90,7 +90,7 @@ int SetInterfaceVMIN(int fd, uint8_t vmin)
     struct termios tty;
 
     if (tcgetattr(fd, &tty) < 0) {
-        printf("Error from tcgetattr: %s\n", strerror(errno));
+        printf("Error from tcsetattr [%d]: %s\n", fd, strerror(errno));
         return -1;
     }
 
@@ -98,7 +98,7 @@ int SetInterfaceVMIN(int fd, uint8_t vmin)
     tty.c_cc[VTIME] = 1;
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
-        printf("Error from tcsetattr: %s\n", strerror(errno));
+        printf("Error from tcsetattr [%d]: %s\n", fd, strerror(errno));
         return -1;
     }
     return 0;
@@ -120,7 +120,7 @@ Serial * Serial_New(const char * path)
 			{
 				SetInterfaceAttributes(serial->serialfd, B19200);
 				lseek(serial->serialfd, 0, SEEK_END);
-				printf("Serial [%p]: %s\n", (void *)serial, path);
+				printf("Serial [%p:%d]: %s\n", (void *)serial, serial->serialfd, path);
 			}
 			else
 			{
@@ -132,6 +132,17 @@ Serial * Serial_New(const char * path)
 	}
 
 	return serial;
+}
+
+void Serial_Reset(Serial * serial)
+{
+	if(serial != NULL)
+	{
+		if (serial->serialfd >= 0)
+		{
+			SetInterfaceVMIN(serial->serialfd, 0);
+		}
+	}
 }
 
 uint8_t Serial_Read(Serial * serial, uint8_t * buffer, uint8_t size)
@@ -206,7 +217,6 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 		PFC_Header * header = (PFC_Header *)&data_buffer[0];
 		int readLen = 0;
 
-		printf("read1\n");
 		readLen = Serial_Read(serial, (uint8_t *)header, sizeof(*header));
 
 		if(readLen == sizeof(*header))
@@ -218,7 +228,6 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 
 				if(header->Length >= sizeof(*header))
 				{
-				    printf("read2\n");
 					readLen = Serial_Read(serial, &data_buffer[sizeof(*header)], (*size) + 1);
 				}
 				else

@@ -217,7 +217,7 @@ PFC_MemoryValue * PFC_MemoryMap_GetMemoryValue(PFC_MemoryMap * MemoryMap, int Ro
 
                 do
                 {
-                    if(value)
+                    if(value != NULL)
                     {
                         if(value->Row == Row && value->Column == Column)
                         {
@@ -636,7 +636,7 @@ void PFC_MemoryRegister_Free(PFC_MemoryRegister * memoryRegister)
             PFC_MemoryValue * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                     PFC_MemoryValue_Free(value);
                 }
@@ -712,7 +712,7 @@ void PFC_Memory_Free(PFC_Memory * memory)
             PFC_MemoryRegister * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                     PFC_MemoryRegister_Free(value);
                 }
@@ -729,7 +729,7 @@ void PFC_Memory_Free(PFC_Memory * memory)
             PFC_MemoryMap * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                     PFC_MemoryMap_Free(value);
                 }
@@ -746,7 +746,7 @@ void PFC_Memory_Free(PFC_Memory * memory)
             PFC_MemoryTable * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                     PFC_free(value);
                 }
@@ -993,7 +993,7 @@ PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID Re
             PFC_MemoryRegister * value = PFC_ValueList_GetValue(list);
             do
             {
-                if(value)
+            	if(value != NULL)
                 {
                     if(value->ID == RegisterID)
                     {

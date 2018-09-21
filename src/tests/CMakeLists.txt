@@ -41,13 +41,11 @@ endif ()
 add_custom_command (
   OUTPUT test_pfclib_runner_out.xml
   COMMAND ${VALGRIND_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/test_pfclib_runner --gtest_output=xml:test_pfclib_runner_out.xml
+  COMMAND rm test_pfclib_runner_out.xml
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   VERBATIM
 )
 
 if (RUN_TESTS)
-  add_custom_target (
-    test_pfclib_runner_TARGET ALL
-    DEPENDS test_pfclib_runner_out.xml
-  )
+  add_custom_target (test_pfclib_runner_TARGET ALL DEPENDS test_pfclib_runner_out.xml)
 endif ()

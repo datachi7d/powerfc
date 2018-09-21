@@ -14,6 +14,9 @@
 #include "process.h"
 
 #include "pfc_process.h"
+#include "serial.h"
+
+using namespace std;
 
 namespace PFC
 {
@@ -47,35 +50,38 @@ static void catch_alarm(int sig)
 protected:
         std::string ServerSerialPath;
         std::string ClientSerialPath;
-		std::fstream ClientSerialStream;
-		std::fstream ServerSerialStream;
+		Serial * ClientSerialStream;
+		Serial * ServerSerialStream;
 
 		PFC_ProcessTest(): _pidClient(-1), _pidServer(-1),
 		        TestServerSerialPath("/tmp/PFCTestServerSerial"),
 		        TestClientSerialPath("/tmp/PFCTestClientSerial"),
 		        ServerSerialPath("/tmp/PFCServerSerial"),
-		        ClientSerialPath("/tmp/PFCClientSerial")
-		        {}
+		        ClientSerialPath("/tmp/PFCClientSerial"),
+				ClientSerialStream(NULL),
+				ServerSerialStream(NULL)
+				{}
 
-		pid_t Setup_serial(std::fstream &SerialStream, const char * serial1, const char * serial2)
+
+		pid_t Setup_serial(Serial ** SerialStream, const char * serial1, const char * serial2)
 		{
 
 		    pid_t _pid;
 
             char pty1[256] = {0};
-            sprintf(pty1, "pty,raw,echo=0,link=%s", serial1);
+            sprintf(pty1, "pty,raw,echo=0,link=%s", serial2);
 
             char pty2[256] = {0};
-            sprintf(pty2, "pty,raw,echo=0,link=%s", serial2);
+            sprintf(pty2, "pty,raw,echo=0,link=%s", serial1);
 
-            std::vector<const char *> commandVector { "/usr/bin/socat", "-d -d -d -d", pty1, pty2 };
+            std::vector<const char *> commandVector { "/usr/bin/socat", "-D", "-d", "-d", "-d", "-d", "-x", "-lu", pty1, pty2 };
             _pid = SpawnProcess(commandVector, false, false);
 
             int counter = 0;
 
-            while ((!SerialStream.is_open()) && counter < 10)
+            while ((*SerialStream == NULL) && counter < 50)
             {
-                SerialStream.open(serial1, std::ios::in | std::ios::out | std::ios::binary);
+                *SerialStream = Serial_New(serial1);
                 usleep(5000);
                 counter++;
             }
@@ -86,16 +92,20 @@ protected:
 
 		void SetUp()
 		{
-		    _pidClient = Setup_serial(ClientSerialStream, TestClientSerialPath.c_str(), ClientSerialPath.c_str());
+            _pidServer = Setup_serial(&ServerSerialStream, TestServerSerialPath.c_str(), ServerSerialPath.c_str());
 
-			ASSERT_TRUE(ClientSerialStream);
+            ASSERT_TRUE(ServerSerialStream != NULL);
 
-            _pidServer = Setup_serial(ServerSerialStream, TestServerSerialPath.c_str(), ServerSerialPath.c_str());
+		    _pidClient = Setup_serial(&ClientSerialStream, TestClientSerialPath.c_str(), ClientSerialPath.c_str());
 
-            ASSERT_TRUE(ServerSerialStream);
+			ASSERT_TRUE(ClientSerialStream != NULL);
+
+
 		}
 		void TearDown()
 		{
+			Serial_Free(ServerSerialStream);
+			Serial_Free(ClientSerialStream);
 			TerminateProcess(_pidClient);
 			TerminateProcess(_pidServer);
 		}
@@ -126,11 +136,54 @@ protected:
 	    ASSERT_TRUE(process != NULL);
 
 	    ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
-
 	    ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
 
 	    PFC_Process_Free(process);
 	}
+
+    TEST_F(PFC_ProcessTest, test_Process_Dump_NewFree)
+    {
+        PFC_Process * process = PFC_Process_NewFromDump("test_memory_dump.dat");
+
+	    ASSERT_TRUE(process != NULL);
+
+	    ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
+
+	    ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
+
+        PFC_Process_Free(process);
+    }
+
+    TEST_F(PFC_ProcessTest, test_Process_Server_Unexpected_Write)
+    {
+        PFC_Process * process = PFC_Process_NewFromConfig("test_memory_config.xml");
+
+        ASSERT_TRUE(process != NULL);
+
+        ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
+
+        ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
+
+        uint8_t writeData[] = {0xf2, 0x02, 0x0b};
+
+        ASSERT_EQ(Serial_Write(ServerSerialStream,writeData, sizeof(writeData)), (uint8_t)sizeof(writeData));
+
+        pthread_t processThread;
+        pthread_create(&processThread, NULL, do_process, (void *)process);
+
+//        char testReadData[255] = {0};
+//
+//        ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 100000);
+//
+//        ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
+
+        sleep(1);
+
+        PFC_Process_Halt(process);
+        pthread_join(processThread, NULL);
+
+        PFC_Process_Free(process);
+    }
 
     TEST_F(PFC_ProcessTest, test_Process_Client_Write)
     {
@@ -142,17 +195,16 @@ protected:
 
         ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
 
-        char writeData[] = {0xf6, 0x03, 0x00, 0x06};
+        uint8_t writeData[] = {0xf6, 0x03, 0x00, 0x06};
 
-        ClientSerialStream.write(writeData, sizeof(writeData));
-        ClientSerialStream.flush();
+        ASSERT_EQ(Serial_Write(ClientSerialStream,writeData, sizeof(writeData)), (uint8_t)sizeof(writeData));
 
         pthread_t processThread;
         pthread_create(&processThread, NULL, do_process, (void *)process);
 
-        char testReadData[255] = {0};
+        uint8_t testReadData[255] = {0};
 
-        ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 100000);
+        ASSERT_USECS(Serial_Read(ServerSerialStream, testReadData, sizeof(writeData)), 100000);
 
         ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
 
@@ -172,20 +224,18 @@ protected:
 
         ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
 
-        char writeData[] = {0xf6, 0x03, 0x00, 0x06};
+        uint8_t writeData[] = {0xf6, 0x03, 0x00, 0x06};
 
         pthread_t processThread;
         pthread_create(&processThread, NULL, do_process, (void *)process);
 
-        ClientSerialStream.write(writeData, sizeof(writeData)-1);
-        ClientSerialStream.flush();
+        ASSERT_EQ(Serial_Write(ClientSerialStream,writeData, sizeof(writeData)-1), (uint8_t)sizeof(writeData)-1);
         usleep(110000);
-        ClientSerialStream.write(writeData, sizeof(writeData));
-        ClientSerialStream.flush();
+        ASSERT_EQ(Serial_Write(ClientSerialStream,writeData, sizeof(writeData)), (uint8_t)sizeof(writeData));
 
-        char testReadData[255] = {0};
+        uint8_t testReadData[255] = {0};
 
-        ASSERT_USECS(ServerSerialStream.read(testReadData, sizeof(writeData)), 1000000);
+        ASSERT_USECS(Serial_Read(ServerSerialStream, testReadData, sizeof(writeData)), 100000);
 
         ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
 
@@ -203,19 +253,17 @@ protected:
 
         ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
 
-        char writeData[] = {0xf6, 0x03, 0x00, 0x06};
+        uint8_t writeData[] = {0xf6, 0x03, 0x00, 0x06};
 
-        ClientSerialStream.write(writeData, sizeof(writeData));
-        ClientSerialStream.flush();
+        ASSERT_EQ(Serial_Write(ClientSerialStream,writeData, sizeof(writeData)), (uint8_t)sizeof(writeData));
 
         pthread_t processThread;
         pthread_create(&processThread, NULL, do_process, (void *)process);
 
-        char testReadData[255] = {0};
-        char expectedData[] = {0xf2, 0x02, 0x0b};
+        uint8_t testReadData[255] = {0};
+        uint8_t expectedData[] = {0xf2, 0x02, 0x0b};
 
-        ASSERT_USECS(ClientSerialStream.read(testReadData, sizeof(expectedData)), 100000);
-
+        ASSERT_USECS(Serial_Read(ClientSerialStream, testReadData, sizeof(expectedData)), 100000);
         ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
 
         PFC_Process_Halt(process);
@@ -224,118 +272,36 @@ protected:
         PFC_Process_Free(process);
     }
 
-	/*
-	TEST_F(PFC_Serial, test_Serial_NewFree)
-	{
-		Serial * serial = Serial_New("/tmp/PFCSerial");
+    TEST_F(PFC_ProcessTest, test_Process_SimMode_Client_Write_Server_Queue)
+    {
+    	PFC_Process * process = PFC_Process_NewFromConfig("test_memory_config.xml");
 
-		ASSERT_TRUE(serial != NULL);
+        ASSERT_TRUE(process != NULL);
 
-		Serial_Free(serial);
-	}
+        ASSERT_EQ(PFC_Process_AddClient(process, ClientSerialPath.c_str()), PFC_ERROR_NONE);
+        ASSERT_EQ(PFC_Process_SetServer(process, ServerSerialPath.c_str()), PFC_ERROR_NONE);
 
+        uint8_t writeData[] = {0xf6, 0x03, 0x00, 0x06};
 
-	TEST_F(PFC_Serial, test_Serial_Write)
-	{
-		Serial * serial = Serial_New("/tmp/PFCSerial");
+        ASSERT_EQ(Serial_Write(ClientSerialStream,writeData, sizeof(writeData)), (uint8_t)sizeof(writeData));
 
-		EXPECT_TRUE(serial != NULL);
+        pthread_t processThread;
+        pthread_create(&processThread, NULL, do_process, (void *)process);
 
-		uint8_t writeData[] = {0x01, 0x02, 0x03, 0x13, 0x11, 0xe0};
-		char testReadData[sizeof(writeData)] = {0};
+        uint8_t testReadData[255] = {0};
+        uint8_t expectedData[] = {0xf2, 0x02, 0x0b};
 
-		ASSERT_EQ(Serial_Write(serial, writeData, sizeof(writeData)), sizeof(writeData));
+        ASSERT_USECS(Serial_Read(ServerSerialStream, testReadData, sizeof(writeData)), 100000);
+        ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
 
-		ASSERT_USECS(SerialStream.read(testReadData, sizeof(testReadData)), 100000);
+        ASSERT_EQ(Serial_Write(ServerSerialStream,expectedData, sizeof(expectedData)), (uint8_t)sizeof(expectedData));
+        ASSERT_USECS(Serial_Read(ClientSerialStream, testReadData, sizeof(expectedData)), 100000);
+        ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
 
-		ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
+        PFC_Process_Halt(process);
+        pthread_join(processThread, NULL);
 
-		Serial_Free(serial);
-	}
-
-	TEST_F(PFC_Serial, test_Serial_Read)
-	{
-		Serial * serial = Serial_New("/tmp/PFCSerial");
-
-		EXPECT_TRUE(serial != NULL);
-
-		char writeData[] = {0x01, 0x02, 0x03, 0x13, 0x11, -100};
-		uint8_t testReadData[sizeof(writeData)] = {0};
-
-		SerialStream.write(writeData, sizeof(writeData));
-		SerialStream.flush();
-
-		ASSERT_EQ(Serial_Read(serial, testReadData, sizeof(testReadData)), sizeof(testReadData));
-
-		ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) == 0);
-
-		Serial_Free(serial);
-	}
-
-	TEST_F(PFC_Serial, test_Serial_Read_Timeout)
-	{
-		Serial * serial = Serial_New("/tmp/PFCSerial");
-
-		EXPECT_TRUE(serial != NULL);
-
-		char writeData[] = {0x01, 0x02, 0x03, 0x13, 0x11, -100};
-		uint8_t testReadData[sizeof(writeData)] = {0};
-
-		SerialStream.write(writeData, sizeof(writeData) - 1);
-		SerialStream.flush();
-
-		ASSERT_EQ(Serial_Read(serial, testReadData, sizeof(testReadData)), 0);
-
-		ASSERT_TRUE(memcmp(writeData, testReadData, sizeof(writeData)) != 0);
-
-		Serial_Free(serial);
-	}
-
-	TEST_F(PFC_Serial, test_Serial_ReadMessage)
-	{
-		Serial * serial = Serial_New("/tmp/PFCSerial");
-
-		EXPECT_TRUE(serial != NULL);
-
-		char writeData[] = {0xf6, 0x03, 0x00, 0x06};
-		uint8_t testReadData[255] = {0};
-
-		SerialStream.write(writeData, sizeof(writeData));
-		SerialStream.flush();
-
-		PFC_ID ID = 0;
-		pfc_size size = 0;
-
-		ASSERT_EQ(Serial_ReadPFCMessage(serial, &ID, testReadData, &size), PFC_ERROR_NONE);
-
-		ASSERT_EQ(size, 1);
-		ASSERT_EQ(ID, 0xf6);
-		ASSERT_EQ(testReadData[0], 0);
-
-		Serial_Free(serial);
-	}
-
-	TEST_F(PFC_Serial, test_Serial_WriteMessage)
-	{
-		Serial * serial = Serial_New("/tmp/PFCSerial");
-
-		EXPECT_TRUE(serial != NULL);
-
-		char expectedData[] = {0xf6, 0x03, 0x00, 0x06};
-		char testReadData[255] = {0};
-
-		PFC_ID ID = 0xf6;
-		pfc_size size = 1;
-		uint8_t writeData = 0;
-
-		ASSERT_EQ(Serial_WritePFCMessage(serial, ID, &writeData, size), PFC_ERROR_NONE);
-
-		ASSERT_USECS(SerialStream.read(testReadData, sizeof(expectedData)), 100000);
-
-		ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
-
-		Serial_Free(serial);
-	}
-	*/
+        PFC_Process_Free(process);
+    }
 
 }

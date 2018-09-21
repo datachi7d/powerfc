@@ -37,10 +37,13 @@ PFC_ValueList * PFC_ValueList_GetFirst(PFC_ValueList * List)
 {
     PFC_ValueList * item = List;
 
-    if(item != NULL && item->value != NULL)
+    if(item != NULL)
     {
-        while(item->previous != NULL && item->value != NULL)
-            item = item->previous;
+    	if(item->value != NULL)
+    	{
+			while(item->previous != NULL && item->value != NULL)
+				item = item->previous;
+    	}
     }
     else
     {
@@ -111,14 +114,33 @@ pfc_error PFC_ValueList_RemoveItem(PFC_ValueList * List, void * Value)
 
             if(valueListItem->value == Value)
             {
-                if(valueListItem->previous != NULL)
-                    valueListItem->previous->next = valueListItem->next;
+            	//Do not free the first item in the list - it is the list
+            	if(PFC_ValueList_GetFirst(List) == valueListItem)
+            	{
+            		if(valueListItem->next != NULL)
+            		{
+            			PFC_ValueList * old = valueListItem->next;
+            			valueListItem->value = valueListItem->next->value;
+            			valueListItem->next = valueListItem->next->next;
+            			valueListItem->previous = NULL;
+            			PFC_free(old);
+            		}
+            		else
+            		{
+            			valueListItem->value = NULL;
+            		}
+            	}
+            	else
+            	{
+					if(valueListItem->previous != NULL)
+						valueListItem->previous->next = valueListItem->next;
 
-                if(valueListItem->next != NULL)
-                    valueListItem->next->previous = valueListItem->previous;
+					if(valueListItem->next != NULL)
+						valueListItem->next->previous = valueListItem->previous;
 
-                PFC_free(valueListItem);
-                valueListItem = NULL;
+					PFC_free(valueListItem);
+					valueListItem = NULL;
+            	}
 
                 Result = PFC_ERROR_NONE;
             }
