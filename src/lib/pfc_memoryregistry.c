@@ -75,7 +75,6 @@ void PFC_MemoryValue_Free(PFC_MemoryValue * ptr)
     if(ptr != NULL)
     {
         PFC_free(ptr->Name);
-        PFC_free(ptr);
     }
 }
 
