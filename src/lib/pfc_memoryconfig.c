@@ -91,6 +91,7 @@ pfc_error XML_GetChildValueAsHex(TreeNode node, const char * name, uint16_t * he
 {
     pfc_error Result = PFC_ERROR_UNSET;
     const char * value = XML_GetChildValue(node, name);
+    TreeNode * childNode = XML_GetChild(node, name);
 
     if(value != NULL)
     {
@@ -104,7 +105,7 @@ pfc_error XML_GetChildValueAsHex(TreeNode node, const char * name, uint16_t * he
         }
         else
         {
-            print_XmlLineError(node);
+            print_XmlLineError(childNode);
             Result = PFC_ERROR_XML;
         }
     }
