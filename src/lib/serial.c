@@ -158,12 +158,13 @@ uint8_t Serial_Read(Serial * serial, uint8_t * buffer, uint8_t size)
         }
     }
 
-    if(ret > 0)
-    {
-        printf("Read [%p,%d,%d]:", (void *)serial, size, (int)ret);
-        printHex(buffer, (uint8_t)ret);
-        printf("\n");
-    }
+    //TODO: debug mode
+//    if(ret > 0)
+//    {
+//        printf("Read [%p,%d,%d]:", (void *)serial, size, (int)ret);
+//        printHex(buffer, (uint8_t)ret);
+//        printf("\n");
+//    }
 
     return ((ret < 0) | (ret != size)) ? 0 : size;
 }
@@ -242,9 +243,10 @@ pfc_error Serial_ReadPFCMessage(Serial * serial, PFC_ID * ID, uint8_t * data, pf
 					{
 						*ID = header->ID;
 						memcpy(data, &data_buffer[sizeof(*header)], *size);
-						printf("Recv Message [%p]: ", (void *)serial);
-						printHex(data_buffer,*size + header->Length);
-						printf("\n");
+// TODO: debug mode
+//						printf("Recv Message [%p]: ", (void *)serial);
+//						printHex(data_buffer,*size + header->Length);
+//						printf("\n");
 						result = PFC_ERROR_NONE;
 					}
 					else
@@ -315,9 +317,10 @@ pfc_error Serial_WritePFCMessage(Serial * serial, PFC_ID ID, uint8_t * data, pfc
 	    {
 	    	data_buffer[header->Length] = CheckSum(data_buffer, header->Length);
 	    	Serial_Write(serial, data_buffer, header->Length + 1);
-			printf("Send Message [%p]: ", (void *)serial);
-			printHex(data_buffer,header->Length + 1);
-			printf("\n");
+// TODO: debug
+//			printf("Send Message [%p]: ", (void *)serial);
+//			printHex(data_buffer,header->Length + 1);
+//			printf("\n");
 
 	    }
 	}

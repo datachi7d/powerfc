@@ -1,0 +1,6 @@
+package "pfc_dump"
+version ""
+
+option "serial" s
+    "Serial port device path"
+    required string

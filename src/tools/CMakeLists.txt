@@ -34,6 +34,17 @@ add_gengetopt_files(pfc_read_SRC pfc_read_cmdline.ggo)
 add_executable (pfc_read ${pfc_read_SRC})
 target_link_libraries(pfc_read pfclib_static)
 
+#PFC dump application
+
+set(pfc_dump_SRC
+	pfc_dump.c
+)
+
+add_gengetopt_files(pfc_dump_SRC pfc_dump_cmdline.ggo)
+
+add_executable (pfc_dump ${pfc_dump_SRC})
+target_link_libraries(pfc_dump pfclib_static)
+
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-error=unused-but-set-variable")
 

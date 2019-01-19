@@ -2,7 +2,7 @@
 
 #include "pfc_read_cmdline.h"
 
-int main()
+int main(int argc, char * argv[])
 {
 
 }
