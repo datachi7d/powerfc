@@ -2,5 +2,9 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: make GCOV=1 gcov 
+  - init: make
     name: build
+
+vscode:
+  extensions:
+    - ms-vscode.cmake-tools@1.6.0:lvoCR5usjseB5thI3sZhWA==
