@@ -52,7 +52,7 @@ PFC_MemoryRegister * PFC_Memory_GetMemoryRegister(PFC_Memory * Memory, PFC_ID Re
 void *  PFC_Memory_GetMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID);
 pfc_error  PFC_Memory_UpdateMemoryRegisterPointer(PFC_Memory * Memory, PFC_ID RegisterID);
 pfc_size  PFC_Memory_GetMemoryRegisterSize(PFC_Memory * Memory, PFC_ID RegisterID);
-void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName);
+void PFC_Memory_LoadFCPRO(PFC_Memory * Memory, const char * FileName);
 void PFC_Memory_Dump(PFC_Memory * Memory);
 
 pfc_size PFC_MemoryMap_Malloc(PFC_MemoryMap * MemoryMap);

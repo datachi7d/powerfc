@@ -1133,7 +1133,7 @@ PFC_MemoryValue *  PFC_Memory_GetFirstMemoryValue(PFC_Memory * Memory, PFC_ID Re
     return memoryValue;
 }
 
-void PFC_Memroy_LoadFCPRO(PFC_Memory * Memory, const char * FileName)
+void PFC_Memory_LoadFCPRO(PFC_Memory * Memory, const char * FileName)
 {
 	if(Memory != NULL)
 	{
