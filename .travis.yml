@@ -1,19 +1,18 @@
 language: c
+dist: focal
 addons:
  apt:
-  sources:
-   - george-edison55-precise-backports
-   - ubuntu-toolchain-r-test
   packages:
    - cmake
    - cmake-data
-   - gcc-5
-   - g++-5
-   - python-virtualenv
+   - gcc
+   - g++
+   - python3
    - lcov
    - socat
    - gengetopt
    - valgrind
+   - libgtest-dev
 compiler:
   - gcc
 before_install:
