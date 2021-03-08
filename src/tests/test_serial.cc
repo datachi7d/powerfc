@@ -54,7 +54,7 @@ protected:
 			char pty2[256] = {0};
 			sprintf(pty2, "pty,raw,echo=0,link=%s", SerialPath.c_str());
 
-			std::vector<const char *> commandVector { "/usr/bin/socat", "-d -d -d -d", pty1, pty2 };
+			std::vector<const char *> commandVector { "/usr/bin/socat", "-d", "-d", "-d", "-d", pty1, pty2 };
 			_pid = SpawnProcess(commandVector, false, false);
 
 			int counter = 0;
