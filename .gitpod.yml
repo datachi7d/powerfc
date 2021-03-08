@@ -3,6 +3,7 @@ image:
 
 tasks:
   - init: make
+    command: make test
     name: build
 
 vscode:
