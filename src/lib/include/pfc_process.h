@@ -16,6 +16,7 @@ pfc_error PFC_Process_LoadFCPro(PFC_Process * process, const char * FCProFile);
 pfc_error PFC_Process_AddClient(PFC_Process * process, const char * serialPath);
 pfc_error PFC_Process_SetServer(PFC_Process * process, const char * serialPath);
 pfc_error PFC_Process_RequestServerRead(PFC_Process * process, Serial * serial, PFC_ID id);
+void PFC_Process_DumpValue(PFC_Process * process, PFC_ID id);
 void PFC_Process_Run(PFC_Process * process);
 void PFC_Process_Free(PFC_Process * process);
 

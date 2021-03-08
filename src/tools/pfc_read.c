@@ -74,29 +74,11 @@ int main(int argc, char * argv[])
                 {
                     PFC_Process_Run(process);
                 }
+
+                PFC_Process_DumpValue(process, *ai.pfcid_arg);
             }
         }
-    	// Serial * serial = Serial_New(ai.serial_arg);
-
-        // if(serial != NULL)
-        // {
-
-        //     PFC_MemoryConfig * memoryConfig = PFC_MemoryConfig_New(ai., true);
-
-
-        //     pfc_error error = PFC_ERROR_NONE;
-        //     if((error = Serial_WritePFCMessage(serial, *ai.pfcid_arg, NULL, 0)) == PFC_ERROR_NONE)
-        //     {
-        //         ReadResponse(serial, *ai.pfcid_arg);
-        //     }
-        //     else
-        //     {
-        //         printf("Error writing to serial %s (%d)\n", ai.serial_arg, error);
-        //         result = -1;
-        //     }
-        // }
     }
-
     return result;
 }
 
