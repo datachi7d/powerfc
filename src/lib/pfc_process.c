@@ -126,7 +126,7 @@ pfc_error PFC_Process_LoadFCPro(PFC_Process * process, const char * FCProFile)
 
 		if(Memory != NULL)
 		{
-			PFC_Memroy_LoadFCPRO(Memory, FCProFile);
+			PFC_Memory_LoadFCPRO(Memory, FCProFile);
 			result = PFC_ERROR_NONE;
 		}
 		else
@@ -346,6 +346,7 @@ pfc_error PFC_Process_RequestServerRead(PFC_Process * process, Serial * serial, 
 
         if(memory_data != NULL && memory_size > 0)
         {
+            printf("Reading ID: %d\n", id);
             result = Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
         }
         else
@@ -502,7 +503,7 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
 
                 if(size == 0)
                 {
-                    printf("Read for %02x[%p:%d]\n", id, memory_data, memory_size);
+                    printf("Read for %02x[%p:%d]\n", id, (void *)memory_data, memory_size);
 
                     if(memory_data != NULL && memory_size != 0)
                     {
@@ -613,6 +614,7 @@ void Process_ServerQueue(PFC_Process * process)
                 else
                 {
                     //TODO: something went wrong...
+                    printf("error\n");
                 }
 
                 // Send response back to client that requested it

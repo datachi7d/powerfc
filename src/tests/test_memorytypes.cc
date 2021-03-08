@@ -61,7 +61,7 @@ TEST_P(TestConvertValueFloat, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestConvertValueFloat1,
         TestConvertValueFloat,
         ::testing::Values(
@@ -92,7 +92,7 @@ TEST_P(TestConvertValueInt, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestConvertValueInt1,
         TestConvertValueInt,
         ::testing::Values(
@@ -124,7 +124,7 @@ TEST_P(TestConvertValueString, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestConvertValueString1,
         TestConvertValueString,
         ::testing::Values(
@@ -166,7 +166,7 @@ TEST_P(TestMemoryTypeString, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestMemoryTypeString1,
         TestMemoryTypeString,
         ::testing::Values(
