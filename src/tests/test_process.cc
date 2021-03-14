@@ -299,7 +299,7 @@ protected:
         ASSERT_USECS(Serial_Read(ClientSerialStream, testReadData, sizeof(expectedData)), 100000);
         ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
 
-        PFC_Process_DumpValue(process, 0x03);
+        PFC_Process_DumpValue(process, 0xf6);
 
         PFC_Process_Halt(process);
         pthread_join(processThread, NULL);
