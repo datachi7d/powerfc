@@ -133,7 +133,7 @@ pfc_size PFC_Convert_PFCValueSize(pfc_memorytype MemoryType);
 pfc_conversion_error PFC_Convert_PFCValueToFloat(pfc_memorytype MemoryType, const void * Value, float * ConvertedValue);
 pfc_conversion_error PFC_Convert_PFCValueToInt(pfc_memorytype MemoryType, const void * Value, int * ConvertedValue);
 pfc_conversion_error PFC_Convert_PFCValueToString(pfc_memorytype MemoryType, bool Unit, const void * Value, char * ConvertedValue, int ConvertedValueLength);
-
+pfc_conversion_error PFC_Convert_StringToPFCValue(pfc_memorytype MemoryType, bool Unit, void * Value, const char * StringValue, int StringValueSize);
 
 const char * PFC_MemoryType_ToString(pfc_memorytype memory_type);
 pfc_memorytype PFC_MemoryType_FromString(const char * name);

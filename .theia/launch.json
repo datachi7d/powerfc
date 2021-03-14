@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "configurations": [
       {
-          "name": "(gdb) Launch",
+          "name": "(gdb) Launch pfc_read",
           "type": "cppdbg",
           "request": "launch",
           "program": "${workspaceFolder}/build/src/tools/pfc_read",
@@ -23,6 +23,35 @@
                   "description": "Enable pretty-printing for gdb",
                   "text": "-enable-pretty-printing",
                   "ignoreFailures": true
+              }
+          ]
+      },
+    {
+          "name": "(gdb) Launch ctest",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "/usr/bin/ctest",
+          "args": [
+              "-R",
+              "'TestConvertValueFromString1/TestConvertValueFromString.test_MemoryTypes/48-byteobject<10-0000-000'",
+              "-VV"
+          ],
+          "stopAtEntry": false,
+          "cwd": "${workspaceFolder}/build",
+          "environment": [],
+          "externalConsole": false,
+          "MIMode": "gdb",
+          "setupCommands": [
+              {
+                  "description": "Enable pretty-printing for gdb",
+                  "text": "-enable-pretty-printing",
+                  "ignoreFailures": true
+              },
+              {
+                  "text": "-gdb-set follow-fork-mode child"
+              },
+                            {
+                  "text": "-gdb-set detach-on-fork off"
               }
           ]
       }
