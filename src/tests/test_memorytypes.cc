@@ -61,7 +61,7 @@ TEST_P(TestConvertValueFloat, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestConvertValueFloat1,
         TestConvertValueFloat,
         ::testing::Values(
@@ -92,7 +92,7 @@ TEST_P(TestConvertValueInt, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestConvertValueInt1,
         TestConvertValueInt,
         ::testing::Values(
@@ -124,7 +124,7 @@ TEST_P(TestConvertValueString, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestConvertValueString1,
         TestConvertValueString,
         ::testing::Values(
@@ -143,6 +143,44 @@ INSTANTIATE_TEST_CASE_P(
                 detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80-35),        true, "-35 °C",         PFC_CONVERSION_ERROR_NOERROR }
         ));
 
+class TestConvertValueFromString : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeStringResource>
+{
+    void SetUp() {  }
+    void TearDown() {  }
+};
+
+TEST_P(TestConvertValueFromString, test_MemoryTypes)
+{
+    detail::TestMemoryTypeStringResource data = GetParam();
+    uint16_t tempData = 0;
+    const char * inputValue = data.expectedConvertedValue.c_str();
+
+    ASSERT_EQ(data.expectedResult, PFC_Convert_StringToPFCValue( data.memoryType, data.Unit, (void*)&tempData, inputValue, strlen(inputValue)));
+
+    if(data.expectedResult == PFC_CONVERSION_ERROR_NOERROR)
+    {
+        ASSERT_EQ(data.rawValue, tempData);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        TestConvertValueFromString1,
+        TestConvertValueFromString,
+        ::testing::Values(
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTFLOAT,       1,              true, "0.004",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTFLOAT,       0xffff,         true, "262.140",        PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       0x8001,         true, "0.01 kg/cm²",    PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       0x8000 + (157), true, "1.57 kg/cm²",    PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       0,              true, "-760 mmHg",      PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTBOOST,       (760-434),      true, "-434 mmHg",      PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTVOLTAGE,     1,              true, "0.1 V",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTVOLTAGE,     150,            true, "15.0 V",         PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTMILLISECOND, 1,              true, "0.004 ms",       PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTMILLISECOND, 9999,           true, "39.996 ms",      PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_SHORTPERCENTAGE,  (9999*2),       true, "99.990 %",       PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80+20),        true, "20 °C",          PFC_CONVERSION_ERROR_NOERROR },
+                detail::TestMemoryTypeStringResource { PFC_MEMORYTYPE_BYTETEMPERATURE,  (80-35),        true, "-35 °C",         PFC_CONVERSION_ERROR_NOERROR }
+        ));
 
 class TestMemoryTypeString : public testing::Test, public ::testing::WithParamInterface< detail::TestMemoryTypeStringResource>
 {
@@ -166,7 +204,7 @@ TEST_P(TestMemoryTypeString, test_MemoryTypes)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
         TestMemoryTypeString1,
         TestMemoryTypeString,
         ::testing::Values(

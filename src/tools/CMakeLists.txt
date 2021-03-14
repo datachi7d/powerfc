@@ -46,7 +46,7 @@ add_executable (pfc_dump ${pfc_dump_SRC})
 target_link_libraries(pfc_dump pfclib_static)
 
 
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-error=unused-but-set-variable")
+#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-error=unused-but-set-variable")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

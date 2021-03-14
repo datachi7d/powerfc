@@ -33,7 +33,7 @@ clean:
 	find $(BUILD_DIR) | grep runner_out.xml | xargs -r rm
 
 test:
-	make -C $(BUILD_DIR) test_pfclib_runner_TARGET
+	make -C $(BUILD_DIR) test
 
 ifeq ($(GCOV),1)
 gcov: all

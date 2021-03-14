@@ -74,7 +74,8 @@ protected:
             char pty2[256] = {0};
             sprintf(pty2, "pty,raw,echo=0,link=%s", serial1);
 
-            std::vector<const char *> commandVector { "/usr/bin/socat", "-D", "-d", "-d", "-d", "-d", "-x", "-lu", pty1, pty2 };
+            // For added debug use: "-d", "-d", "-d", "-d",
+            std::vector<const char *> commandVector { "/usr/bin/socat", "-D", "-x", "-lu", pty1, pty2 };
             _pid = SpawnProcess(commandVector, false, false);
 
             int counter = 0;
@@ -297,6 +298,8 @@ protected:
         ASSERT_EQ(Serial_Write(ServerSerialStream,expectedData, sizeof(expectedData)), (uint8_t)sizeof(expectedData));
         ASSERT_USECS(Serial_Read(ClientSerialStream, testReadData, sizeof(expectedData)), 100000);
         ASSERT_TRUE(memcmp(expectedData, testReadData, sizeof(expectedData)) == 0);
+
+        PFC_Process_DumpValue(process, 0xf6);
 
         PFC_Process_Halt(process);
         pthread_join(processThread, NULL);

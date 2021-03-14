@@ -1,3 +1,5 @@
+include(GoogleTest)
+
 set (test_pfclib_runner_SOURCES
 	main.cc
 	test_lists.cc
@@ -26,6 +28,8 @@ add_executable (test_pfclib_runner ${test_pfclib_runner_SOURCES})
 target_include_directories (test_pfclib_runner PRIVATE ${test_pfclib_runner_INCLUDE_DIRS})
 target_link_libraries (test_pfclib_runner ${test_pfclib_runner_LIBRARIES})
 
+gtest_discover_tests(test_pfclib_runner PROPERTIES TIMEOUT 30)
+
 configure_file(test_memory_config.xml test_memory_config.xml COPYONLY)
 configure_file(test_memory_dump.dat test_memory_dump.dat COPYONLY)
 configure_file(FCPRO.hd1 FCPRO.hd1 COPYONLY)
@@ -38,14 +42,14 @@ endif ()
 
 
 
-add_custom_command (
-  OUTPUT test_pfclib_runner_out.xml
-  COMMAND ${VALGRIND_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/test_pfclib_runner --gtest_output=xml:test_pfclib_runner_out.xml
-  COMMAND rm test_pfclib_runner_out.xml
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  VERBATIM
-)
+#add_custom_command (
+#  OUTPUT test_pfclib_runner_out.xml
+#  COMMAND ${VALGRIND_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/test_pfclib_runner --gtest_output=xml:test_pfclib_runner_out.xml
+#  COMMAND rm test_pfclib_runner_out.xml
+#  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+#  VERBATIM
+#)
 
-if (RUN_TESTS)
-  add_custom_target (test_pfclib_runner_TARGET ALL DEPENDS test_pfclib_runner_out.xml)
-endif ()
+#if (RUN_TESTS)
+#  add_custom_target (test_pfclib_runner_TARGET ALL DEPENDS test_pfclib_runner_out.xml)
+#endif ()

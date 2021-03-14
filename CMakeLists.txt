@@ -3,6 +3,8 @@ project (pfclib)
 
 enable_testing ()
 
+find_package(GTest REQUIRED)
+
 option (BUILD_TESTS "Build tests" ON)
 option (RUN_TESTS "Enable tests" ON)
 option (RUN_VALGRIND "Enable valgrind of tests" ON)

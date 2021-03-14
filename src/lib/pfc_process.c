@@ -126,7 +126,7 @@ pfc_error PFC_Process_LoadFCPro(PFC_Process * process, const char * FCProFile)
 
 		if(Memory != NULL)
 		{
-			PFC_Memroy_LoadFCPRO(Memory, FCProFile);
+			PFC_Memory_LoadFCPRO(Memory, FCProFile);
 			result = PFC_ERROR_NONE;
 		}
 		else
@@ -264,7 +264,11 @@ pfc_error Process_NewServerQueueItem(PFC_Process * process, Serial * clientSeria
 
         if(queueItem->clients != NULL)
         {
-            PFC_ValueList_AddItem(queueItem->clients, clientSerial);
+            if(clientSerial != NULL)
+            {
+                PFC_ValueList_AddItem(queueItem->clients, clientSerial);
+            }
+            
 
             queueItem->id = id;
             queueItem->data = data;
@@ -346,6 +350,7 @@ pfc_error PFC_Process_RequestServerRead(PFC_Process * process, Serial * serial, 
 
         if(memory_data != NULL && memory_size > 0)
         {
+            printf("Reading ID: %d\n", id);
             result = Process_AddServerRequest(process, serial, id, PFC_ITEM_OPERATION_READ, memory_data, memory_size);
         }
         else
@@ -502,7 +507,7 @@ void Process_ClientRequest(PFC_Process * process, Serial * serial)
 
                 if(size == 0)
                 {
-                    printf("Read for %02x[%p:%d]\n", id, memory_data, memory_size);
+                    printf("Read for %02x[%p:%d]\n", id, (void *)memory_data, memory_size);
 
                     if(memory_data != NULL && memory_size != 0)
                     {
@@ -565,7 +570,6 @@ void Process_ServerQueue(PFC_Process * process)
         pfc_error result = PFC_ERROR_UNSET;
 
         result = Serial_ReadPFCMessage(process->server, &id, data, &size);
-        printf("Trace: %s:%d\n", __FILE__, __LINE__);
 
         if(result == PFC_ERROR_NONE)
         {
@@ -576,10 +580,8 @@ void Process_ServerQueue(PFC_Process * process)
 			}
 			else
 			{
-				queue_item = (PFC_Server_Queue_Item *)PFC_ValueList_GetFirst(process->serverQueue);
+				queue_item = (PFC_Server_Queue_Item *)PFC_ValueList_GetValue(PFC_ValueList_GetFirst(process->serverQueue));
 			}
-
-            printf("Trace: %s:%d\n", __FILE__, __LINE__);
 
             if(queue_item != NULL)
             {
@@ -613,6 +615,7 @@ void Process_ServerQueue(PFC_Process * process)
                 else
                 {
                     //TODO: something went wrong...
+                    printf("error\n");
                 }
 
                 // Send response back to client that requested it
@@ -766,5 +769,19 @@ bool PFC_Process_Running(PFC_Process * process)
 void PFC_Process_Halt(PFC_Process * process)
 {
     process->running = false;
+}
+
+void PFC_Process_DumpValue(PFC_Process * process, PFC_ID id)
+{
+    PFC_Memory * memory = PFC_MemoryConfig_GetMemory(process->MemoryConfig);
+    if(memory != NULL)
+    {
+        PFC_MemoryRegister * memoryRegister = PFC_Memory_GetMemoryRegister(memory, id);
+        
+        if(memoryRegister != NULL)
+        {
+            PFC_MemoryRegister_DumpValue(memoryRegister, memory);
+        }
+    }
 }
 

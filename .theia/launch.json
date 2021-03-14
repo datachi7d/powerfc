@@ -1,0 +1,59 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "(gdb) Launch pfc_read",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "${workspaceFolder}/build/src/tools/pfc_read",
+          "args": [
+              "-s", "/tmp/sim2",
+              "-c", "${workspaceFolder}/src/tests/test_memory_config.xml",
+              "-i", "129"
+          ],
+          "stopAtEntry": false,
+          "cwd": "${workspaceFolder}",
+          "environment": [],
+          "externalConsole": false,
+          "MIMode": "gdb",
+          "setupCommands": [
+              {
+                  "description": "Enable pretty-printing for gdb",
+                  "text": "-enable-pretty-printing",
+                  "ignoreFailures": true
+              }
+          ]
+      },
+    {
+          "name": "(gdb) Launch ctest",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "/usr/bin/ctest",
+          "args": [
+              "-R",
+              "'TestConvertValueFromString1/TestConvertValueFromString.test_MemoryTypes/48-byteobject<15-0000-0000-0001'",
+              "-VV"
+          ],
+          "stopAtEntry": false,
+          "cwd": "${workspaceFolder}/build",
+          "environment": [],
+          "externalConsole": false,
+          "MIMode": "gdb",
+          "setupCommands": [
+              {
+                  "description": "Enable pretty-printing for gdb",
+                  "text": "-enable-pretty-printing",
+                  "ignoreFailures": true
+              },
+              {
+                  "text": "-gdb-set follow-fork-mode child"
+              },
+                            {
+                  "text": "-gdb-set detach-on-fork off"
+              }
+          ]
+      }
+  ]
+}

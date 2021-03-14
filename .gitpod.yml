@@ -1,0 +1,12 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: make
+    command: make test
+    name: build
+
+vscode:
+  extensions:
+    - ms-vscode.cmake-tools@1.6.0:lvoCR5usjseB5thI3sZhWA==
+    - ms-vscode.cpptools@0.26.2:Pq/tmf2WN3SanVzB4xZc1g==
