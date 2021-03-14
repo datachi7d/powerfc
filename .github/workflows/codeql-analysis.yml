@@ -60,6 +60,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
+        apt-get update && apt-get install -y cmake valgrind gengetopt libgtest-dev socat
         make
     #   make bootstrap
     #   make release
