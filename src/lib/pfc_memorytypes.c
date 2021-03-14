@@ -238,6 +238,12 @@ int Convert_ByteTemperature(pcf_conversion conversion, const void * value, int v
         int intValue = (*((uint8_t *)value)) - 80;
         result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
     }
+    else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
+    {
+        int outputInt = 0;
+        result = Convert_Int(conversion, value, valueSize, &outputInt, sizeof(outputInt), Units, Format);
+        *(uint8_t *)output = (uint8_t)(outputInt + 80);
+    }
 
     return result;
 }
@@ -406,11 +412,11 @@ int Convert_Short(pcf_conversion conversion, const void * value, int valueSize, 
         int intValue = *((uint16_t *)value);
         result = Convert_Int(conversion, &intValue, valueSize, output, outputLength, Units, Format);
     }
-        else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
+    else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
     {
         int outputInt = 0;
         result = Convert_Int(conversion, value, valueSize, &outputInt, sizeof(outputInt), Units, Format);
-        *((uint16_t*)value) = outputInt;
+        *((uint16_t*)output) = outputInt;
     }
 
     return result;
@@ -430,17 +436,8 @@ int Convert_ShortFloat(pcf_conversion conversion, const void * value, int valueS
     else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
     {
         float outputFloat = 0.0f;
-        uint16_t outputValue = 0;
         result = Convert_Float(conversion, value, valueSize, &outputFloat, sizeof(outputFloat), Units, Format);
-        if (outputLength == sizeof(outputValue))
-        {
-            outputValue = (uint16_t)((outputFloat * 1000.0f) / 4.0f);
-            memcpy(output, &outputValue, outputLength);
-        }
-        else
-        {
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_TYPELENGTH);
-        }
+        *(uint16_t *)output = (uint16_t)((outputFloat * 1000.0f) / 4.0f);
     }
 
     return result;
@@ -472,6 +469,12 @@ int Convert_ShortPercentage(pcf_conversion conversion, const void * value, int v
     {
         float floatValue = ( ((float)(*((uint16_t*)value))) / 200.0f) ;
         result = Convert_Float(conversion, &floatValue, valueSize, output, outputLength, Units, Format);
+    }
+    else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
+    {
+        float outputFloat = 0.0f;
+        result = Convert_Float(conversion, value, valueSize, &outputFloat, sizeof(outputFloat), Units, Format);
+        *(uint16_t *)output = (uint16_t)((outputFloat * 200.0f));
     }
 
     return result;
@@ -528,6 +531,12 @@ int Convert_ShortVoltage(pcf_conversion conversion, const void * value, int valu
         float floatValue = ((float)(*((uint16_t*)value)))/10.0f;
         result = Convert_Float(conversion, &floatValue, valueSize, output, outputLength, Units, Format);
     }
+    else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
+    {
+        float outputFloat = 0.0f;
+        result = Convert_Float(conversion, value, valueSize, &outputFloat, sizeof(outputFloat), Units, Format);
+        *(uint16_t *)output = (uint16_t)((outputFloat * 10.0f));
+    }
 
     return result;
 }
@@ -557,8 +566,6 @@ int Convert_ShortBoost(pcf_conversion conversion, const void * value, int valueS
     {
         float floatValue = 0.0f;
 
-
-
         if( *((uint16_t*)value) & 0x8000 )
         {
             floatValue = (((float)(*((uint16_t*)value)&0xff))/100.0f);
@@ -571,6 +578,20 @@ int Convert_ShortBoost(pcf_conversion conversion, const void * value, int valueS
         }
 
         result = Convert_Float(conversion, &floatValue, valueSize, output, outputLength, Units, Format);
+    }
+    else if (conversion == PFC_CONVERSION_TOPFC_FROMSTRING)
+    {
+        float outputFloat = 0.0f;
+        result = Convert_Float(conversion, value, valueSize, &outputFloat, sizeof(outputFloat), Units, Format);
+
+        if(outputFloat < 0.0f)
+        {
+            *(uint16_t *)output  = (uint16_t)(outputFloat + 760.0f);
+        }
+        else
+        {
+            *(uint16_t *)output  = (uint16_t)(outputFloat * 100.0f) | 0x8000;
+        }            
     }
 
     return result;

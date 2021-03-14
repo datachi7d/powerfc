@@ -33,7 +33,7 @@
           "program": "/usr/bin/ctest",
           "args": [
               "-R",
-              "'TestConvertValueFromString1/TestConvertValueFromString.test_MemoryTypes/48-byteobject<10-0000-000'",
+              "'TestConvertValueFromString1/TestConvertValueFromString.test_MemoryTypes/48-byteobject<15-0000-0000-0001'",
               "-VV"
           ],
           "stopAtEntry": false,
