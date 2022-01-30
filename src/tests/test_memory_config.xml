@@ -792,11 +792,11 @@
             </pfc_memory_value>
             <pfc_memory_value>
                <name>AirFlow1</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTVOLTAGE</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORTMILLIVOLTAGE</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
                <name>AirFlow2</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTVOLTAGE</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORTMILLIVOLTAGE</MemoryType>
             </pfc_memory_value>
             <pfc_memory_value>
                <name>Injector</name>
@@ -856,7 +856,7 @@
             </pfc_memory_value>
             <pfc_memory_value>
                <name>ThrottleVoltage</name>
-               <MemoryType>PFC_MEMORYTYPE_SHORTVOLTAGE</MemoryType>
+               <MemoryType>PFC_MEMORYTYPE_SHORTMILLIVOLTAGE</MemoryType>
             </pfc_memory_value>
          </pfc_memory_values>
       </pfc_memory_register>
