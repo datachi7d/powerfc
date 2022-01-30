@@ -398,6 +398,39 @@ PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRe
     return value;
 }
 
+
+pfc_error PFC_MemoryRegister_GetValueByName(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory, const char * Name, char * Output, int OutputLength)
+{
+    pfc_error result = PFC_ERROR_UNSET;
+
+	if(MemoryRegister != NULL && Memory != NULL)
+	{
+        result = PFC_ERROR_NOT_FOUND;
+		PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
+        do
+		{
+			if(value != NULL && strcmp(value->Name, Name) == 0)
+			{
+				uint8_t * ptr = PFC_Memory_GetMemoryRegisterPointer(Memory,MemoryRegister->ID);
+
+				if(ptr != NULL)
+				{
+					ptr += PFC_MemoryRegister_GetOffsetOfValue(MemoryRegister,value);
+					PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), false, ptr, Output, OutputLength);
+                    result = PFC_ERROR_NONE;
+				}
+			}
+		} while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+    }
+    else
+    {
+        result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return result;
+}
+
+
 void PFC_MemoryRegister_DumpValue(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory)
 {
 	if(MemoryRegister != NULL && Memory != NULL)

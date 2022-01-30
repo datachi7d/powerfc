@@ -5,6 +5,7 @@
 
 #include "pfc_types.h"
 #include "pfc_memorytypes.h"
+#include "pfc_memory.h"
 
 
 typedef int (*PFC_ConversionFunction)(pcf_conversion conversion, const void * value, int valueSize, void * output, int outputLength, const char * Units, const char * Format);
@@ -92,10 +93,20 @@ static int Convert_Float(pcf_conversion conversion, const void * value, int valu
     switch(conversion)
     {
         case PFC_CONVERSION_TOSTRING:
-            result = PFC_CERROR_TO_INT(PFC_CONVERSION_ERROR_UNSUPPORTED);
+            result = snprintf((char *)output, outputLength, Format, *((float *)value));
             break;
         case PFC_CONVERSION_TOSTRING_WITHUNIT:
-            result = snprintf((char *)output, outputLength, Format, *((float *)value), Units);
+            {
+                int unitFormatLen = strlen(Format) + 4;
+                char * unitFormat = PFC_malloc(unitFormatLen);
+                result = snprintf(unitFormat, unitFormatLen, "%s %%s", Format);
+                if(result > -0)
+                {
+                    result = snprintf((char *)output, outputLength, unitFormat, *((float *)value), Units);
+                }
+                PFC_free(unitFormat);
+                break;
+            }       
             break;
         case PFC_CONVERSION_TOBASIC:
             if(outputLength == sizeof(float))
@@ -129,11 +140,20 @@ static int Convert_Int(pcf_conversion conversion, const void * value, int valueS
     switch(conversion)
     {
         case PFC_CONVERSION_TOSTRING:
-            //result = snprintf((char *)output, outputLength, Format, *((int *)value));
+            result = snprintf((char *)output, outputLength, Format, *((int *)value));
             break;
         case PFC_CONVERSION_TOSTRING_WITHUNIT:
-            result = snprintf((char *)output, outputLength, Format, *((int *)value), Units);
-            break;
+            {
+                int unitFormatLen = strlen(Format) + 4;
+                char * unitFormat = PFC_malloc(unitFormatLen);
+                result = snprintf(unitFormat, unitFormatLen, "%s %%s", Format);
+                if(result > -0)
+                {
+                    result = snprintf((char *)output, outputLength, unitFormat, *((int *)value), Units);
+                }
+                PFC_free(unitFormat);
+                break;
+            }            
         case PFC_CONVERSION_TOBASIC:
             if(outputLength == sizeof(int))
             {
@@ -616,7 +636,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ByteRPM,
 				.Units = "rpm",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEMILLISECOND,
@@ -624,7 +644,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ByteMillisecond,
 				.Units = "ms",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTETEMPERATURE,
@@ -632,7 +652,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ByteTemperature,
 				.Units = "°C",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTERPMCRANK,
@@ -640,7 +660,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ByteRPMCrank,
 				.Units = "rpm",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTELOAD,
@@ -656,7 +676,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_Byte,
 				.Units = "°",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEBATTERYVOLTAGE,
@@ -664,7 +684,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ByteBatteryVoltage,
 				.Units = "V",
-				.Format = "%2.1f %s",
+				.Format = "%2.1f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEVOLTAGE,
@@ -672,7 +692,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ByteVoltage,
 				.Units = "V",
-				.Format = "%1.2f %s",
+				.Format = "%1.2f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEBOOST,
@@ -680,7 +700,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ByteFloat17,
 				.Units = "kg/cm²",
-				.Format = "%1.5f %s",
+				.Format = "%1.5f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEBOOSTSOLENOID,
@@ -688,7 +708,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ByteBoostSolenoid,
 				.Units = "kg/cm²",
-				.Format = "%1.2f %s",
+				.Format = "%1.2f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_BYTEFLOAT,
@@ -752,7 +772,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ShortFloat,
 				.Units = "ms",
-				.Format = "%3.3f %s",
+				.Format = "%3.3f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTMILLIVOLTAGE,
@@ -760,7 +780,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_ShortMilliVoltage,
 				.Units = "mV",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTPERCENTAGE,
@@ -768,7 +788,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ShortPercentage,
 				.Units = "%",
-				.Format = "%3.3f %s",
+				.Format = "%3.3f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTLAG,
@@ -776,7 +796,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ShortLag,
 				.Units = "ms",
-				.Format = "%1.3f %s",
+				.Format = "%1.3f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTCORRECTION,
@@ -792,7 +812,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_Short,
 				.Units = " RPM",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTSPEED,
@@ -800,7 +820,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_INT,
 				.ConversionFunction = Convert_Short,
 				.Units = " km/hr",
-				.Format = "%d %s",
+				.Format = "%d",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTVOLTAGE,
@@ -808,7 +828,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ShortVoltage,
 				.Units = "V",
-				.Format = "%2.1f %s",
+				.Format = "%2.1f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_SHORTBOOST,
@@ -816,7 +836,7 @@ static const pfc_memorytype_conversioninfo conversionTable[] = {
 				.BasicType = PFC_BASICTYPE_FLOAT,
 				.ConversionFunction = Convert_ShortBoost,
 				.Units = "mmHg\0kg/cm²",
-				.Format = "%3.0f %s\0%1.2f %s",
+				.Format = "%3.0f\0%1.2f",
 		},
 		{
 				.MemoryType = PFC_MEMORYTYPE_STRINGSENSOR,
@@ -890,7 +910,7 @@ pfc_conversion_error PFC_Convert_PFCValueTo(pcf_conversion conversionType,pfc_ba
 
     if(memoryTypeConversion != NULL)
     {
-        if(memoryTypeConversion->BasicType == BasicType || conversionType == PFC_CONVERSION_TOSTRING_WITHUNIT || conversionType == PFC_CONVERSION_TOSTRING_WITHUNIT)
+        if(memoryTypeConversion->BasicType == BasicType || conversionType == PFC_CONVERSION_TOSTRING_WITHUNIT || conversionType == PFC_CONVERSION_TOSTRING)
         {
             int len = memoryTypeConversion->ConversionFunction(conversionType, Value, memoryTypeConversion->Size, ConvertedValue, ConvertedValueSize, memoryTypeConversion->Units, memoryTypeConversion->Format);
 
@@ -928,7 +948,7 @@ pfc_conversion_error PFC_Convert_PFCValueToInt(pfc_memorytype MemoryType, const 
 
 pfc_conversion_error PFC_Convert_PFCValueToString(pfc_memorytype MemoryType, bool Unit, const void * Value, char * ConvertedValue, int ConvertedValueLength)
 {
-    return PFC_Convert_PFCValueTo(Unit ? PFC_CONVERSION_TOSTRING_WITHUNIT : PFC_CONVERSION_TOSTRING_WITHUNIT, PFC_BASICTYPE_NONE, MemoryType, Value, ConvertedValue, ConvertedValueLength);
+    return PFC_Convert_PFCValueTo(Unit ? PFC_CONVERSION_TOSTRING_WITHUNIT : PFC_CONVERSION_TOSTRING, PFC_BASICTYPE_NONE, MemoryType, Value, ConvertedValue, ConvertedValueLength);
 }
 
 pfc_conversion_error PFC_Convert_StringTo(pcf_conversion conversionType,pfc_basictype BasicType, pfc_memorytype MemoryType, void * Value, const void * StringValue, int StringValueSize)

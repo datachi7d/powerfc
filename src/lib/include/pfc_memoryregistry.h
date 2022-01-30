@@ -27,6 +27,7 @@ PFC_MemoryValue * PFC_MemoryValue_GetFirst(PFC_MemoryValue * memoryValue);
 int PFC_MemoryValue_GetIndex(PFC_MemoryValue * memoryValue);
 
 PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRegister);
+pfc_error PFC_MemoryRegister_GetValueByName(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory, const char * Name, char * Output, int OutputLength);
 void PFC_MemoryRegister_DumpValue(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory);
 pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue ** value);
 pfc_size PFC_MemoryRegister_GetSize(PFC_MemoryRegister * memoryRegister);
