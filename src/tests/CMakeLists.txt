@@ -8,6 +8,7 @@ set (test_pfclib_runner_SOURCES
 	test_memoryconfig.cc
 	test_serial.cc
 	test_process.cc
+	test_recorder.cc
 	support/process.cc)
 
 set (test_pfclib_runner_INCLUDE_DIRS
