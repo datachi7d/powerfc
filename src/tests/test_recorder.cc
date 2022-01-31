@@ -51,6 +51,10 @@ TEST_F(PFC_Recorder, test_record)
     entry = PFC_Recording_GetEntry(recording, 2);
     ASSERT_TRUE(entry == NULL);
 
+    ASSERT_EQ(PFC_Recording_Reset(recording), PFC_ERROR_NONE);
+    entry = PFC_Recording_GetEntry(recording, 0);
+    ASSERT_TRUE(entry == NULL);
+
     PFC_Recording_Free(recording);
 
     PFC_MemoryConfig_Free(memoryConfig);

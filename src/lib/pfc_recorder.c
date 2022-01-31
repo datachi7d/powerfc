@@ -41,9 +41,8 @@ struct _PFC_Recording_Entry
     };  
 };
 
-
-
 #define PFC_RecordingEntryHeaderV1 0xcafe0fc1
+
 
 PFC_Recording * PFC_Recording_New(uint8_t * MemoryBuffer, uint32_t MemorySize)
 {
@@ -112,7 +111,6 @@ pfc_error PFC_Recording_AddEntry(PFC_Recording * Recording, PFC_Memory * Memory,
 
     return result;
 }
-
 
 pfc_error PFC_Recording_WriteToFile(PFC_Recording * Recording, const char * file)
 {
@@ -185,7 +183,6 @@ PFC_Recording * PFC_Recording_New_FromFile(const char * file, uint8_t * MemoryBu
                     while(totalRead < fd_info.st_size)
                     {
                         currentRead = read(fd, MemoryBuffer, MemorySize - totalRead);
-                        printf("read: %ld\n", currentRead);
                         if(currentRead > 0)
                         {
                             totalRead += currentRead;
@@ -222,6 +219,19 @@ PFC_Recording * PFC_Recording_New_FromFile(const char * file, uint8_t * MemoryBu
 pfc_error PFC_Recording_Reset(PFC_Recording * Recording)
 {
     pfc_error result = PFC_ERROR_UNSET;
+
+    if(Recording != NULL)
+    {
+        Recording->MemoryPosition = 0;
+        Recording->RecordingEntries = 0;
+        result = PFC_ERROR_NONE;
+    }
+    else
+    {
+        result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+
     return result;
 }
 
