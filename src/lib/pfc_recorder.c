@@ -8,6 +8,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 struct _PFC_Recording
 {
@@ -110,10 +114,121 @@ pfc_error PFC_Recording_AddEntry(PFC_Recording * Recording, PFC_Memory * Memory,
 }
 
 
+pfc_error PFC_Recording_WriteToFile(PFC_Recording * Recording, const char * file)
+{
+    pfc_error result = PFC_ERROR_NONE;
+    if(Recording != NULL)
+    {
+        int fd = open(file, O_WRONLY | O_TRUNC | O_SYNC | O_CREAT, 0644);
+        if(fd >= 0)
+        {
+            ssize_t totalWritten = 0;
+            
+            while(totalWritten < Recording->MemoryPosition)
+            {
+                ssize_t written = write(fd, Recording->MemoryBuffer, Recording->MemoryPosition - totalWritten);
+
+                if(written > 0)
+                {
+                    totalWritten += written;
+                }
+                else
+                {
+                    result = PFC_ERROR_FILEIO;
+                    break;
+                }
+            }
+
+            fsync(fd);
+
+            if(totalWritten != Recording->MemoryPosition)
+            {
+                result = PFC_ERROR_FILEIO;
+            }
+            
+            close(fd);
+        }
+        else
+        {
+            result = PFC_ERROR_FILEIO;
+        }
+    }
+    else
+    {
+        result = PFC_ERROR_NULL_PARAMETER;
+    }
+
+    return result;
+}
+
+PFC_Recording * PFC_Recording_New_FromFile(const char * file, uint8_t * MemoryBuffer, uint32_t MemorySize)
+{
+    PFC_Recording * recording = NULL;
+    if(MemoryBuffer != NULL && MemorySize > 0)
+    {
+        int fd = open(file, O_RDONLY);
+
+        if(fd >= 0)
+        {
+            struct stat fd_info = {0};
+            int status = 0;
+            status = fstat(fd, &fd_info);
+            if(status == 0)
+            {
+                if(fd_info.st_size <= MemorySize)
+                {
+                    recording = PFC_Recording_New(MemoryBuffer, MemorySize);
+                    recording->RecordingEntries = -1;
+                    ssize_t totalRead = 0;
+                    ssize_t currentRead = 0;
+
+                    while(totalRead < fd_info.st_size)
+                    {
+                        currentRead = read(fd, MemoryBuffer, MemorySize - totalRead);
+                        printf("read: %ld\n", currentRead);
+                        if(currentRead > 0)
+                        {
+                            totalRead += currentRead;
+                        }
+                        else
+                        {
+                            PFC_Recording_Free(recording);
+                            recording = NULL;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    printf("Size too small %ld\n", fd_info.st_size);
+                }
+            }
+            else
+            {
+                printf("Status error\n");
+            }
+
+            close(fd);
+        }
+        else
+        {
+            printf("File error: %s\n", file);
+        }
+    }
+    
+    return recording;
+}
+
+pfc_error PFC_Recording_Reset(PFC_Recording * Recording)
+{
+    pfc_error result = PFC_ERROR_UNSET;
+    return result;
+}
+
 PFC_Recording_Entry * PFC_Recording_GetEntry(PFC_Recording * Recording, uint16_t entryNumber)
 {    
     PFC_Recording_Entry * entry = NULL;
-    if(Recording != NULL && (entryNumber < Recording->RecordingEntries && Recording->RecordingEntries > 0))
+    if(Recording != NULL && (entryNumber < Recording->RecordingEntries || Recording->RecordingEntries < 0))
     { 
         uint16_t currentEntry = 0;
         uint32_t  memoryPos = 0;
@@ -144,7 +259,6 @@ PFC_Recording_Entry * PFC_Recording_GetEntry(PFC_Recording * Recording, uint16_t
 
     return entry;
 }
-
 
 uint64_t PFC_Recording_Entry_GetTimestamp(PFC_Recording_Entry * Entry)
 {
