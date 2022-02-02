@@ -142,7 +142,6 @@ int PFC_MemoryValue_GetIndex(PFC_MemoryValue * memoryValue)
     return result;
 }
 
-
 PFC_MemoryMap * PFC_MemoryMap_New(PFC_Memory * Memory, const char * Name, PFC_ID IDMin, PFC_ID IDMax, int Columns, int Rows)
 {
     PFC_MemoryMap * memoryMap = NULL;
@@ -262,7 +261,6 @@ pfc_size PFC_MemoryMap_Malloc(PFC_MemoryMap * MemoryMap)
     return Result;
 }
 
-
 void PFC_MemoryMap_SetFCPOffset(PFC_MemoryMap * MemoryMap, uint16_t FCPOffset)
 {
 
@@ -282,7 +280,6 @@ void PFC_MemoryMap_SetFCPOffset(PFC_MemoryMap * MemoryMap, uint16_t FCPOffset)
         }
     }
 }
-
 
 PFC_MemoryValue * MemoryRegister_AddValue(PFC_MemoryRegister * memoryRegister, pfc_memorytype Type, const char * Name, int Row, int Column)
 {
@@ -385,7 +382,6 @@ PFC_MemoryValue * PFC_MemoryRegister_AddValueXY(PFC_MemoryRegister * memoryRegis
     return MemoryRegister_AddValue(memoryRegister, Type, Name, Row, Column);
 }
 
-
 PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRegister)
 {
     PFC_MemoryValue * value = NULL;
@@ -398,6 +394,24 @@ PFC_MemoryValue * PFC_MemoryRegister_GetFirstValue(PFC_MemoryRegister * memoryRe
     return value;
 }
 
+PFC_MemoryValue * PFC_MemoryRegister_GetMemoryValueByName(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory, const char * Name)
+{
+    PFC_MemoryValue * value = NULL;
+  	if(MemoryRegister != NULL && Memory != NULL)
+	{
+		value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
+        do
+		{
+			if(value != NULL && strcmp(value->Name, Name) == 0)
+			{   
+                break;
+			}
+		} while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+    }
+    
+
+    return value;
+}
 
 pfc_error PFC_MemoryRegister_GetValueByName(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory, const char * Name, char * Output, int OutputLength)
 {
@@ -405,22 +419,28 @@ pfc_error PFC_MemoryRegister_GetValueByName(PFC_MemoryRegister * MemoryRegister,
 
 	if(MemoryRegister != NULL && Memory != NULL)
 	{
-        result = PFC_ERROR_NOT_FOUND;
-		PFC_MemoryValue * value = PFC_MemoryRegister_GetFirstValue(MemoryRegister);
-        do
-		{
-			if(value != NULL && strcmp(value->Name, Name) == 0)
-			{
-				uint8_t * ptr = PFC_Memory_GetMemoryRegisterPointer(Memory,MemoryRegister->ID);
+        PFC_MemoryValue * value = PFC_MemoryRegister_GetMemoryValueByName(MemoryRegister, Memory, Name);
+        if(value != NULL)
+        {
+            uint8_t * ptr = PFC_Memory_GetMemoryRegisterPointer(Memory,MemoryRegister->ID);
 
-				if(ptr != NULL)
-				{
-					ptr += PFC_MemoryRegister_GetOffsetOfValue(MemoryRegister,value);
-					PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), false, ptr, Output, OutputLength);
+            if(ptr != NULL)
+            {
+                ptr += PFC_MemoryRegister_GetOffsetOfValue(MemoryRegister,value);
+                if( PFC_Convert_PFCValueToString(PFC_MemoryValue_GetType(value), false, ptr, Output, OutputLength) == PFC_CONVERSION_ERROR_NOERROR)
+                {
                     result = PFC_ERROR_NONE;
-				}
-			}
-		} while((PFC_MemoryRegister_GetNextValue(MemoryRegister, &value)) == PFC_ERROR_NONE);
+                }
+                else
+                {
+                    result = PFC_ERROR_CONVERSION;
+                }
+            }
+        }
+        else
+        {
+            result = PFC_ERROR_NOT_FOUND;
+        }
     }
     else
     {
@@ -429,7 +449,6 @@ pfc_error PFC_MemoryRegister_GetValueByName(PFC_MemoryRegister * MemoryRegister,
 
     return result;
 }
-
 
 void PFC_MemoryRegister_DumpValue(PFC_MemoryRegister * MemoryRegister, PFC_Memory * Memory)
 {
@@ -471,7 +490,6 @@ void PFC_MemoryRegister_DumpValue(PFC_MemoryRegister * MemoryRegister, PFC_Memor
 	}
 }
 
-
 pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, PFC_MemoryValue ** value)
 {
     pfc_error result = PFC_ERROR_UNSET;
@@ -499,7 +517,6 @@ pfc_error PFC_MemoryRegister_GetNextValue(PFC_MemoryRegister * memoryRegister, P
                     break;
                 }
             }
-
 
             if(result == PFC_ERROR_NOT_FOUND)
             {
@@ -858,7 +875,6 @@ PFC_MemoryRegister * PFC_Memory_NewRegister(PFC_Memory * Memory, PFC_ID Register
     return memoryRegister;
 }
 
-
 PFC_MemoryTable * PFC_Memory_NewTable(PFC_Memory * Memory, PFC_ID registerID, pfc_memorytype Column1, pfc_memorytype Column2, uint8_t rows, const char * registerName, const char * Column1name, const char * Column2name)
 {
     PFC_MemoryTable * Result = NULL;
@@ -923,7 +939,6 @@ PFC_MemoryRegister * PFC_MemoryTable_GetRegister(PFC_MemoryTable * Table)
 
 	return Result;
 }
-
 
 PFC_MemoryMap * PFC_Memory_NewMap(PFC_Memory * Memory, PFC_ID FirstRegisterID, PFC_ID LastRegisterID, pfc_memorytype cellType, uint8_t columns, uint8_t rows, const char * name)
 {

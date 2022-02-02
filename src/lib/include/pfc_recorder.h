@@ -19,6 +19,7 @@ pfc_error PFC_Recording_AddEntry(PFC_Recording * Recording, PFC_Memory * Memory,
 pfc_error PFC_Recording_WriteToFile(PFC_Recording * Recording, const char * file);
 PFC_Recording * PFC_Recording_New_FromFile(const char * file, uint8_t * MemoryBuffer, uint32_t MemorySize);
 pfc_error PFC_Recording_Reset(PFC_Recording * Recording);
+uint32_t PFC_Recording_GetSize(PFC_Recording * Recording);
 
 PFC_Recording_Entry * PFC_Recording_GetEntry(PFC_Recording * Recording, uint16_t entryNumber);
 uint64_t PFC_Recording_Entry_GetTimestamp(PFC_Recording_Entry * Entry);
