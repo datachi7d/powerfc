@@ -132,6 +132,7 @@ pfc_error PFC_Recording_WriteToFile(PFC_Recording * Recording, const char * file
                 }
                 else
                 {
+                    //printf("File error: %d\n", written);
                     result = PFC_ERROR_FILEIO;
                     break;
                 }
@@ -141,6 +142,7 @@ pfc_error PFC_Recording_WriteToFile(PFC_Recording * Recording, const char * file
 
             if(totalWritten != Recording->MemoryPosition)
             {
+                //printf("File not written out: %d\n", totalWritten);
                 result = PFC_ERROR_FILEIO;
             }
             
@@ -268,6 +270,16 @@ PFC_Recording_Entry * PFC_Recording_GetEntry(PFC_Recording * Recording, uint16_t
     }
 
     return entry;
+}
+
+uint32_t PFC_Recording_GetSize(PFC_Recording * Recording)
+{
+    uint32_t result = 0;
+    if(Recording != NULL)
+    {
+        result = Recording->MemoryPosition;
+    }
+    return result;
 }
 
 uint64_t PFC_Recording_Entry_GetTimestamp(PFC_Recording_Entry * Entry)
